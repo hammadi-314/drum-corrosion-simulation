@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Reproduce the 5-grade drum recession sensitivity CSV.
-No material-specific H2S electrochemical kinetics, cracking, or FEA is solved.
+All interior and exterior surfaces exposed. Chamber wall accounts for inner local loss plus outer baseline. No material-specific H2S electrochemical kinetics, cracking, or FEA is solved.
 Run: python3 simulate_corrosion_v4.py
 Input: material_scenarios_v4.json and face_fields.json in same directory.
 Output: simulated_surface_results_v4_generated.csv
@@ -48,7 +48,7 @@ with out.open("w", newline="") as stream:
                     rates = [local_rate(r, r0) for r in body["rate"]]
                     lo, hi = min(rates), max(rates)
                     stat = fields["partStats"][name]
-                    wall = 10.0 - integrate_one_day_at_a_time(hi, days) if name.startswith("chamber_") else "N/A"
+                    wall = max(0.0, 10.0 - integrate_one_day_at_a_time(hi, days) - integrate_one_day_at_a_time(r0, days)) if name.startswith("chamber_") else "N/A"
                     writer.writerow([
                         m["label"], scenario, days, name,
                         f"{lo:.6f}", f"{hi:.6f}",
