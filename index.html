@@ -72,7 +72,7 @@ import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 
 const $=id=>document.getElementById(id);
-const material=$('material'),field=$('field'),days=$('days'),part=$('part'),front=$('front'),probe=$('probe');
+const material=$('material'),scenario=$('scenario'),field=$('field'),days=$('days'),part=$('part'),front=$('front'),probe=$('probe');
 const canvas=$('view'),loading=$('loading'),status=$('status');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2)); renderer.outputColorSpace=THREE.SRGBColorSpace;
@@ -87,10 +87,18 @@ const controls=new OrbitControls(camera,canvas);controls.target.copy(target);con
 const originalPos=camera.position.clone();
 const low=new THREE.Color('#23cbe7'),mid=new THREE.Color('#f5b94c'),high=new THREE.Color('#fa604e'),dryCol=new THREE.Color('#748398');
 const raycaster=new THREE.Raycaster(); const pointer=new THREE.Vector2();
-let source=null,group=null,meshes=[],hasPick=false,pickPosition=null,pickName=null,pickFace=null;
+let source=null,profiles=null,group=null,meshes=[],hasPick=false,pickPosition=null,pickName=null,pickFace=null;
 let objectSequence=0;let dragging=null;
 function currentDays(){return Number(days.value)}
-function fieldsForRate(r){const k=currentDays()/365;return {rate:r,loss:r*k,wall:10-r*k};}
+const RATE_ANCHOR=0.7,MAX_REFERENCE=2.399351,PITTING_SENSITIVITY=2.4/0.74;
+function profile(){return profiles.materials[material.value]}
+function baseRate(key=material.value){return profiles.materials[key][scenario.value]}
+function hotspot(ref){return Math.max(0,Math.min(1,(ref-RATE_ANCHOR)/(MAX_REFERENCE-RATE_ANCHOR)))}
+function materialRate(ref,key=material.value){return baseRate(key)*(1+(PITTING_SENSITIVITY-1)*hotspot(ref))}
+function triangleRate(name,idx){return materialRate(source.meshes[name].rate[idx])}
+function integrateLoss(rate){let loss=0;for(let d=0;d<currentDays();d++)loss+=rate/365;return loss}
+function maxComparisonRate(){return Math.max(...Object.keys(profiles.materials).map(key=>baseRate(key)))*PITTING_SENSITIVITY}
+function fieldsForRate(r){const loss=integrateLoss(r);return {rate:r,loss,wall:10-loss};}
 function unitForField(){return field.value==='rate'?'mm/year':'mm'}
 function displayValue(rate){const o=fieldsForRate(rate);return o[field.value]}
 function precisionForField(){return field.value==='rate'?3:4}
