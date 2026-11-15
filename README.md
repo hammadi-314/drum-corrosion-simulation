@@ -1,4 +1,4 @@
-# Revolver Drum — Dual-Mode 3D Corrosion Viewer (v5.0)
+# Revolver Drum — Dual-Mode 3D Corrosion Viewer (v5.1)
 
 **Live viewer:** https://hammadi-314.github.io/drum-corrosion-simulation/?v=5
 
@@ -10,7 +10,7 @@ The 3D model comes from the project's six-chamber STEP assembly: **10 CAD bodies
 
 Mode 1 uses a distinct **published measurement or transparent published-current-to-rate conversion** for the selected material. The specific source, actually tested material grade, test environment and limitations appear next to the 3D viewer. The five papers **do not share experimental conditions**. **Never treat Mode 1 as a five-alloy corrosion ranking for one H₂S environment.**
 
-Mode 1 assigns the relevant published or converted **UNIFORM benchmark rate to every face** on the drum, because the experimental studies did not measure pit-location fields on the user's CAD. Consequently minimum and maximum rates/penetration are equal for every material. This is intentional and preferable to inventing a spatial failure field. All faces receive a single color in this mode, and the min/max legend is identical.
+Mode 1 assigns the relevant published or converted **UNIFORM benchmark rate to every face** on the drum, because the experimental studies did not measure pit-location fields on the user's CAD. Consequently minimum and maximum rates/penetration are equal for every material. This is intentional and preferable to inventing a spatial failure field. All faces on a selected drum retain a uniform corrosion color, but **the colors now differ across materials** because the visual scale runs from the smallest to the largest reported/derived rate among the five papers. The contrast curve is amplified with `severity = normalized_rate^0.55`; **this changes only appearance, not corrosion rates**. The visual legend therefore shows the shared research-rate range rather than identical endpoints for each material. These paper rates come from different environments and must not be interpreted as a sour-service ranking.
 
 | Candidate dropdown | Sample actually tested | Research original | Site-equivalent corrosion rate | Environmental limitation |
 | --- | --- | --- | ---: | --- |
@@ -57,7 +57,9 @@ All inner and outer surfaces are exposed. The hottest spatial locations are **as
 
 - Material, part, exposure interval (7, 30, 90, 365 days), output field (rate, loss, remaining wall), orbit/zoom, click-to-probe, and export CSV work in **both modes**.
 - In **Mode 1**, the low/central/high selector is hidden because laboratory benchmark results are not three arbitrary scenarios. In **Mode 2**, it remains available.
-- Color normalization is per selected material, **not cross-material**, so equal colors across materials do not indicate equal measured rate. Mode 1 uses **one color** deliberately because the field is uniform. For chamber wall thickness, red (Mode 2) is more wall loss; gray end plates and hubs have no evaluated thickness, but remain exposed.
+- **Mode 1:** Colors are mapped to one shared rate range across the five different published study benchmarks, with a stronger visual contrast (`gamma 0.55`). Each material is still uniformly colored across its entire CAD surface, because the source does not establish drum-specific hotspots. These colors do **not** establish comparative resistance to identical H₂S conditions.
+- **Mode 2:** Numerical values and illustrative hotspot locations are unchanged. The displayed severity is a perceptual blend of **72% within-material hotspot-normalized intensity** and **28% cross-material assumed-rate-normalized intensity**, raised to exponent `0.85` for visibility. The selected material's legend uses the same visual mapping, ensuring colors and legend match. This is a display choice, not a new physical material-corrosion model.
+- For remaining chamber wall, the left (cool-color) legend endpoint denotes **higher thickness** and the right (warm-color) endpoint denotes **lower thickness**. Gray end plates and hubs have no evaluated thickness but remain exposed.
 - The **five-material table in Mode 1 is descriptive only**; different temperatures, H₂S concentration, salinity, sample finish/grades and methods prevent a quantitative same-condition ranking.
 - `Export readings CSV` includes mode, tested grade, research URL, experiment environment, calculated loss and limitations for all 10 components.
 - Time integration assumes a **constant corrosion rate**, so 30/90/365-day scenarios are mathematically linear extrapolations, not verified service-life estimates.
