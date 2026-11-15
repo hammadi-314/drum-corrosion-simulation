@@ -1,0 +1,100 @@
+{
+  "study": "Comparative H2S sour-service surface-recession sensitivity study v4.0",
+  "warning": "Only the 316L paper supplies a near-matching experimental sour-service corrosion-rate point. All other numeric material rates are transparent exploratory inputs, NOT material-specific published rates at these conditions.",
+  "environment": {
+    "temperature_C": 60,
+    "H2S_partial_bar": 3,
+    "total_bar": 30,
+    "NaCl_wtpercent": 5,
+    "acetic_acid_wtpercent": 0.5,
+    "initial_chamber_wall_mm": 10,
+    "exposed_mesh_triangles": 12080,
+    "exposed_area_m2": 27.293367,
+    "sour_exposure_all_faces": true
+  },
+  "materials": {
+    "6061_T6": {
+      "label": "Al 6061-T6",
+      "low": 0.09,
+      "central": 0.5,
+      "high": 2,
+      "basis": "Hypothetical wet-sour screening; lower scenario near Yang et al. published 0.0881 mm/y for 6061 in H2S GAS at 75C, NOT liquid 60C. Wet exposure cannot be inferred reliably.",
+      "confidence": "VERY LOW",
+      "source": "https://doi.org/10.1080/00986445.2022.2030729"
+    },
+    "7075_T6": {
+      "label": "Al 7075-T6",
+      "low": 0.15,
+      "central": 0.9,
+      "high": 3,
+      "basis": "Uncalibrated wet-sour design sensitivity. Literature comparing 7075-T6 to 6061-T6 finds 7075 more susceptible in chloride exposure; NO matched sour rate reported.",
+      "confidence": "VERY LOW",
+      "source": "https://doi.org/10.1016/j.electacta.2016.05.138"
+    },
+    "1020_NORMALIZED": {
+      "label": "AISI 1020 normalized",
+      "low": 0.7,
+      "central": 3,
+      "high": 8,
+      "basis": "Uncalibrated representative carbon-steel sour-service range. Carbon steel H2S literature reports strong dependence on scale, pH, flow and co-gas; no certified normalized 1020 coupon at this exact environment.",
+      "confidence": "LOW",
+      "source": "https://www.icmt.ohio.edu/documents/NACE2017/C2017-9098.pdf"
+    },
+    "AISI_304": {
+      "label": "AISI 304",
+      "low": 0.5,
+      "central": 1.2,
+      "high": 3,
+      "basis": "Hypothetical range anchored only qualitatively by sour-environment comparative 304L/316L research (316L lower rate), not an experiment on 304 at the current 3 bar H2S conditions.",
+      "confidence": "LOW",
+      "source": "https://doi.org/10.1016/j.corsci.2010.09.050"
+    },
+    "AISI_316": {
+      "label": "AISI 316",
+      "low": 0.37,
+      "central": 0.74,
+      "high": 1.48,
+      "basis": "Central 0.74 mm/y measured on 316L (different grade) at 60C, 3bar H2S, acidic 5% NaCl. Low/high are illustrative 0.5x/2x sensitivity, not statistical uncertainty.",
+      "confidence": "MEDIUM FOR 316L REFERENCE; LOW FOR 316",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7399776/"
+    }
+  },
+  "model": {
+    "method": "Explicit time integration of local constant-rate recession: h_(n+1)=h_n-r_i*delta_t/365, 1 day steps; rates are set by material scenario times common spatial hotspot shape",
+    "localized_factor_source": "AISI 316L published peak pitting-rate 2.4 mm/year divided by 316L uniform 0.74 mm/year = 3.243243 applied as a common worst-case what-if factor, NOT proven for other materials.",
+    "hotspot_placement": "Demonstrative spatial template inherited from earlier chamber mapping; spatial hotspot positions NOT calculated from electrochemistry, flow, or stress.",
+    "geometry": "Full original 10-solid mesh retained; colors/numerical recession, not re-meshed eroded CAD",
+    "no_h2s_ssc_or_hic_analysis": true,
+    "nonpressure_rating": true
+  },
+  "sources": [
+    {
+      "title": "Shah et al (2020), 316L 3 bar H2S vs without H2S",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7399776/"
+    },
+    {
+      "title": "Shah et al (2022) 316L pitting measured in highly sour environment",
+      "url": "https://doi.org/10.48048/tis.2022.4642"
+    },
+    {
+      "title": "Davoodi et al 2011 304L versus 316L in H2S acidic electrolyte",
+      "url": "https://doi.org/10.1016/j.corsci.2010.09.050"
+    },
+    {
+      "title": "Yang et al 2022 6061 gaseous and liquid H2S",
+      "url": "https://doi.org/10.1080/00986445.2022.2030729"
+    },
+    {
+      "title": "Zhang et al AISI-1020 CO2/H2S corrosion at 60C",
+      "url": "https://www.sciencedirect.com/science/article/pii/S0042207X21007363"
+    },
+    {
+      "title": "Al 6061/7075 chloride corrosion trends",
+      "url": "https://www.sciencedirect.com/science/article/pii/S0013468616306946"
+    },
+    {
+      "title": "ISO 15156 sour material qualification requirements",
+      "url": "https://www.twi-global.com/technical-knowledge/published-papers/sour-service-limits-of-dual-certified-316-316l-austenitic-stainless-steel-and-weldments-march-2010"
+    }
+  ]
+}
