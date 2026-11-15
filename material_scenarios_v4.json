@@ -65,7 +65,9 @@
     "hotspot_placement": "Demonstrative spatial template inherited from earlier chamber mapping; spatial hotspot positions NOT calculated from electrochemistry, flow, or stress.",
     "geometry": "Full original 10-solid mesh retained; colors/numerical recession, not re-meshed eroded CAD",
     "no_h2s_ssc_or_hic_analysis": true,
-    "nonpressure_rating": true
+    "nonpressure_rating": true,
+    "remaining_wall_thickness_method": "Conservative two-sided chamber-only screening: remaining 10mm wall = max(0,10mm - loss of assumed inner hotspot - loss of opposing outer wall at same material uniform baseline). This is not face-to-face surface pairing, exact geometry erosion, or pressure-integrity assessment.",
+    "negative_wall_handling": "Clamp remaining wall to 0 mm; hypothetical breach cannot establish actual time to failure."
   },
   "sources": [
     {
