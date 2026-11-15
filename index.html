@@ -187,11 +187,17 @@ canvas.addEventListener('pointerup',e=>{if(!dragging||Math.hypot(e.clientX-dragg
  raycaster.setFromCamera(pointer,camera);const intersects=raycaster.intersectObjects(meshes.filter(m=>m.visible),false);
  if(intersects.length){const h=intersects[0];hasPick=true;pickName=h.object.userData.fieldName;pickFace=h.faceIndex;pickPosition=h.point.clone();showProbe(pickName,pickFace,pickPosition);}
 });
-$('export').addEventListener('click',()=>{if(!source)return;
- const mats=material.selectedOptions[0].textContent,nowDays=currentDays(),entries=Object.entries(source.partStats).filter(([nm,s])=>nm.startsWith('chamber_'));
- const rows=[['material_label','component','exposure_days','mapped_min_reference_rate_mm_y','mapped_max_reference_rate_mm_y','min_reference_penetration_mm','max_reference_penetration_mm','minimum_wall_thickness_mm','wet_area_m2','scientific_status']];
- for(const [name,s]of entries)rows.push([mats,name,nowDays,s.rateMin,s.rateMax,fmt(s.rateMin*nowDays/365,6),fmt(s.rateMax*nowDays/365,6),fmt(10-s.rateMax*nowDays/365,6),s.wetArea_m2,'316L benchmark remapped, NOT alloy-specific corrosion prediction']);
- const csv=rows.map(row=>row.map(x=>'"'+String(x).replaceAll('"','""')+'"').join(',')).join('\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));const a=document.createElement('a');a.href=url;a.download='H2S_Drum_Reference_Readings_'+material.value+'_'+nowDays+'days.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+$('export').addEventListener('click',()=>{
+ if(!source)return;
+ const chosen=material.selectedOptions[0].textContent, nowDays=currentDays(), k=nowDays/365;
+ const rows=[['material_label','component','exposure_days','reference_min_rate_mm_y','reference_max_rate_mm_y','reference_min_penetration_mm','reference_max_penetration_mm','nominal_min_wall_mm_or_NA','exposed_area_m2','scientific_status']];
+ for(const [name,s] of Object.entries(source.partStats)){
+   rows.push([chosen,name,nowDays,s.rateMin,s.rateMax,fmt(s.rateMin*k,6),fmt(s.rateMax*k,6),name.startsWith('chamber_')?fmt(10-s.rateMax*k,6):'N/A',s.wetArea_m2,'Full sour exposure: assigned 316L literature reference, NOT material-specific corrosion prediction']);
+ }
+ const csv=rows.map(row=>row.map(x=>'"'+String(x).replaceAll('"','""')+'"').join(',')).join('\n');
+ const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+ const link=document.createElement('a');link.href=url;link.download='H2S_All_Surfaces_Reference_'+material.value+'_'+nowDays+'days.csv';
+ document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
 });
 function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();
 </script></body></html>
