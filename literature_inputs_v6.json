@@ -1,0 +1,100 @@
+{
+  "version": "6.0",
+  "study": "Five individually literature-traceable alloy corrosion-rate benchmarks mapped to the user-supplied ten-body drum",
+  "scopeWarning": "These are NOT measured under identical conditions. Use as separate literature-benchmark transfers only. Not 60C/3bar H2S corrosion predictions for five alloys and not an evidence-based material ranking.",
+  "alloys": {
+    "6061_T6": {
+      "label": "Al 6061-T6",
+      "testedGrade": "Al 6061-T6 (uncoated)",
+      "rate_mm_per_year": 0.10315242031798148,
+      "originalReportedValue": "9.47 µA/cm² (9.47 × 10⁻⁶ A/cm²)",
+      "rateType": "FARADAY_CONVERTED_ELECTROCHEMICAL",
+      "method": "Uncoated/reference 6061-T6 polarization j_corr in Table 3; approximate ASTM G102 conversion, i_corr=9.47 µA/cm², EW=26.9815385/3 g/equiv, density=2.70 g/cm³; not an experimentally observed uniform penetration depth",
+      "environment": "Aqueous 3.5 wt% NaCl; no intentionally added H₂S; study of anodizing vs uncoated reference",
+      "sourceTitle": "Effect of Citric Acid Hard Anodizing on the Mechanical Properties and Corrosion Resistance of Different Aluminum Alloys (Materials, 2024), Table 3",
+      "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11396439/",
+      "doi": "10.3390/ma17174285",
+      "limitation": "No H2S test; equivalent-weight approximation assumes aluminum predominantly dissolves as Al3+, not exact alloy stoichiometry; positive polarization hysteresis suggests localized attack could make Faraday uniform-depth proxy underestimate pit depth."
+    },
+    "7075_T6": {
+      "label": "Al 7075-T6",
+      "testedGrade": "Al 7075-T6 (uncoated)",
+      "rate_mm_per_year": 0.0032445059996975083,
+      "originalReportedValue": "0.31 µA/cm² (0.31 × 10⁻⁶ A/cm²)",
+      "rateType": "FARADAY_CONVERTED_ELECTROCHEMICAL",
+      "method": "Uncoated/reference 7075-T6 polarization j_corr from same Table 3 as 6061-T6; approximate ASTM G102 conversion, i_corr=0.31 µA/cm², EW=26.9815385/3 g/equiv, density=2.81 g/cm³",
+      "environment": "Same 3.5 wt% aqueous NaCl study as Al 6061-T6; no intentionally added H₂S",
+      "sourceTitle": "Effect of Citric Acid Hard Anodizing on the Mechanical Properties and Corrosion Resistance of Different Aluminum Alloys (Materials, 2024), Table 3",
+      "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11396439/",
+      "doi": "10.3390/ma17174285",
+      "limitation": "This low electrochemical current is not proof of wet sour-service suitability. Positive hysteresis suggests localized corrosion; converted mm/y is an approximate uniform-equivalent rate only."
+    },
+    "1020_NORMALIZED": {
+      "label": "AISI 1020 candidate (normalized)",
+      "testedGrade": "AISI 1020 (normalization heat treatment NOT confirmed in paper)",
+      "rate_mm_per_year": 0.58,
+      "otherMeasuredRates_mm_per_year": [
+        0.62,
+        0.78,
+        0.84,
+        0.88,
+        0.92
+      ],
+      "originalReportedValue": "0.58 ± 0.06 mm/year (2400-grit surface finish); weight-loss Table 5",
+      "rateType": "DIRECT_GRAVIMETRIC",
+      "method": "Seven-day gravimetric weight loss for the smoothest 2400-grit specimen in Table 5; paper also reports 0.92 ± 0.06 mm/y at 100-grit and intermediate values, all in CO₂ brine, not H₂S.",
+      "environment": "25°C, CO₂-saturated 3 wt% NaCl, pH ~5, atmospheric pressure, stagnant 168 hours (7 days), 2400-grit",
+      "sourceTitle": "Mechanistic Role of Surface Roughness on CO₂ Corrosion Kinetics and Pitting Susceptibility of AISI 1020 Carbon Steel (International Journal of Design & Nature and Ecodynamics, 2026), Table 5",
+      "sourceUrl": "https://www.iieta.org/journals/ijdne/paper/10.18280/ijdne.210410",
+      "doi": "10.18280/ijdne.210410",
+      "limitation": "CO2, not H2S; temperature 25C, not 60C; exact normalized state not verified; value corresponds to smooth sample and is not a material-wide minimum."
+    },
+    "AISI_304": {
+      "label": "AISI 304",
+      "testedGrade": "AISI 304 stainless steel substrate (uncoated)",
+      "rate_mm_per_year": 0.17,
+      "originalReportedValue": "0.17 mm/year for stainless steel substrate (abstract)",
+      "rateType": "DIRECT_AUTHOR_REPORTED_ABSTRACT",
+      "method": "Author-reported stainless steel substrate corrosion rate in abstract; Cr3C2–25NiCr coating reported 72% lower rate than stainless steel substrate.",
+      "environment": "Simulated H₂S-containing oil/gas field medium; complete test temperature, H₂S partial pressure and solution chemistry not available from accessible abstract",
+      "sourceTitle": "Assessment of Sulfide Corrosion and Wear Behavior of HVOF-Sprayed Cr3C2–25NiCr Coating on 304 Stainless Steels in H2S Environment (Transactions of the Indian Institute of Metals, 2023)",
+      "sourceUrl": "https://doi.org/10.1007/s12666-023-02986-2",
+      "doi": "10.1007/s12666-023-02986-2",
+      "limitation": "Only abstract verified; precise temperature/H2S pressure not established. Do not assume its 0.17 mm/y rate applies to 3 bar H2S or to untested surface finish."
+    },
+    "AISI_316": {
+      "label": "AISI 316 candidate (316L proxy)",
+      "testedGrade": "AISI 316L, NOT exact AISI 316",
+      "rate_mm_per_year": 0.74,
+      "originalReportedValue": "0.74 mm/year (weight-loss uniform corrosion)",
+      "rateType": "DIRECT_GRAVIMETRIC_PROXY_GRADE",
+      "method": "Seven-day 316L weight-loss corrosion at 3-bar H2S from 2020 paper; as-used candidate 316 differs in composition/carbon limit.",
+      "environment": "60°C, H₂S partial pressure 3 bar, total pressure 30 bar, 5 wt% NaCl + 0.5 wt% acetic acid, pH ~3, 7-day immersion",
+      "sourceTitle": "The Effect of H₂S Pressure on the Formation of Multiple Corrosion Products on 316L Stainless Steel Surface (Shah et al., 2020)",
+      "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7399776/",
+      "doi": "10.1155/2020/3989563",
+      "limitation": "Measured on 316L not AISI 316; weight-loss corrosion is not deepest pit or SSC/HIC qualification."
+    }
+  },
+  "method": {
+    "baselineRate": "ONE chosen published/converted literature benchmark per material. No low/central/high assigned hypotheses.",
+    "mode1": "Uniform whole-surface literature benchmark, r_i = base_rate(material); no hypothetical hotspots.",
+    "mode2": "Illustrative chamber hotspot overlay on top of the same literature benchmark. Local r_i = base_rate(material)*(1+(F-1)*H_i), H_i inherited illustrative CAD field, F=2.4/0.74 from different 316L published studies; ONLY 316L has related measured pit/uniform evidence. Other alloys' local values are hypothetical and are NOT measured pit rates.",
+    "pitMultiplier": 3.243243243243243,
+    "pitSupport": "316L deepest-pit penetration 2.4 mm/y after 7d at 3 bar H2S from Shah et al., Trends in Sciences 2022; baseline 0.74 mm/y from a related 2020 316L study; ratio transferred to other materials only as clearly hypothetical shape overlay",
+    "pitSourceUrl": "https://doi.org/10.48048/tis.2022.4642",
+    "faraday": "CR(mm/y)=0.00327*i_corr(µA/cm2)*EW(g/equiv)/density(g/cm3); aluminum-dominant Al3+ assumed EW=26.9815385/3; densities 6061=2.70,7075=2.81",
+    "faradayStandardUrl": "https://store.astm.org/standards/g102",
+    "loss": "loss_i = r_i * exposure_days / 365, with constant-rate projection only",
+    "wall": "Remaining chamber wall = max(0, 10mm - local inner loss - uniform outer loss); illustrated pairing, no exact wall-pair geometry",
+    "notCalculated": [
+      "Common-condition five-alloy corrosion ranking",
+      "True H2S electrochemistry for all alloys",
+      "Actual pitting location or pit probability",
+      "SSC/HIC cracking",
+      "FEA stress",
+      "Pressure rating",
+      "Long-term service life"
+    ]
+  }
+}
