@@ -136,8 +136,8 @@ function updateMetrics(){
  $('minWall').textContent=chamberRates.length?fmt(10-integrateLoss(Math.max(...chamberRates)),4):'N/A';
  $('maxLoss').textContent=fmt(integrateLoss(rateMax),4);
  const globalMax=maxComparisonRate();
- $('legendMin').textContent=(field.value==='wall'?fmt(10-integrateLoss(globalMax),4):fmt(0,field.value==='rate'?2:4))+' '+unit;
- $('legendMax').textContent=(field.value==='rate'?fmt(globalMax,2):field.value==='wall'?'10.0000':fmt(integrateLoss(globalMax),4))+' '+unit;
+ $('legendMin').textContent=(field.value==='wall'?fmt(10,4):fmt(0,field.value==='rate'?2:4))+' '+unit;
+ $('legendMax').textContent=(field.value==='rate'?fmt(globalMax,2):field.value==='wall'?fmt(10-integrateLoss(globalMax),4):fmt(integrateLoss(globalMax),4))+' '+unit;
  $('activefield').textContent=(field.value==='rate'?'Assigned local rate':field.value==='loss'?'Integrated metal loss':'Estimated remaining chamber wall')+' · '+unit;
  $('durationLabel').textContent='Exposure: '+currentDays()+' days'+(currentDays()===7?' · benchmark duration':' · unvalidated constant-rate what-if');
  const body=$('chamberrows');body.innerHTML='';
