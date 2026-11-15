@@ -105,46 +105,59 @@ function precisionForField(){return field.value==='rate'?3:4}
 function fmt(v,p=4){return Number(v).toFixed(p)}
 function severityColor(x){const a=new THREE.Color();if(x<=.5){a.copy(low).lerp(mid,x*2)}else{a.copy(mid).lerp(high,(x-.5)*2)}return a}
 function updateMaterialVisibility(){const isolate=part.value;for(const mesh of meshes){const nm=mesh.userData.fieldName;mesh.visible=isolate==='all' ? (nm!=='front_end_plate'||front.checked) : nm===isolate;}}
-function buildNumericalColors(){if(!source)return;
- let min=source.mappedWetMin_mmperyr,max=source.mappedWetMax_mmperyr;
- for(const m of meshes){const info=source.meshes[m.userData.fieldName];if(!info)continue;
-  const geo=m.geometry,n=info.rate.length;
-  const colors=new Float32Array(n*9);
-  for(let faceId=0;faceId<n;faceId++){
-    const r=info.rate[faceId],col=r>0?severityColor(Math.max(0,Math.min(1,(r-min)/(max-min)))):dryCol;
-    const j=faceId*9;for(let k=0;k<3;k++){colors[j+3*k]=col.r;colors[j+3*k+1]=col.g;colors[j+3*k+2]=col.b;}
-  }
-  geo.setAttribute('color',new THREE.BufferAttribute(colors,3));
-  m.material?.dispose?.();m.material=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.85,metalness:.04,side:THREE.DoubleSide});
+function buildNumericalColors(){
+ if(!source||!profiles)return;
+ const globalMax=maxComparisonRate();
+ for(const mesh of meshes){
+   const name=mesh.userData.fieldName,info=source.meshes[name];
+   if(!info)continue;
+   const n=info.rate.length,colors=new Float32Array(n*9);
+   for(let i=0;i<n;i++){
+     const r=materialRate(info.rate[i]),col=severityColor(Math.min(1,r/globalMax));
+     for(let v=0;v<3;v++){const j=i*9+3*v;colors[j]=col.r;colors[j+1]=col.g;colors[j+2]=col.b;}
+   }
+   mesh.geometry.setAttribute('color',new THREE.BufferAttribute(colors,3));
+   mesh.material?.dispose?.();mesh.material=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.86,metalness:.04,side:THREE.DoubleSide});
  }
 }
 function updateMetrics(){
- if(!source)return;
- const selected=part.value, entries=Object.entries(source.partStats).filter(([n])=>selected==='all'||selected===n);
- const mn=Math.min(...entries.map(([_,s])=>s.rateMin)), mx=Math.max(...entries.map(([_,s])=>s.rateMax));
- const day=currentDays(),scale=day/365, isChamber=selected==='all'||selected.startsWith('chamber_');
- const low=field.value==='wall'?(isChamber?10-mx*scale:null):displayValue(mn);
- const high=field.value==='wall'?(isChamber?10-mn*scale:null):displayValue(mx);
- const pretty=v=>v===null?'N/A':fmt(v,precisionForField()),unit=unitForField();
- $('minValue').textContent=pretty(low);$('maxValue').textContent=pretty(high);
- $('minUnit').textContent=field.value==='wall'&&!isChamber?'not applicable':unit;
- $('maxUnit').textContent=field.value==='wall'&&!isChamber?'not applicable':unit;
- const ch=entries.filter(([n])=>n.startsWith('chamber_')).map(([_,s])=>s.rateMax);
- $('minWall').textContent=ch.length?fmt(10-Math.max(...ch)*scale,4):'N/A';
- $('maxLoss').textContent=fmt(mx*scale,4);
- $('legendMin').textContent=pretty(field.value==='wall'?high:low)+' '+unit;
- $('legendMax').textContent=pretty(field.value==='wall'?low:high)+' '+unit;
- $('activefield').textContent=(field.value==='rate'?'Reference rate':field.value==='loss'?'Reference penetration':'Reference remaining wall')+' · '+unit;
- $('durationLabel').textContent='Exposure: '+day+' days'+(day!==7?' (linear what-if)':' (reference duration)');
+ if(!source||!profiles)return;
+ const selected=part.value,parts=Object.entries(source.partStats).filter(([n])=>selected==='all'||n===selected);
+ const rateMin=Math.min(...parts.map(([_,s])=>materialRate(s.rateMin)));
+ const rateMax=Math.max(...parts.map(([_,s])=>materialRate(s.rateMax)));
+ const chamberSelected=selected==='all'||selected.startsWith('chamber_');
+ const lower=field.value==='wall'?(chamberSelected?10-integrateLoss(rateMax):null):displayValue(rateMin);
+ const upper=field.value==='wall'?(chamberSelected?10-integrateLoss(rateMin):null):displayValue(rateMax);
+ const fmtField=v=>v===null?'N/A':fmt(v,precisionForField()), unit=unitForField();
+ $('minValue').textContent=fmtField(lower);$('maxValue').textContent=fmtField(upper);
+ $('minUnit').textContent=field.value==='wall'&&!chamberSelected?'N/A':unit;
+ $('maxUnit').textContent=field.value==='wall'&&!chamberSelected?'N/A':unit;
+ const chamberRates=parts.filter(([n])=>n.startsWith('chamber_')).map(([_,s])=>materialRate(s.rateMax));
+ $('minWall').textContent=chamberRates.length?fmt(10-integrateLoss(Math.max(...chamberRates)),4):'N/A';
+ $('maxLoss').textContent=fmt(integrateLoss(rateMax),4);
+ const globalMax=maxComparisonRate();
+ $('legendMin').textContent=(field.value==='wall'?fmt(10-integrateLoss(globalMax),4):fmt(0,field.value==='rate'?2:4))+' '+unit;
+ $('legendMax').textContent=(field.value==='rate'?fmt(globalMax,2):field.value==='wall'?'10.0000':fmt(integrateLoss(globalMax),4))+' '+unit;
+ $('activefield').textContent=(field.value==='rate'?'Assigned local rate':field.value==='loss'?'Integrated metal loss':'Estimated remaining chamber wall')+' · '+unit;
+ $('durationLabel').textContent='Exposure: '+currentDays()+' days'+(currentDays()===7?' · benchmark duration':' · unvalidated constant-rate what-if');
  const body=$('chamberrows');body.innerHTML='';
  for(const [name,s] of Object.entries(source.partStats)){
-  const chamber=name.startsWith('chamber_'),tr=document.createElement('tr');
+  const chamber=name.startsWith('chamber_'),lo=materialRate(s.rateMin),hi=materialRate(s.rateMax),tr=document.createElement('tr');
   if(selected===name)tr.classList.add('active');
-  tr.innerHTML=`<td>${s.label||name.replaceAll('_',' ')}</td><td>${fmt(s.rateMin*scale,4)}</td><td>${fmt(s.rateMax*scale,4)}</td><td>${chamber?fmt(10-s.rateMax*scale,4):'N/A'}</td><td>${fmt(s.wetArea_m2,3)}</td>`;
+  tr.innerHTML=`<td>${s.label||name.replaceAll('_',' ')}</td><td>${fmt(integrateLoss(lo),4)}</td><td>${fmt(integrateLoss(hi),4)}</td><td>${chamber?fmt(10-integrateLoss(hi),4):'N/A'}</td><td>${fmt(s.wetArea_m2,3)}</td>`;
   tr.addEventListener('click',()=>{part.value=part.value===name?'all':name;updateAll()});body.appendChild(tr);
  }
+ const comp=$('materialRows');comp.innerHTML='';
+ for(const [key,p] of Object.entries(profiles.materials)){
+  const rate=baseRate(key),tr=document.createElement('tr');
+  if(key===material.value)tr.classList.add('active');
+  tr.innerHTML=`<td>${p.label}</td><td>${fmt(rate,3)}</td><td>${fmt(integrateLoss(rate),4)}</td><td>${fmt(integrateLoss(rate*PITTING_SENSITIVITY),4)}</td><td>${fmt(10-integrateLoss(rate*PITTING_SENSITIVITY),4)}</td>`;
+  tr.title='Screening scenario only. Input evidence: '+p.confidence;
+  tr.addEventListener('click',()=>{material.value=key;loadModel()});comp.appendChild(tr);
+ }
+ $('compareCase').textContent=scenario.options[scenario.selectedIndex].textContent+' · '+currentDays()+' days';
  if(hasPick)showProbe(pickName,pickFace,pickPosition);
- status.textContent='Full sour exposure: '+source.coverageExposedTriangles.toLocaleString()+'/'+source.meshTriangleCount.toLocaleString()+' triangles, '+fmt(source.coverageExposedArea_m2,3)+' m². '+(day===7?'316L 7-day literature reference.':'Linear arithmetic only — not a validated long-term prediction.');
+ status.textContent='All '+source.meshTriangleCount.toLocaleString()+' faces exposed · one-day numerical integration · '+profile().label+' · '+scenario.value+' base '+fmt(baseRate(),3)+' mm/year. Evidence: '+profile().confidence+'.';
 }
 function showProbe(name,faceIndex,point){
  if(!source||!name||faceIndex===null)return;
