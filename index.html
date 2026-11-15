@@ -63,7 +63,7 @@ aside{display:flex;flex-direction:column;gap:12px}.panel{background:#0e1e2e;bord
 <div class="rule"></div><p class="hint">The measured deepest pit in the original 316L experiment was <b>0.04681 mm after seven days</b>. Your displayed per-face maximum is close but not exactly equal because it comes from discretized CAD hotspot interpolation, rather than the actual measured pit coordinates.</p>
 </section>
 </div>
-<footer class="sources"><b>Research:</b> <a href="https://tis.wu.ac.th/index.php/tis/article/view/4642" target="_blank" rel="noreferrer">Shah et al., 2022 — 316L sour corrosion and pitting</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7399776/" target="_blank" rel="noreferrer">Shah et al., 2020 — sour exposure conditions</a>. <b>CAD:</b> user-supplied <code>DRUM_COMPLETE_MULTI_BODY.step</code>; numerical field: face-mapped reference dataset in <code>data/face_fields.json</code>. Open over GitHub Pages or a local HTTP server so the model and data can load.</footer>
+<footer class="sources"><b>Research:</b> <a href="https://tis.wu.ac.th/index.php/tis/article/view/4642" target="_blank" rel="noreferrer">Shah et al., 2022 — 316L sour corrosion and pitting</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7399776/" target="_blank" rel="noreferrer">Shah et al., 2020 — sour exposure conditions</a>. <b>CAD:</b> user-supplied <code>DRUM_COMPLETE_MULTI_BODY.step</code>; numerical field: face-mapped reference dataset in <code>face_fields.json</code>. Open over GitHub Pages or a local HTTP server so the model and data can load.</footer>
 </main>
 <script type="module">
 import * as THREE from 'three';
@@ -145,7 +145,7 @@ const loader=new GLTFLoader();
 async function loadModel(){const serial=++objectSequence;
  loading.classList.remove('hidden');loading.textContent='Loading 3D geometry…';
  const slug=material.value;
- const path=`models/drum_${slug}_SOUR_REFERENCE.glb`;
+ const path=`drum_${slug}_SOUR_REFERENCE.glb`;
  try{
   const gltf=await loader.loadAsync(path);if(serial!==objectSequence)return;
   if(group){scene.remove(group);group.traverse(m=>{if(m.isMesh){m.geometry?.dispose?.();m.material?.dispose?.()}})}
@@ -165,7 +165,7 @@ async function loadModel(){const serial=++objectSequence;
  }catch(err){loading.textContent='Could not load geometry or numeric field: '+err.message;console.error(err);}
 }
 (async()=>{try{
- const resp=await fetch('data/face_fields.json');if(!resp.ok)throw Error('HTTP '+resp.status);
+ const resp=await fetch('face_fields.json');if(!resp.ok)throw Error('HTTP '+resp.status);
  source=await resp.json();await loadModel();
  }catch(err){loading.textContent='Data unavailable. Open this package using GitHub Pages or a local HTTP server. '+err.message;console.error(err);}
 })();
