@@ -30,37 +30,37 @@ aside{display:flex;flex-direction:column;gap:12px}.panel{background:#0e1e2e;bord
 </head>
 <body><main>
 <header class="header"><div><div class="eyebrow">MEEN 401 · ENGINEERING EVALUATION</div><h1>Drum corrosion | five-material sour sensitivity</h1><p class="subtitle">Compare material-specific corrosion-rate scenarios on the entire drum. All interior and exterior faces are exposed; click any surface to inspect the numerical loss.</p></div></header>
-<div class="chips"><span class="chip">60°C</span><span class="chip">H₂S partial pressure 3 bar</span><span class="chip">30 bar total</span><span class="chip">5 wt% NaCl</span><span class="chip">0.5 wt% acetic acid</span><span class="chip">Nominal wall 10 mm</span><span class="chip">Viewer v4.0</span></div>
+<div class="chips"><span class="chip">60°C</span><span class="chip">H₂S partial pressure 3 bar</span><span class="chip">30 bar total</span><span class="chip">5 wt% NaCl</span><span class="chip">0.5 wt% acetic acid</span><span class="chip">Nominal wall 10 mm</span><span class="chip">Viewer v4.1</span></div>
 <div class="notice"><b>Five-material corrosion sensitivity simulation — not H₂S service qualification.</b> Different grade readings now use low/central/high engineering rate assumptions. Only the 316L rate is closely backed by the reference sour experiment; other values are hypotheses informed by research in differing environments. The location of possible localized attack is illustrative, not predicted. Do not use these numerical rankings as certified material-selection data.</div>
 <div class="viewgrid">
 <section class="viewport" aria-label="Interactive drum surface mapping"><canvas id="view"></canvas><div class="viewporttop"><span class="overlaytag">3D CAD mesh · 10 bodies</span><span class="overlaytag" id="activefield">Corrosion rate · mm/year</span></div><div class="viewportbottom">Drag to rotate · Scroll to zoom · Right-drag to pan · Click surface to probe</div><div id="loading" class="loading">Loading 3D assembly and numerical surface data…</div></section>
 <aside>
 <section class="panel"><h2>Analysis controls</h2>
 <div class="control"><label for="material">Proposed material</label><select id="material"><option value="6061_T6">Al 6061-T6</option><option value="7075_T6">Al 7075-T6</option><option value="1020_NORMALIZED">AISI 1020 — normalized</option><option value="AISI_304">AISI 304</option><option value="AISI_316" selected>AISI 316</option></select></div>
-<div class="control"><label for="scenario">Material corrosion scenario (assumptions)</label><select id="scenario"><option value="low">Low-rate sensitivity</option><option value="central" selected>Central-rate sensitivity</option><option value="high">High-rate sensitivity</option></select></div><div class="control"><label for="field">Displayed field (numerical readout)</label><select id="field"><option value="rate">Local reference corrosion rate · mm/year</option><option value="loss" selected>Reference metal penetration · mm</option><option value="wall">Remaining nominal chamber wall · mm</option></select></div>
+<div class="control"><label for="scenario">Material corrosion scenario (assumptions)</label><select id="scenario"><option value="low">Low-rate sensitivity</option><option value="central" selected>Central-rate sensitivity</option><option value="high">High-rate sensitivity</option></select></div><div class="control"><label for="field">Displayed field (numerical readout)</label><select id="field"><option value="rate">Assigned local corrosion rate · mm/year</option><option value="loss" selected>Calculated metal penetration · mm</option><option value="wall">Estimated remaining chamber wall · mm</option></select></div>
 <div class="control"><label for="days">Exposure duration</label><select id="days"><option value="7" selected>7 days — published test duration</option><option value="30">30 days — linear what-if</option><option value="90">90 days — linear what-if</option><option value="365">365 days — linear what-if</option></select></div>
 <div class="control"><label for="part">Inspect component</label><select id="part"><option value="all">All 10 bodies — all surfaces exposed</option><option value="chamber_1">Chamber 1</option><option value="chamber_2">Chamber 2</option><option value="chamber_3">Chamber 3</option><option value="chamber_4">Chamber 4</option><option value="chamber_5">Chamber 5</option><option value="chamber_6">Chamber 6</option><option value="front_end_plate">Front end plate</option><option value="rear_end_plate">Rear end plate</option><option value="hub_1">Hub 1</option><option value="hub_2">Hub 2</option></select></div>
 <label class="check"><input type="checkbox" id="front" /> Show front end plate (uncheck to see chamber interiors)</label>
 <div class="ctlrow"><button id="reset">Reset camera</button><button id="export">Export readings CSV</button></div>
 </section>
-<section class="panel"><div class="statheader"><h2>Color scale · mapped field</h2><span class="statuslabel">Face-by-face</span></div><div class="grad"></div><div class="gradnums"><span id="legendMin">0.0134 mm</span><span id="legendMax">0.0460 mm</span></div><div class="note"><span style="display:inline-block;background:#718096;width:13px;height:13px;border-radius:3px;vertical-align:-2px;margin-right:6px"></span>All mesh surfaces receive sour exposure (minimum 0.70 mm/year assigned reference). Warmer colors show hypothetical higher-rate chamber regions, <b>not predicted pit locations</b>. No material-specific simulation has been performed.</div></section>
+<section class="panel"><div class="statheader"><h2>Color scale · selected material only</h2><span class="statuslabel">Per-material</span></div><div class="hint" id="colorScope">Selected material · Central-rate sensitivity</div><div class="grad"></div><div class="gradnums"><span id="legendMin">—</span><span id="legendMax">—</span></div><div class="note" id="legendExplanation">Blue = less corrosion. Red = more corrosion. Scale automatically adjusts to the selected material and rate scenario.</div><div class="note"><span style="display:inline-block;background:#718096;width:13px;height:13px;border-radius:3px;vertical-align:-2px;margin-right:6px"></span>Gray with remaining-wall mode = end plates/hubs have no assessed wall thickness; <b>they are still exposed</b>. Hotspots are hypothetical and not predicted.</div></section>
 <section class="panel"><h2>Click-to-probe reading</h2><div id="probe" class="probe">Click any chamber, plate, or hub surface to inspect reference values and coordinates.</div><div class="rule"></div><div id="status" class="hint">Preparing numerical field…</div></section>
 </aside>
 </div>
 <section class="metrics" aria-label="Minimum and maximum numerical metrics">
-<div class="metric"><div class="label">Minimum exposed-surface reference value</div><div class="val" id="minValue">—</div><div class="unit" id="minUnit">mm</div></div>
-<div class="metric"><div class="label">Maximum exposed-surface reference value</div><div class="val" id="maxValue">—</div><div class="unit" id="maxUnit">mm</div></div>
+<div class="metric"><div class="label">Minimum selected material value</div><div class="val" id="minValue">—</div><div class="unit" id="minUnit">mm</div></div>
+<div class="metric"><div class="label">Maximum selected material value</div><div class="val" id="maxValue">—</div><div class="unit" id="maxUnit">mm</div></div>
 <div class="metric"><div class="label">Minimum remaining chamber wall</div><div class="val" id="minWall">—</div><div class="unit">mm · 10 mm original</div></div>
-<div class="metric"><div class="label">Maximum reference penetration</div><div class="val" id="maxLoss">—</div><div class="unit">mm · exposed chamber regions</div></div>
+<div class="metric"><div class="label">Maximum scenario penetration</div><div class="val" id="maxLoss">—</div><div class="unit">mm · exposed chamber regions</div></div>
 </section>
 <div class="twocol">
 <section class="tablepanel"><div class="rowhead"><h2>Numerical results — all 10 bodies</h2><span class="secondary" id="durationLabel">Reference exposure: 7 days</span></div>
 <table class="data-table"><thead><tr><th>Chamber</th><th>Min loss (mm)</th><th>Max loss (mm)</th><th>Min wall (mm)</th><th>Exposed area (m²)</th></tr></thead><tbody id="chamberrows"></tbody></table>
-<p class="note">All interior and exterior CAD surfaces are assigned sour exposure. Chamber wall remaining is evaluated only for six chamber tubes (nominal wall 10 mm); end plates and hubs have no assumed 10 mm thickness.</p></section>
+<p class="note">All interior and exterior CAD surfaces are assigned sour exposure. Only six chambers have a modelled 10 mm wall; the conservative wall scenario subtracts corrosion on both sides. End plates and hubs have no assessed thickness.</p></section>
 <section class="tablepanel"><h2>Interpretation and limitations</h2>
-<p class="hint"><b>What is actually calculated?</b> A 316L literature rate is assigned to every triangulated STEP surface, with illustrative sensitivity hotspots in chamber interiors. Depth is computed as <b>rate × (days/365)</b>; nominal remaining wall is <b>10 mm − depth</b>. The minimum and maximum are calculated across <b>all surface triangle samples</b> in the selected components.</p>
+<p class="hint"><b>What is actually calculated?</b> Each selected material has assumed low/central/high corrosion-rate inputs. Local rates use a hypothetical 316L-derived hotspot multiplier; loss is integrated daily. The chamber-wall estimate subtracts local inner-surface loss and uniform outer-surface loss. The color scale is calculated <b>only from the currently selected material</b>, not the five-material maximum.</p>
 <div class="rule"></div><p class="hint"><b>What is not calculated?</b> No H₂S electrochemical solution, material-specific kinetics, fluid pooling, pit initiation probability, crack growth, or structural stresses/deflections. All 10 CAD bodies are treated as exposed; high-rate zones are hypothetical and not predicted. <span class="warning">Do not extrapolate the 7-day rate to real service life or claim sour-service qualification.</span></p>
-<div class="rule"></div><p class="hint">The measured deepest pit in the original 316L experiment was <b>0.04681 mm after seven days</b>. The display maximum is below the published pit-rate reference because its hypothetical hotspot field is discretized; those triangle positions were not observed experimentally.</p>
+<div class="rule"></div><p class="hint">The source 316L study reported a deepest pit of <b>0.04681 mm after seven days</b>. Spatial hotspot positions here remain hypothetical. Color scaling to each selected material improves visibility, but <b>colors between two different materials are no longer directly comparable</b>; use the numerical results table for that.</p>
 </section>
 </div>
 <section class="tablepanel" style="margin-top:14px"><div class="rowhead"><h2>Material scenario comparison · full drum</h2><span class="secondary" id="compareCase">Central-rate scenario</span></div><table class="data-table"><thead><tr><th>Material</th><th>Base rate (mm/y)</th><th>Minimum loss (mm)</th><th>Maximum loss (mm)</th><th>Min chamber wall (mm)</th></tr></thead><tbody id="materialRows"></tbody></table><p class="note">These are literature-informed hypothetical rate inputs, not five sour-service tests. Click any material row to view its 3D model.</p></section>
@@ -105,19 +105,29 @@ function precisionForField(){return field.value==='rate'?3:4}
 function fmt(v,p=4){return Number(v).toFixed(p)}
 function severityColor(x){const a=new THREE.Color();if(x<=.5){a.copy(low).lerp(mid,x*2)}else{a.copy(mid).lerp(high,(x-.5)*2)}return a}
 function updateMaterialVisibility(){const isolate=part.value;for(const mesh of meshes){const nm=mesh.userData.fieldName;mesh.visible=isolate==='all' ? (nm!=='front_end_plate'||front.checked) : nm===isolate;}}
+// The color range is recalculated for ONLY the selected material and scenario.
+function selectedColorRateRange(){
+ const min=baseRate();
+ return {min,max:min*PITTING_SENSITIVITY};
+}
 function buildNumericalColors(){
  if(!source||!profiles)return;
- const globalMax=maxComparisonRate();
+ const range=selectedColorRateRange(),denominator=Math.max(1e-12,range.max-range.min);
  for(const mesh of meshes){
    const name=mesh.userData.fieldName,info=source.meshes[name];
    if(!info)continue;
    const n=info.rate.length,colors=new Float32Array(n*9);
    for(let i=0;i<n;i++){
-     const r=materialRate(info.rate[i]),col=severityColor(Math.min(1,r/globalMax));
-     for(let v=0;v<3;v++){const j=i*9+3*v;colors[j]=col.r;colors[j+1]=col.g;colors[j+2]=col.b;}
+     const r=materialRate(info.rate[i]);
+     const severity=Math.max(0,Math.min(1,(r-range.min)/denominator));
+     const col=field.value==='wall'&&!name.startsWith('chamber_')?dryCol:severityColor(severity);
+     for(let v=0;v<3;v++){
+       const j=i*9+3*v;colors[j]=col.r;colors[j+1]=col.g;colors[j+2]=col.b;
+     }
    }
    mesh.geometry.setAttribute('color',new THREE.BufferAttribute(colors,3));
-   mesh.material?.dispose?.();mesh.material=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.86,metalness:.04,side:THREE.DoubleSide});
+   mesh.material?.dispose?.();
+   mesh.material=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.86,metalness:.04,side:THREE.DoubleSide});
  }
 }
 function updateMetrics(){
@@ -135,9 +145,19 @@ function updateMetrics(){
  const chamberRates=parts.filter(([n])=>n.startsWith('chamber_')).map(([_,s])=>materialRate(s.rateMax));
  $('minWall').textContent=chamberRates.length?fmt(Math.max(0,10-integrateLoss(Math.max(...chamberRates))-integrateLoss(baseRate())),4):'N/A';
  $('maxLoss').textContent=fmt(integrateLoss(rateMax),4);
- const globalMax=maxComparisonRate();
- $('legendMin').textContent=(field.value==='wall'?fmt(10,4):fmt(0,field.value==='rate'?2:4))+' '+unit;
- $('legendMax').textContent=(field.value==='rate'?fmt(globalMax,2):field.value==='wall'?fmt(Math.max(0,10-integrateLoss(globalMax)-integrateLoss(Math.max(...Object.keys(profiles.materials).map(key=>baseRate(key))))),4):fmt(integrateLoss(globalMax),4))+' '+unit;
+ const selectedRange=selectedColorRateRange();
+ const legendLower=field.value==='rate'?selectedRange.min:field.value==='loss'?integrateLoss(selectedRange.min):Math.max(0,10-integrateLoss(selectedRange.min)-integrateLoss(baseRate()));
+ const legendUpper=field.value==='rate'?selectedRange.max:field.value==='loss'?integrateLoss(selectedRange.max):Math.max(0,10-integrateLoss(selectedRange.max)-integrateLoss(baseRate()));
+ const nDigits=field.value==='rate'?3:4;
+ // The gradient runs cyan -> orange -> red. For wall thickness, red means LESS wall.
+ $('legendMin').textContent=fmt(legendLower,nDigits)+' '+unit;
+ $('legendMax').textContent=fmt(legendUpper,nDigits)+' '+unit;
+ $('colorScope').textContent=profile().label+' · '+scenario.options[scenario.selectedIndex].textContent+' · '+currentDays()+' days';
+ $('legendExplanation').textContent=field.value==='wall'
+  ?'Cyan (left) = more wall remaining; red (right) = less wall remaining. Chamber walls only; gray plates/hubs are still exposed.'
+  :field.value==='rate'
+    ?'Cyan (left) = lowest assigned rate for this material; red (right) = highest hypothetical localized rate.'
+    :'Cyan (left) = minimum calculated surface loss; red (right) = maximum calculated surface loss. Both are for the selected material.';
  $('activefield').textContent=(field.value==='rate'?'Assigned local rate':field.value==='loss'?'Integrated metal loss':'Estimated remaining chamber wall')+' · '+unit;
  $('durationLabel').textContent='Exposure: '+currentDays()+' days'+(currentDays()===7?' · benchmark duration':' · unvalidated constant-rate what-if');
  const body=$('chamberrows');body.innerHTML='';
@@ -202,7 +222,7 @@ async function loadModel(){const serial=++objectSequence;
  }catch(err){loading.textContent='Numerical dataset failed to load. '+err.message;console.error(err);}
 })();
 material.addEventListener('change',loadModel);scenario.addEventListener('change',()=>{buildNumericalColors();updateMetrics()});part.addEventListener('change',updateAll);front.addEventListener('change',updateAll);
-field.addEventListener('change',updateMetrics);days.addEventListener('change',updateMetrics);
+field.addEventListener('change',()=>{buildNumericalColors();updateMetrics()});days.addEventListener('change',()=>{buildNumericalColors();updateMetrics()});
 $('reset').addEventListener('click',()=>{camera.position.copy(originalPos);controls.target.copy(target);controls.update()});
 canvas.addEventListener('pointerdown',e=>{dragging={x:e.clientX,y:e.clientY}});
 canvas.addEventListener('pointerup',e=>{if(!dragging||Math.hypot(e.clientX-dragging.x,e.clientY-dragging.y)>6){dragging=null;return}dragging=null;
