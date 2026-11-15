@@ -1,89 +1,79 @@
-# Five-Material Sour Corrosion Sensitivity Study — Revolver Drum v4.1
+# Revolver Drum — Dual-Mode 3D Corrosion Viewer (v5.0)
 
-**Live 3D viewer:** https://hammadi-314.github.io/drum-corrosion-simulation/
+**Live viewer:** https://hammadi-314.github.io/drum-corrosion-simulation/?v=5
 
-## What this model is
+The 3D model comes from the project's six-chamber STEP assembly: **10 CAD bodies**, **12,080 triangular surface faces** and approximately **27.293367 m²** of surface area. Every inside/outside mesh face is considered exposed. No material removal is physically applied to the geometry.
 
-A transparent **numerical surface recession sensitivity study** using the user-supplied 10-solid revolver drum model. Full exposure is assigned to all **12,080 GLB/STEP surface triangles**, totaling **27.293367 m²**, across six chambers, two end plates and two hubs. All inside and outside faces are included.
+## Two modes — choose from the Analysis mode dropdown
 
-Different selectable material and rate scenarios now produce **different numerical results**, unlike the previous viewer where all five grades inherited the same 316L benchmark. The analysis numerically integrates assigned metal loss one day at a time; the 3D mesh itself is **not physically eroded**. Color intensity and numeric legend now scale **independently for the currently selected material and scenario**. This makes variation across one material's surfaces easier to see, but similar colors across different materials **do not mean similar numerical corrosion**. Use the five-material results table to compare actual scenario numbers.
+### Mode 1 — published experimental benchmarks (DEFAULT)
 
-## Why these are engineering scenarios, not five validated rates
+Mode 1 uses a distinct **published measurement or transparent published-current-to-rate conversion** for the selected material. The specific source, actually tested material grade, test environment and limitations appear next to the 3D viewer. The five papers **do not share experimental conditions**. **Never treat Mode 1 as a five-alloy corrosion ranking for one H₂S environment.**
 
-The published 316L corrosion reference is 0.74 mm/year in 60 °C, 3 bar H₂S, 30 bar total, 5 wt% NaCl + 0.5 wt% acetic acid, approximately seven days. **316L differs from AISI 316**. The other material scenarios are not measured in this identical environment. Published sour/acid-chloride data supports qualitative differences, but no matched five-alloy study was established.
+Mode 1 assigns the relevant published or converted **UNIFORM benchmark rate to every face** on the drum, because the experimental studies did not measure pit-location fields on the user's CAD. Consequently minimum and maximum rates/penetration are equal for every material. This is intentional and preferable to inventing a spatial failure field. All faces receive a single color in this mode, and the min/max legend is identical.
 
-Every low/central/high rate shown below is an **explicit chosen numerical sensitivity input**, **not a published rate in the specified sour solution**, except the central **316L-derived** benchmark.
+| Candidate dropdown | Sample actually tested | Research original | Site-equivalent corrosion rate | Environmental limitation |
+| --- | --- | --- | ---: | --- |
+| Al 6061-T6 | Al 6061-T6 | 9.47 µA/cm² corrosion current density | **0.1031524 mm/y** (derived) | 3.5% NaCl, no H₂S |
+| Al 7075-T6 | Al 7075-T6 | 0.31 µA/cm² corrosion current density | **0.0032445 mm/y** (derived) | Same chloride paper, no H₂S |
+| AISI 1020 normalized candidate | AISI 1020; normalization not specified | 0.58–0.92 mm/y weight-loss range over surface finishes; viewer uses 0.58 smoother condition | **0.580 mm/y** (published) | 25°C, CO₂-saturated 3% NaCl, no H₂S |
+| AISI 304 | Uncoated AISI 304 substrate | 0.17 mm/y | **0.170 mm/y** (published) | Simulated H₂S-containing oil/gas field solution; full pressure/temperature unknown in accessible abstract |
+| AISI 316 | AISI **316L**, not 316 | 0.74 mm/y | **0.740 mm/y** (316L benchmark proxy) | 60°C, 3 bar H₂S partial / 30 bar total; 5% NaCl, 0.5% acetic acid |
 
-| Material | Low (mm/y) | Central (mm/y) | High (mm/y) | Interpretation |
-| --- | ---: | ---: | ---: | --- |
-| Al 6061-T6 | 0.09 | 0.50 | 2.00 | Sensitivity assumptions; source measured 0.0881 mm/y in **gaseous** H₂S at 75 °C, NOT the chosen wet condition |
-| Al 7075-T6 | 0.15 | 0.90 | 3.00 | Sensitivity assumptions; chloride studies show greater susceptibility than 6061 under some conditions |
-| AISI 1020 normalized | 0.70 | 3.00 | 8.00 | Sensitivity assumptions; sour-steel rates vary strongly with pH, temperature, flow and corrosion-product scale |
-| AISI 304 | 0.50 | 1.20 | 3.00 | Sensitivity assumptions; controlled H₂S study found generally lower attack on 316L than 304L, not these exact rates |
-| AISI 316 | 0.37 | 0.74 | 1.48 | Center extrapolated from **316L** experiment; low/high are hypothetical half/double multipliers |
-
-These intervals do **not** represent confidence intervals or statistically estimated probabilities.
-
-## Equations and implementation
-
-At each triangular CAD face, define a local severity fraction from the preceding illustrative CAD hotspot template `face_fields.json`, on the interval 0 to 1. No hotspot location has been solved or empirically determined for the actual drum.
-
-For each material `m`, rate-case `c`, and face `i`:
+**Aluminum conversion:** Used ASTM G102 / Faraday penetration-rate equation, assuming Al dissolution as Al³⁺, equivalent weight `26.9815385/3 = 8.993846 g/equiv`, approximate density 2.70 g/cm³ for 6061-T6 and 2.81 g/cm³ for 7075-T6:
 
 ```text
-hotspot_i  = clamp((previous_reference_rate_i - 0.700) / (2.399351 - 0.700), 0, 1)
-common_pit_ratio = 2.4 / 0.74 = 3.243243
-local_rate_i = assumed_uniform_rate_[m,c] * (1 + (common_pit_ratio - 1) * hotspot_i)
-loss_i(t+1 day) = loss_i(t) + local_rate_i / 365
-remaining_nominal_chamber_wall = max(0, 10.0 - loss_inner_local - loss_outer_uniform)
+CR [mm/year] = 0.00327 × i_corr [µA/cm²] × equivalent_weight [g/equiv] / density [g/cm³]
 ```
 
-The common pitting multiplier uses two separate reported 316L measurements and is a **what-if multiplier**, NOT a universal material-specific pit rate. The 10 mm thickness is the uploaded chamber CAD wall; both its inner and outer surfaces are treated as exposed. The wall estimate subtracts the chosen inner-local loss plus the outside uniform baseline, without geometrically pairing the two sides of the wall. The end plates and hubs do not inherit this wall thickness. A zero result indicates only a hypothetical thickness-exhaustion scenario and is NOT a pressure-integrity prediction. The computation uses constant rates over selected durations, **not electrochemical PDE/FEM, process-fluid CFD, metal geometry erosion or structural FEA**.
+These aluminum rate figures are **not reported penetration rates** from the paper and are only uniform-corrosion approximations. Electrochemical corrosion current can fail to capture localized attack. The significant difference between 6061 and 7075 in this NaCl test does **not** prove 7075 is better under H₂S exposure.
 
-> Any 30, 90 or 365 day result is a constant-rate sensitivity extrapolation far beyond the 7 day reference, not a tested life forecast.
+**Mode 1 calculation for each face**: `loss_i(t) = published_or_derived_rate × t_days / 365`; hypothetical two-sided chamber-wall thickness `T = max(0, 10 − 2 × loss_i)`. This only transfers coupon data to the model geometry as a numerical illustration; it cannot forecast real drum operation, actual pitting or time to failure. Other components' thickness is marked N/A.
 
-## Seven-day results — CENTRAL sensitivity case
+**Mode 1 references:**
+- 6061-T6 and 7075-T6: *Effect of Citric Acid Hard Anodizing on the Mechanical Properties and Corrosion Resistance of Different Aluminum Alloys*, 2024, Table 3, uncoated references: https://doi.org/10.3390/ma17174285
+- ASTM G102 corrosion-current conversion: https://ecommerce.sist.si/catalog/standards/astm/6fd59c55-07d4-42ad-8512-bfc5f750a993/astm-g102-23
+- AISI 1020 (CO₂, **not** H₂S): Mohammed et al., 2026: https://doi.org/10.18280/ijdne.210410
+- AISI 304 (H₂S simulated oil/gas field, missing full test conditions): Huang et al., 2023: https://doi.org/10.1007/s12666-023-02986-2
+- AISI 316L (sour reference, **not** exact 316): Shah et al., 2020: https://pmc.ncbi.nlm.nih.gov/articles/PMC7399776/
 
-| Material | Min uniform loss (mm) | Max localized-sensitivity loss (mm) | Minimum remaining chamber wall (mm, both faces) |
-| --- | ---: | ---: | ---: |
-| Al 6061-T6 | 0.0096 | 0.0311 | 9.9593 |
-| Al 7075-T6 | 0.0173 | 0.0560 | 9.9268 |
-| AISI 1020 normalized | 0.0575 | 0.1866 | 9.7559 |
-| AISI 304 | 0.0230 | 0.0746 | 9.9023 |
-| AISI 316 | 0.0142 | 0.0460 | 9.9398 |
+### Mode 2 — common-condition sour-service numerical SENSITIVITY
 
-**Do not interpret this order as a measured five-alloy corrosion ranking.** In particular, the favorable-looking 6061 scenario is not an evidence-based demonstration of 6061 performance in wet H₂S.
+Retains the previous common **60°C, 3 bar H₂S partial pressure, 30 bar total, 5 wt% NaCl and 0.5 wt% acetic acid** scenario. The five material-specific low/central/high rate values in `material_scenarios_v4.json` are **unvalidated engineering sensitivity assumptions**, not measurements from experiments under matched conditions.
 
-## How to use the GitHub viewer
+For each face `i`, previous illustrative hotspot reference value `R_i`, and base rate `r_m`:
 
-Choose material, rate case (low, central, high), visualized value (local rate, recession, wall), exposure duration (7, 30, 90, 365 days), and part. The 3D field and the corresponding min/max color legend update for **the selected material only**. Blue indicates lower metal loss (or more remaining chamber wall), while red indicates higher loss (or less remaining wall). End plates and hubs are gray only when viewing remaining wall, because their wall thickness is not evaluated; they remain exposed and appear in the other fields. Rotate/zoom the 3D model, click any visible face for its numerical scenario values, and inspect the full ten-body table. Click a material row in the comparison table to switch its 3D model. The front plate starts hidden to show chambers but is still included in exposure metrics.
+```text
+hotspot_i = clamp((R_i − 0.700) / (2.399351 − 0.700), 0, 1)
+common_rate_multiplier = 2.4 / 0.74 = 3.243243 (316L literature comparison)
+local_rate_i = r_m × [1 + (common_rate_multiplier − 1) × hotspot_i]
+loss_i(t + 1 day) = loss_i(t) + local_rate_i / 365
+remaining_chamber_wall = max(0, 10 − local_inner_loss − outer_baseline_loss)
+```
 
-`Export readings CSV` downloads calculated results for **all five materials and all ten components** at the current case and duration.
+All inner and outer surfaces are exposed. The hottest spatial locations are **assumed**, not predicted by physics. The common factor is illustrative and not validated for aluminum, 1020, 304 or 316. The two-sided wall assumption does not geometrically pair surfaces; it simply subtracts an assumed local interior loss and opposite exterior uniform baseline.
 
-### Reproducing the numerical run
+### Common UI and numerical limitations
 
-- `material_scenarios_v4.json`: the five input rate triplets, source notes, and assumptions
-- `face_fields.json`: the 12,080-face geometry-aligned hotspot template, now fully exposed
-- `simulate_corrosion_v4.py`: independent open-source Python reproduction of the face-by-face one-day time integration
-- `simulation_results_v4.csv`: 60 summary scenario rows (5 materials × 3 cases × 4 durations)
-- `triangle_reference_field.csv`: original all-surface base template, **not material-specific**; see the actual viewer or simulation script for new material-dependent rates
-- `drum_*.glb`: 3D assets from user-supplied STEP; surface is colored but not physically corroded
+- Material, part, exposure interval (7, 30, 90, 365 days), output field (rate, loss, remaining wall), orbit/zoom, click-to-probe, and export CSV work in **both modes**.
+- In **Mode 1**, the low/central/high selector is hidden because laboratory benchmark results are not three arbitrary scenarios. In **Mode 2**, it remains available.
+- Color normalization is per selected material, **not cross-material**, so equal colors across materials do not indicate equal measured rate. Mode 1 uses **one color** deliberately because the field is uniform. For chamber wall thickness, red (Mode 2) is more wall loss; gray end plates and hubs have no evaluated thickness, but remain exposed.
+- The **five-material table in Mode 1 is descriptive only**; different temperatures, H₂S concentration, salinity, sample finish/grades and methods prevent a quantitative same-condition ranking.
+- `Export readings CSV` includes mode, tested grade, research URL, experiment environment, calculated loss and limitations for all 10 components.
+- Time integration assumes a **constant corrosion rate**, so 30/90/365-day scenarios are mathematically linear extrapolations, not verified service-life estimates.
+- Neither mode performs electrochemical FEM, sour-service cracking analysis, CFD, geometric erosion, structural pressure calculations or ISO 15156 qualification.
 
-## Conclusions for senior design
+## Files and reproducibility
 
-1. **Design sensitivity**: depending on assumed rates, identical 10 mm chamber wall geometry gives substantially different seven-day recession. Carbon-steel and stainless/aluminum scenarios overlap in uncertainty; the exercise is a sensitivity assessment, not a final materials winner.
-2. **Architecture improvements**: protect all wettable inner/outer chamber faces, end plates, shaft/hub interfaces and fasteners; use compatible sour-service coatings/sealing, remove persistent aqueous pockets where practicable, and ensure access for inspection and drainage.
-3. **Selection decision**: retain qualified corrosion-resistant materials as candidates, but do NOT select 6061 or 316 solely because a model field is small. At the chosen **3 bar H₂S** with acidic chloride, the actual standard applicability envelope and cracking susceptibility require engineering review. **316/316L are not automatically ISO 15156-compliant** at these conditions.
-4. **Next validation gate**: obtain the true field temperature, H₂S partial pressure, chloride, pH and liquid/wetting assumptions. Commission matched-condition sour-corrosion coupon/pitting tests for candidate grades (including their exact heat treatment, coating/weld state) and separate SSC/HIC qualification as necessary. Recalibrate the numerical rates and then rerun structural FEA with credible damage geometries.
+- `index.html` — dual-mode interactive 3D website
+- `research_benchmarks_v5.json` — **Mode 1** source measurements, conversions, conditions, applicability limitations
+- `research_mode1_results_v5.csv` — **Mode 1** reproduction of 5 × 4 exposure-duration uniform benchmarks
+- `material_scenarios_v4.json` — **Mode 2** hypothetical low/central/high inputs and bibliography
+- `simulate_corrosion_v4.py` — Mode 2 computational reproduction
+- `simulation_results_v4.csv` — Mode 2 60-case summary
+- `face_fields.json` — exposure and prior illustrative hotspot template, 12,080 triangle samples
+- `drum_*.glb` — geometry used for all five material selections
 
-## Source bibliography
+## Senior-design progression
 
-- Shah et al. (2020), 316L test with/without 3 bar H₂S: https://pmc.ncbi.nlm.nih.gov/articles/PMC7399776/
-- Shah et al. (2022), 316L pitting in highly sour service: https://doi.org/10.48048/tis.2022.4642
-- Davoodi et al. (2011), 304L vs 316L in H₂S acidic media: https://doi.org/10.1016/j.corsci.2010.09.050
-- Yang et al. (2022), 6061 H₂S gas/liquid behavior: https://doi.org/10.1080/00986445.2022.2030729
-- Zhang et al., AISI-1020 CO₂/H₂S corrosion at 60 °C: https://www.sciencedirect.com/science/article/pii/S0042207X21007363
-- 6061-T6 vs 7075-T6 chloride exposure research: https://www.sciencedirect.com/science/article/pii/S0013468616306946
-- TWI, 316/316L sour-service limits and weld considerations: https://www.twi-global.com/technical-knowledge/published-papers/sour-service-limits-of-dual-certified-316-316l-austenitic-stainless-steel-and-weldments-march-2010
-
-**Engineering safety disclaimer:** This is **not** a pressure-boundary qualification, safe-life calculation, H₂S cracking prediction, or certification to any oil-and-gas material standard.
+The update separates **actual published evidence** from **engineering assumptions**. Mode 1 documents where the present literature does and does not match your selected sour-service conditions; Mode 2 tests the sensitivity of wall-thinning results to plausible-but-unvalidated numerical inputs. Together these tools support the requirement for qualified sour-service materials, corrosion-protection design, and targeted laboratory testing and structural FEA. **Neither mode supports final selection of an alloy on corrosion alone.**
