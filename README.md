@@ -1,4 +1,4 @@
-# Five-Material Sour Corrosion Sensitivity Study — Revolver Drum v4.0
+# Five-Material Sour Corrosion Sensitivity Study — Revolver Drum v4.1
 
 **Live 3D viewer:** https://hammadi-314.github.io/drum-corrosion-simulation/
 
@@ -6,7 +6,7 @@
 
 A transparent **numerical surface recession sensitivity study** using the user-supplied 10-solid revolver drum model. Full exposure is assigned to all **12,080 GLB/STEP surface triangles**, totaling **27.293367 m²**, across six chambers, two end plates and two hubs. All inside and outside faces are included.
 
-Different selectable material and rate scenarios now produce **different numerical results**, unlike the previous viewer where all five grades inherited the same 316L benchmark. The analysis numerically integrates assigned metal loss one day at a time; the 3D mesh itself is **not physically eroded**. Color intensity is scaled against the **same five-material maximum** at each scenario for an interpretable comparison.
+Different selectable material and rate scenarios now produce **different numerical results**, unlike the previous viewer where all five grades inherited the same 316L benchmark. The analysis numerically integrates assigned metal loss one day at a time; the 3D mesh itself is **not physically eroded**. Color intensity and numeric legend now scale **independently for the currently selected material and scenario**. This makes variation across one material's surfaces easier to see, but similar colors across different materials **do not mean similar numerical corrosion**. Use the five-material results table to compare actual scenario numbers.
 
 ## Why these are engineering scenarios, not five validated rates
 
@@ -56,7 +56,7 @@ The common pitting multiplier uses two separate reported 316L measurements and i
 
 ## How to use the GitHub viewer
 
-Choose material, rate case (low, central, high), visualized value (local rate, recession, wall), exposure duration (7, 30, 90, 365 days), and part. Rotate/zoom the 3D model, click any visible face for its numerical scenario values, and inspect the full ten-body table. Click a material row in the comparison table to switch its 3D model. The front plate starts hidden to show chambers but is still included in exposure metrics.
+Choose material, rate case (low, central, high), visualized value (local rate, recession, wall), exposure duration (7, 30, 90, 365 days), and part. The 3D field and the corresponding min/max color legend update for **the selected material only**. Blue indicates lower metal loss (or more remaining chamber wall), while red indicates higher loss (or less remaining wall). End plates and hubs are gray only when viewing remaining wall, because their wall thickness is not evaluated; they remain exposed and appear in the other fields. Rotate/zoom the 3D model, click any visible face for its numerical scenario values, and inspect the full ten-body table. Click a material row in the comparison table to switch its 3D model. The front plate starts hidden to show chambers but is still included in exposure metrics.
 
 `Export readings CSV` downloads calculated results for **all five materials and all ten components** at the current case and duration.
 
