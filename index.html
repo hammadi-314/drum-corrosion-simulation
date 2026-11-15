@@ -149,7 +149,7 @@ function currentDays(){return Number(days.value)}
 const RATE_ANCHOR=0.7,MAX_REFERENCE=2.399351,PITTING_SENSITIVITY=2.4/0.74; // 316L-only published ratio applied illustratively
 function isResearch(){return studyMode.value==='literature'}
 function benchmark(key=material.value){return benchmarks.materials[key]}
-function profile(){return profiles.materials[material.value]}
+function profile(){return benchmark()}
 function baseRate(key=material.value){return benchmark(key).rate_mm_per_year}
 function hotspot(ref){return Math.max(0,Math.min(1,(ref-RATE_ANCHOR)/(MAX_REFERENCE-RATE_ANCHOR)))}
 function uniformRate(key=material.value){return baseRate(key)}
@@ -218,30 +218,29 @@ function buildNumericalColors(){
  }
 }
 function updateModeUI(){
- if(!profiles||!benchmarks)return;
+ if(!benchmarks)return;
  const published=isResearch(),study=benchmark();
- $('scenarioControl').hidden=published;
- $('sourConditionChips').hidden=published;
- $('researchInfo').hidden=!published;
- $('comparisonTitle').textContent=published?'Published study benchmarks (different conditions)':'Material rate scenario comparison (60°C / 3 bar H₂S)';
- $('baseRateHeader').textContent=published?'Published / derived rate (mm/y)':'Assumed base rate (mm/y)';
- $('comparisonNote').textContent=published
-  ?'WARNING: These five results come from DIFFERENT environments, methods, and sometimes material grades. They are NOT a controlled same-condition comparison and cannot rank candidates for your 3 bar H₂S drum. The values apply uniformly only as an illustrative CAD transfer.'
-  :'Mode 2 is a common sour-service numerical sensitivity, with hypothetical material rates and hotspot locations. No matched alloy experiments or material-specific H₂S predictions were performed.';
+ $('sourConditionChips').hidden=false;
+ $('researchInfo').hidden=false;
+ $('comparisonTitle').textContent=published
+  ?'Published uniform corrosion benchmark · all ten bodies'
+  :'Literature-based projected corrosion · hypothetical hotspots';
+ $('baseRateHeader').textContent='Paper-based reference rate (mm/y)';
+ $('comparisonNote').textContent='Each candidate uses ONE paper-linked or derived rate, but experiments used DIFFERENT temperatures, electrolytes, H₂S exposure and sometimes grades. Values cannot rank these five alloys under one sour-service condition. Mode 2 hotspot multipliers are additionally hypothetical.';
  $('modeNotice').innerHTML=published
-  ?'<b>Mode 1 — Published research values, NOT a matched five-material experiment.</b> Each material uses a measured paper value or a clearly labeled electrochemical conversion. The papers differ in H₂S exposure, temperature, electrolyte and sometimes material grade. The selected benchmark is mapped uniformly to all CAD faces without invented pit locations. Longer exposure is an illustrative constant-rate extrapolation, not an experimental prediction.'
-  :'<b>Mode 2 — Common sour-service sensitivity, NOT a validated corrosion simulation.</b> Fixed scenario: 60°C, 3 bar H₂S partial pressure, 30 bar total, 5% NaCl and 0.5% acetic acid. The five baseline rates are assumed engineering screening inputs; hypothetical interior hotspots use a shared 316L-derived multiplier. This is not an ISO 15156 qualification or proven material ranking.';
- if(published){
-  $('researchDetails').innerHTML='<b>Selected candidate:</b> '+study.label+
-    '<br><b>Actually tested:</b> '+study.testedGrade+
-    '<br><b>Original paper:</b> '+study.paperValue+' ('+study.paperUnit+')'+
-    '<br><b>Used numerical rate:</b> '+fmt(study.rate_mm_per_year,5)+' mm/year'+
-    '<br><b>Value origin:</b> '+study.rateMethod+
-    '<br><b>Test environment:</b> '+study.environment+
-    '<br><b>Applicability limitation:</b> '+study.limit;
-  $('researchPaper').href=study.sourceUrl;
-  $('researchPaper').textContent='Open published study and verify methods ↗';
- }
+  ?'<b>Mode 1 — Published or derived coupon benchmarks.</b> The selected paper rate is applied uniformly to all CAD faces, with no invented pitting pattern. The original study and its conditions appear below. Study conditions differ between materials; corrosion data do not establish sour-service qualification.'
+  :'<b>Mode 2 — Literature baseline with illustrative localized attack.</b> No arbitrary low/central/high rates: each candidate now uses ONE paper-based corrosion-rate input. Hypothetical hotspots are still mapped using a 316L pit-rate factor of 2.4/0.74 (from separate 316L experiments). For the other four material candidates, this factor is NOT experimentally validated. Different papers used DIFFERENT environments, so Mode 2 is NOT a five-alloy 3-bar H₂S experiment.';
+ $('researchDetails').innerHTML='<b>Candidate:</b> '+study.label+
+  '<br><b>Grade actually tested:</b> '+study.testedGrade+
+  '<br><b>Original numerical result:</b> '+study.originalReportedValue+
+  '<br><b>Single input corrosion rate:</b> '+fmt(study.rate_mm_per_year,6)+' mm/year'+
+  '<br><b>Data status:</b> '+study.rateType.replaceAll('_',' ').toLowerCase()+
+  '<br><b>Calculation / extraction:</b> '+study.method+
+  '<br><b>Test conditions:</b> '+study.environment+
+  '<br><b>Limitations:</b> '+study.limitation+
+  (!published?'<br><b>Mode 2 additional assumption:</b> Pit multiplier 2.4/0.74 applied to demonstrative hotspots, even though this ratio is from 316L and not verified for the selected alloy.':'');
+ $('researchPaper').href=study.sourceUrl;
+ $('researchPaper').textContent='Open exact supporting paper ↗';
 }
 function updateMetrics(){
  if(!source||!profiles||!benchmarks)return;
@@ -275,14 +274,12 @@ function updateMetrics(){
   ?'Color scale · five published study rates'
   :'Color scale · fixed across all five materials';
  $('colorModeLabel').textContent=published?'Research contrast':'Fixed scale';
- $('colorScope').textContent=profile().label+' · '+
-  (published?'Shared literature scale':'Shared absolute scale · '+scenario.options[scenario.selectedIndex].textContent)+
-  ' · '+currentDays()+' days';
+ $('colorScope').textContent=profile().label+' · '+(published?'Uniform study benchmark':'Shared absolute scale · study-derived rate + illustrative hotspots')+' · '+currentDays()+' days';
  $('legendExplanation').textContent=published
   ?'Mode 1: uniform color per material based on its published/derived benchmark. Different papers used DIFFERENT conditions, so colors are not a sour-service ranking.'
   :field.value==='wall'
-   ?'Mode 2: both ticks mark the selected material’s maximum and minimum remaining wall on the fixed five-material scale. Cyan = thicker wall; red = thinner wall. Endpoints are intentionally unlabeled.'
-   :'Mode 2: the two vertical ticks identify the selected material’s minimum and maximum '+(field.value==='rate'?'corrosion rates':'metal losses')+' on one fixed five-material color scale. The overall endpoints are intentionally unlabeled; numerical inputs are unchanged.';
+   ?'Mode 2: ticks mark maximum/minimum remaining chamber wall using one shared scale. Rates come from different papers; the localized corrosion pattern is only a what-if.'
+   :'Mode 2: vertical ticks mark the selected material’s minimum/maximum '+(field.value==='rate'?'local rates':'metal loss')+' on a shared five-material color scale. Paper rates come from unmatched test conditions; only the hotspot factor is assumed.';
  const gradient=[],bar=document.querySelector('.grad');
  for(let k=0;k<=24;k++){
   const fraction=k/24;
@@ -326,7 +323,7 @@ function updateMetrics(){
   }
  }
  $('activefield').textContent=(field.value==='rate'?'Assigned corrosion rate':field.value==='loss'?'Calculated metal loss':'Remaining chamber wall')+' · '+unit;
- $('durationLabel').textContent='Exposure: '+currentDays()+' days · '+(published?'uniform research benchmark transferred to CAD':'common sour sensitivity assumption');
+ $('durationLabel').textContent='Exposure: '+currentDays()+' days · '+(published?'paper-based uniform benchmark':'paper-based baseline, hypothetical spatial multiplier');
  const body=$('chamberrows');body.innerHTML='';
  for(const [name,s] of Object.entries(source.partStats)){
   const chamber=name.startsWith('chamber_'),rlo=materialRate(s.rateMin),rhi=materialRate(s.rateMax),tr=document.createElement('tr');
@@ -340,14 +337,14 @@ function updateMetrics(){
   if(key===material.value)tr.classList.add('active');
   const midRate=published?r:r*(1+(PITTING_SENSITIVITY-1)*0.4),swatch=severityColor(materialSeverity(midRate,key)).getStyle();
   tr.innerHTML=`<td><span class="material-swatch" style="background:${swatch}"></span>${p.label}</td><td>${fmt(r,5)}</td><td>${fmt(integrateLoss(r),5)}</td><td>${fmt(integrateLoss(max),5)}</td><td>${fmt(Math.max(0,10-integrateLoss(max)-integrateLoss(r)),5)}</td>`;
-  tr.title=published?benchmark(key).environment:'Scenario assumptions; confidence '+p.confidence;
+  tr.title=benchmark(key).environment+' | '+benchmark(key).rateType+' | '+benchmark(key).limitation;
   tr.addEventListener('click',()=>{material.value=key;updateModeUI();loadModel()});compare.appendChild(tr);
  }
- $('compareCase').textContent=published?'Different research environments · '+currentDays()+'-day extrapolation':scenario.options[scenario.selectedIndex].textContent+' · '+currentDays()+' days';
+ $('compareCase').textContent=(published?'Uniform benchmarks':'Published baseline + illustrative hotspots')+' · '+currentDays()+' days';
  if(hasPick)showProbe(pickName,pickFace,pickPosition);
  status.textContent=published
   ?'Mode 1 · '+benchmark().paperValue+' ('+benchmark().testedGrade+'); equivalent rate '+fmt(uniformRate(),5)+' mm/year. Research environment DIFFERENT for each material. All '+source.meshTriangleCount.toLocaleString()+' faces assume uniform exposure.'
-  :'Mode 2 · '+profile().label+' · baseline '+fmt(uniformRate(),3)+' mm/year, common 60°C/3 bar H₂S screening scenario. Inputs and hotspots are hypothetical.';
+  :'Mode 2 · '+profile().label+' · research-derived baseline '+fmt(uniformRate(),5)+' mm/year from its own paper; hypothetical localized factor. Cross-material study conditions differ.';
 }
 function showProbe(name,faceIndex,point){
  if(!source||!profiles||!benchmarks||!name||faceIndex===null)return;
@@ -387,18 +384,15 @@ async function loadModel(){const serial=++objectSequence;
 (async()=>{try{
  let resp=null,lastDataError='';for(const dataPath of ['./face_fields.json?v=3','./data/face_fields.json?v=3']){try{const r=await fetch(dataPath,{cache:'no-store'});if(r.ok){resp=r;break}lastDataError=dataPath+': HTTP '+r.status}catch(e){lastDataError=e.message}} if(!resp)throw Error('Could not load numerical data from root or data/. '+lastDataError);
  source=await resp.json();
- const p=await fetch('./material_scenarios_v4.json?v=4',{cache:'no-store'});
- if(!p.ok)throw Error('material_scenarios_v4.json missing: HTTP '+p.status);
- profiles=await p.json();
- const q=await fetch('./research_benchmarks_v5.json?v=5',{cache:'no-store'});
- if(!q.ok)throw Error('research_benchmarks_v5.json missing: HTTP '+q.status);
- benchmarks=await q.json();
+ const q=await fetch('./literature_inputs_v6.json?v=6',{cache:'no-store'});
+ if(!q.ok)throw Error('literature_inputs_v6.json missing: HTTP '+q.status);
+ const dataset=await q.json();benchmarks={materials:dataset.alloys,method:dataset.method};
+ profiles={materials:dataset.alloys};
  updateModeUI();await loadModel();
  }catch(err){loading.textContent='Numerical dataset failed to load. '+err.message;console.error(err);}
 })();
 studyMode.addEventListener('change',()=>{if(!benchmarks)return;updateModeUI();buildNumericalColors();updateMetrics();});
 material.addEventListener('change',()=>{if(!benchmarks)return;updateModeUI();loadModel()});
-scenario.addEventListener('change',()=>{if(!benchmarks)return;updateModeUI();buildNumericalColors();updateMetrics()});
 part.addEventListener('change',updateAll);front.addEventListener('change',updateAll);
 field.addEventListener('change',()=>{buildNumericalColors();updateMetrics()});days.addEventListener('change',()=>{buildNumericalColors();updateMetrics()});
 $('reset').addEventListener('click',()=>{camera.position.copy(originalPos);controls.target.copy(target);controls.update()});
@@ -411,17 +405,17 @@ canvas.addEventListener('pointerup',e=>{if(!dragging||Math.hypot(e.clientX-dragg
 $('export').addEventListener('click',()=>{
  if(!source||!profiles||!benchmarks)return;
  const published=isResearch();
- const rows=[['analysis_mode','material_candidate','source_tested_grade','rate_scenario','component','days','local_min_rate_mm_per_year','local_max_rate_mm_per_year','min_loss_mm','max_loss_mm','min_remaining_chamber_wall_mm_or_NA','exposed_area_m2','paper_or_input_file','study_environment_or_assumption','scientific_limitation']];
+ const rows=[['analysis_mode','material_candidate','source_tested_grade','rate_source_type','component','days','local_min_rate_mm_per_year','local_max_rate_mm_per_year','min_loss_mm','max_loss_mm','min_remaining_chamber_wall_mm_or_NA','exposed_area_m2','paper_URL','study_environment','scientific_limitation']];
  for(const [key,p] of Object.entries(profiles.materials)){
   const ref=benchmark(key);
   for(const [name,s] of Object.entries(source.partStats)){
    const lo=materialRate(s.rateMin,key),hi=materialRate(s.rateMax,key),outer=uniformRate(key);
-   rows.push([published?'MODE_1_PUBLISHED_UNMATCHED':'MODE_2_COMMON_H2S_SENSITIVITY',p.label,published?ref.testedGrade:p.label,published?'original benchmark':scenario.value,name,currentDays(),lo,hi,integrateLoss(lo),integrateLoss(hi),name.startsWith('chamber_')?Math.max(0,10-integrateLoss(hi)-integrateLoss(outer)):'N/A',s.wetArea_m2,published?ref.sourceUrl:'material_scenarios_v4.json',published?ref.environment:'60C,3bar H2S,30bar total,5% NaCl,0.5% acetic acid (assumed rate)',published?ref.limit:'Unvalidated assumed rates and illustrative localized attack']);
+   rows.push([published?'MODE_1_PAPER_UNIFORM':'MODE_2_PAPER_BASELINE_ILLUSTRATIVE_HOTSPOTS',p.label,ref.testedGrade,ref.rateType,name,currentDays(),lo,hi,integrateLoss(lo),integrateLoss(hi),name.startsWith('chamber_')?Math.max(0,10-integrateLoss(hi)-integrateLoss(outer)):'N/A',s.wetArea_m2,ref.sourceUrl,ref.environment,ref.limitation+(published?'':' | HOTSPOT FACTOR IS UNVALIDATED FOR MOST ALLOYS')]);
   }
  }
  const csv=rows.map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\n');
  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
- const link=document.createElement('a');link.href=url;link.download='Drum_'+(published?'Mode1_ResearchBenchmarks':'Mode2_SourSensitivity')+'_'+currentDays()+'days.csv';
+ const link=document.createElement('a');link.href=url;link.download='Drum_'+(published?'Mode1_PublishedBenchmark':'Mode2_LiteratureBasedSpatialWhatIf')+'_'+currentDays()+'days.csv';
  document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
 });
 
