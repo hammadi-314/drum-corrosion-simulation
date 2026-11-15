@@ -26,11 +26,48 @@ aside{display:flex;flex-direction:column;gap:12px}.panel{background:#0e1e2e;bord
 .statheader{display:flex;justify-content:space-between;align-items:center}.statuslabel{background:#23465a;color:#c0e8fe;border-radius:5px;padding:4px 6px;font-size:10px;font-weight:700}.hint{color:#bad5e9;font-size:11px;line-height:1.6}.muted{color:#899fb3}.warning{color:#ffdb9a}
 @media(max-width:1150px){.viewgrid{grid-template-columns:minmax(0,1fr) 300px}.metrics{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:780px){main{padding:16px 12px}.viewgrid,.twocol{grid-template-columns:1fr}.viewport{min-height:375px;height:58vh}.metrics{grid-template-columns:repeat(2,1fr)}.metric .label{min-height:0}}
+
+/* Viewer v4.2 — white presentation theme. Numerical corrosion calculations unchanged. */
+:root{background:#ffffff;color:#172333;color-scheme:light}
+body{background:#ffffff;color:#172333}
+.eyebrow{color:#21618a}
+.subtitle{color:#536578}
+.chip{background:#f5f8fb;border-color:#d9e2ea;color:#40566b}
+.notice{background:#fffaf0;border-color:#e7ce94;color:#684e21}
+.viewport{background:#ffffff;border-color:#d3dde7;box-shadow:0 1px 7px #1c3d5b0a}
+.overlaytag{background:#ffffffea;color:#2c455a;border-color:#d1dde7}
+.viewportbottom{background:#ffffffea;color:#3b556b;border:1px solid #e0e6ec}
+.loading{background:#fffffff2;color:#33485c}
+.panel,.metric,.tablepanel{background:#ffffff;border-color:#d8e1e9;box-shadow:0 2px 8px #223f5709}
+.panel h2,.tablepanel h2{color:#172333}
+label{color:#4e6073}
+select,button{background:#ffffff;border-color:#bdccd8;color:#1d3347}
+select:focus-visible,button:focus-visible{outline:2px solid #2a74b5;outline-offset:2px}
+button:hover{background:#e9f3fb}
+.check{color:#364d62}
+.metric .label{color:#596a79}
+.metric .val{color:#172333}
+.metric .unit{color:#61798c}
+.secondary,.note,.muted{color:#607386}
+.data-table th{color:#4e6375;border-bottom-color:#cdd8e2}
+.data-table td{border-bottom-color:#e4eaf0}
+.data-table tbody tr:hover{background:#f1f7fc}
+.data-table tbody tr.active{background:#e5f2fa}
+.grad{border-color:#aebdca}
+.gradnums,.probe{color:#405569}
+.probe b{color:#162b3c}
+.rule{background:#e1e7ed}
+.sources{color:#576c7e}
+.sources a{color:#146aa4}
+.statuslabel{background:#e5f2fa;color:#1c5579}
+.hint{color:#43596b}
+.warning{color:#805300}
+
 </style>
 </head>
 <body><main>
 <header class="header"><div><div class="eyebrow">MEEN 401 · ENGINEERING EVALUATION</div><h1>Drum corrosion | five-material sour sensitivity</h1><p class="subtitle">Compare material-specific corrosion-rate scenarios on the entire drum. All interior and exterior faces are exposed; click any surface to inspect the numerical loss.</p></div></header>
-<div class="chips"><span class="chip">60°C</span><span class="chip">H₂S partial pressure 3 bar</span><span class="chip">30 bar total</span><span class="chip">5 wt% NaCl</span><span class="chip">0.5 wt% acetic acid</span><span class="chip">Nominal wall 10 mm</span><span class="chip">Viewer v4.1</span></div>
+<div class="chips"><span class="chip">60°C</span><span class="chip">H₂S partial pressure 3 bar</span><span class="chip">30 bar total</span><span class="chip">5 wt% NaCl</span><span class="chip">0.5 wt% acetic acid</span><span class="chip">Nominal wall 10 mm</span><span class="chip">Viewer v4.2</span></div>
 <div class="notice"><b>Five-material corrosion sensitivity simulation — not H₂S service qualification.</b> Different grade readings now use low/central/high engineering rate assumptions. Only the 316L rate is closely backed by the reference sour experiment; other values are hypotheses informed by research in differing environments. The location of possible localized attack is illustrative, not predicted. Do not use these numerical rankings as certified material-selection data.</div>
 <div class="viewgrid">
 <section class="viewport" aria-label="Interactive drum surface mapping"><canvas id="view"></canvas><div class="viewporttop"><span class="overlaytag">3D CAD mesh · 10 bodies</span><span class="overlaytag" id="activefield">Corrosion rate · mm/year</span></div><div class="viewportbottom">Drag to rotate · Scroll to zoom · Right-drag to pan · Click surface to probe</div><div id="loading" class="loading">Loading 3D assembly and numerical surface data…</div></section>
