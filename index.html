@@ -53,7 +53,8 @@ button:hover{background:#e9f3fb}
 .data-table td{border-bottom-color:#e4eaf0}
 .data-table tbody tr:hover{background:#f1f7fc}
 .data-table tbody tr.active{background:#e5f2fa}
-.grad{border-color:#aebdca}
+.grad{border-color:#aebdca;height:18px}
+.material-swatch{display:inline-block;width:12px;height:12px;border:1px solid #4a647744;border-radius:3px;vertical-align:-1px;margin-right:8px}
 .gradnums,.probe{color:#405569}
 .probe b{color:#162b3c}
 .rule{background:#e1e7ed}
@@ -71,7 +72,7 @@ button:hover{background:#e9f3fb}
 </head>
 <body><main>
 <header class="header"><div><div class="eyebrow">MEEN 401 · ENGINEERING EVALUATION</div><h1>Drum corrosion | five-material sour sensitivity</h1><p class="subtitle">Compare published corrosion benchmarks separately from a common sour-service sensitivity scenario. All ten CAD bodies are included; experimental study conditions are shown for every material.</p></div></header>
-<div class="chips" id="sourConditionChips"><span class="chip">60°C</span><span class="chip">H₂S partial pressure 3 bar</span><span class="chip">30 bar total</span><span class="chip">5 wt% NaCl</span><span class="chip">0.5 wt% acetic acid</span><span class="chip">Nominal wall 10 mm</span><span class="chip">Viewer v5.0</span></div>
+<div class="chips" id="sourConditionChips"><span class="chip">60°C</span><span class="chip">H₂S partial pressure 3 bar</span><span class="chip">30 bar total</span><span class="chip">5 wt% NaCl</span><span class="chip">0.5 wt% acetic acid</span><span class="chip">Nominal wall 10 mm</span><span class="chip">Viewer v5.1</span></div>
 <div class="notice" id="modeNotice"><b>Five-material corrosion sensitivity simulation — not H₂S service qualification.</b> Different grade readings now use low/central/high engineering rate assumptions. Only the 316L rate is closely backed by the reference sour experiment; other values are hypotheses informed by research in differing environments. The location of possible localized attack is illustrative, not predicted. Do not use these numerical rankings as certified material-selection data.</div>
 <div class="viewgrid">
 <section class="viewport" aria-label="Interactive drum surface mapping"><canvas id="view"></canvas><div class="viewporttop"><span class="overlaytag">3D CAD mesh · 10 bodies</span><span class="overlaytag" id="activefield">Corrosion rate · mm/year</span></div><div class="viewportbottom">Drag to rotate · Scroll to zoom · Right-drag to pan · Click surface to probe</div><div id="loading" class="loading">Loading 3D assembly and numerical surface data…</div></section>
@@ -86,7 +87,7 @@ button:hover{background:#e9f3fb}
 <div class="ctlrow"><button id="reset">Reset camera</button><button id="export">Export readings CSV</button></div>
 </section>
 <section class="panel" id="researchInfo" hidden><h2>Source study and validity</h2><div id="researchDetails" class="hint"></div><p class="note"><a id="researchPaper" href="#" target="_blank" rel="noopener noreferrer">Open published source ↗</a></p></section>
-<section class="panel"><div class="statheader"><h2>Color scale · selected material only</h2><span class="statuslabel">Per-material</span></div><div class="hint" id="colorScope">Selected material · Central-rate sensitivity</div><div class="grad"></div><div class="gradnums"><span id="legendMin">—</span><span id="legendMax">—</span></div><div class="note" id="legendExplanation">Blue = less corrosion. Red = more corrosion. Scale automatically adjusts to the selected material and rate scenario.</div><div class="note"><span style="display:inline-block;background:#718096;width:13px;height:13px;border-radius:3px;vertical-align:-2px;margin-right:6px"></span>Gray with remaining-wall mode = end plates/hubs have no assessed wall thickness; <b>they are still exposed</b>. Hotspots are hypothetical and not predicted.</div></section>
+<section class="panel"><div class="statheader"><h2 id="colorTitle">Color scale · visual comparison</h2><span class="statuslabel" id="colorModeLabel">Enhanced</span></div><div class="hint" id="colorScope">Selected material · Central-rate sensitivity</div><div class="grad"></div><div class="gradnums"><span id="legendMin">—</span><span id="legendMax">—</span></div><div class="note" id="legendExplanation">Blue = less corrosion. Red = more corrosion. Scale automatically adjusts to the selected material and rate scenario.</div><div class="note"><span style="display:inline-block;background:#718096;width:13px;height:13px;border-radius:3px;vertical-align:-2px;margin-right:6px"></span>Gray with remaining-wall mode = end plates/hubs have no assessed wall thickness; <b>they are still exposed</b>. Hotspots are hypothetical and not predicted.</div></section>
 <section class="panel"><h2>Click-to-probe reading</h2><div id="probe" class="probe">Click any chamber, plate, or hub surface to inspect reference values and coordinates.</div><div class="rule"></div><div id="status" class="hint">Preparing numerical field…</div></section>
 </aside>
 </div>
@@ -101,9 +102,9 @@ button:hover{background:#e9f3fb}
 <table class="data-table"><thead><tr><th>Chamber</th><th>Min loss (mm)</th><th>Max loss (mm)</th><th>Min wall (mm)</th><th>Exposed area (m²)</th></tr></thead><tbody id="chamberrows"></tbody></table>
 <p class="note">All interior and exterior CAD surfaces are assigned sour exposure. Only six chambers have a modelled 10 mm wall; the conservative wall scenario subtracts corrosion on both sides. End plates and hubs have no assessed thickness.</p></section>
 <section class="tablepanel"><h2>Interpretation and limitations</h2>
-<p class="hint"><b>What is actually calculated?</b> Each selected material has assumed low/central/high corrosion-rate inputs. Local rates use a hypothetical 316L-derived hotspot multiplier; loss is integrated daily. The chamber-wall estimate subtracts local inner-surface loss and uniform outer-surface loss. The color scale is calculated <b>only from the currently selected material</b>, not the five-material maximum.</p>
+<p class="hint"><b>What is actually calculated?</b> Mode 1 applies different published or converted corrosion benchmarks to the full 3D drum, using a shared rate-based color scale. Mode 2 uses assumed material rates with illustrative hotspots and enhanced contrast. The wall estimate subtracts inner loss and outer uniform loss. <b>Color intensity is enhanced for readability, without changing any numerical results.</b></p>
 <div class="rule"></div><p class="hint"><b>What is not calculated?</b> No H₂S electrochemical solution, material-specific kinetics, fluid pooling, pit initiation probability, crack growth, or structural stresses/deflections. All 10 CAD bodies are treated as exposed; high-rate zones are hypothetical and not predicted. <span class="warning">Do not extrapolate the 7-day rate to real service life or claim sour-service qualification.</span></p>
-<div class="rule"></div><p class="hint">The source 316L study reported a deepest pit of <b>0.04681 mm after seven days</b>. Spatial hotspot positions here remain hypothetical. Color scaling to each selected material improves visibility, but <b>colors between two different materials are no longer directly comparable</b>; use the numerical results table for that.</p>
+<div class="rule"></div><p class="hint">The source 316L study reported a deepest pit of <b>0.04681 mm after seven days</b>. Spatial hotspot positions here remain hypothetical. Mode 1 study conditions differ, so color differences are <b>not</b> proof of better sour performance. Mode 2 uses assumed rates and hypothetical hotspots. Always rely on the numerical values and research limitations, not the colors alone.</p>
 </section>
 </div>
 <section class="tablepanel" style="margin-top:14px"><div class="rowhead"><h2 id="comparisonTitle">Material benchmark comparison · full drum</h2><span class="secondary" id="compareCase">Central-rate scenario</span></div><table class="data-table"><thead><tr><th>Material</th><th id="baseRateHeader">Rate (mm/y)</th><th>Minimum loss (mm)</th><th>Maximum loss (mm)</th><th>Min chamber wall (mm)</th></tr></thead><tbody id="materialRows"></tbody></table><p class="note" id="comparisonNote">Published studies were conducted in DIFFERENT environments. This table documents the evidence and cannot be used as a single-condition alloy ranking. Click a row to change material.</p></section>
@@ -152,28 +153,46 @@ function fmt(v,p=4){return Number(v).toFixed(p)}
 function severityColor(x){const a=new THREE.Color();if(x<=.5){a.copy(low).lerp(mid,x*2)}else{a.copy(mid).lerp(high,(x-.5)*2)}return a}
 function updateMaterialVisibility(){const isolate=part.value;for(const mesh of meshes){const nm=mesh.userData.fieldName;mesh.visible=isolate==='all' ? (nm!=='front_end_plate'||front.checked) : nm===isolate;}}
 // The color range is recalculated for ONLY the selected material and scenario.
-function selectedColorRateRange(){
- const base=uniformRate();
+function selectedColorRateRange(key=material.value){
+ const base=uniformRate(key);
  return {min:base,max:isResearch()?base:base*PITTING_SENSITIVITY};
+}
+// Visual contrast only: no corrosion input or numerical calculation is altered.
+function researchRateRange(){
+ const rates=Object.values(benchmarks.materials).map(x=>x.rate_mm_per_year);
+ return {min:Math.min(...rates),max:Math.max(...rates)};
+}
+function assumedRateRange(){
+ const rates=Object.keys(profiles.materials).map(key=>baseRate(key));
+ return {min:Math.min(...rates),max:Math.max(...rates)*PITTING_SENSITIVITY};
+}
+function clamp01(v){return Math.max(0,Math.min(1,v))}
+function materialSeverity(rate,key=material.value){
+ if(isResearch()){
+  const range=researchRateRange();
+  return Math.pow(clamp01((rate-range.min)/Math.max(1e-12,range.max-range.min)),0.55);
+ }
+ const local=selectedColorRateRange(key),global=assumedRateRange();
+ const localFrac=clamp01((rate-local.min)/Math.max(1e-12,local.max-local.min));
+ const globalFrac=clamp01((rate-global.min)/Math.max(1e-12,global.max-global.min));
+ return Math.pow(0.72*localFrac+0.28*globalFrac,0.85);
 }
 function buildNumericalColors(){
  if(!source||!profiles||!benchmarks)return;
- const range=selectedColorRateRange(),denominator=Math.max(1e-12,range.max-range.min);
  for(const mesh of meshes){
-   const name=mesh.userData.fieldName,info=source.meshes[name];
-   if(!info)continue;
-   const n=info.rate.length,colors=new Float32Array(n*9);
-   for(let i=0;i<n;i++){
-     const r=materialRate(info.rate[i]);
-     const severity=isResearch()?0:(Math.max(0,Math.min(1,(r-range.min)/denominator)));
-     const col=field.value==='wall'&&!name.startsWith('chamber_')?dryCol:severityColor(isResearch()?0.10:severity);
-     for(let v=0;v<3;v++){
-       const j=i*9+3*v;colors[j]=col.r;colors[j+1]=col.g;colors[j+2]=col.b;
-     }
+  const name=mesh.userData.fieldName,info=source.meshes[name];
+  if(!info)continue;
+  const n=info.rate.length,colors=new Float32Array(n*9);
+  for(let i=0;i<n;i++){
+   const r=materialRate(info.rate[i]);
+   const color=field.value==='wall'&&!name.startsWith('chamber_')?dryCol:severityColor(materialSeverity(r));
+   for(let v=0;v<3;v++){
+    const j=i*9+3*v;colors[j]=color.r;colors[j+1]=color.g;colors[j+2]=color.b;
    }
-   mesh.geometry.setAttribute('color',new THREE.BufferAttribute(colors,3));
-   mesh.material?.dispose?.();
-   mesh.material=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.86,metalness:.04,side:THREE.DoubleSide});
+  }
+  mesh.geometry.setAttribute('color',new THREE.BufferAttribute(colors,3));
+  mesh.material?.dispose?.();
+  mesh.material=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.86,metalness:.04,side:THREE.DoubleSide});
  }
 }
 function updateModeUI(){
@@ -217,18 +236,26 @@ function updateMetrics(){
  const rates=parts.filter(([n])=>n.startsWith('chamber_')).map(([_,s])=>materialRate(s.rateMax));
  $('minWall').textContent=rates.length?fmt(Math.max(0,10-integrateLoss(Math.max(...rates))-integrateLoss(uniformRate())),4):'N/A';
  $('maxLoss').textContent=fmt(integrateLoss(rateMax),4);
- const range=selectedColorRateRange(),lo=field.value==='rate'?range.min:field.value==='loss'?integrateLoss(range.min):Math.max(0,10-integrateLoss(range.min)-integrateLoss(uniformRate()));
- const hi=field.value==='rate'?range.max:field.value==='loss'?integrateLoss(range.max):Math.max(0,10-integrateLoss(range.max)-integrateLoss(uniformRate()));
- $('legendMin').textContent=fmt(lo,field.value==='rate'?4:5)+' '+unit;
- $('legendMax').textContent=fmt(hi,field.value==='rate'?4:5)+' '+unit;
- $('colorScope').textContent=profile().label+' · '+(published?'Research benchmark (uniform field)':scenario.options[scenario.selectedIndex].textContent)+' · '+currentDays()+' days';
+ const range=published?researchRateRange():selectedColorRateRange();
+ const legendValue=(rate)=>field.value==='rate'?rate:field.value==='loss'?integrateLoss(rate):
+  Math.max(0,10-integrateLoss(rate)-(published?integrateLoss(rate):integrateLoss(uniformRate())));
+ const lo=legendValue(range.min),hi=legendValue(range.max);
+ // The gradient follows corrosion severity: in wall mode left is thicker, right is thinner.
+ $('legendMin').textContent=fmt(lo,5)+' '+unit;
+ $('legendMax').textContent=fmt(hi,5)+' '+unit;
+ $('colorTitle').textContent=published?'Color scale · five published study rates':'Color scale · local + material contrast';
+ $('colorModeLabel').textContent=published?'Research contrast':'Scenario contrast';
+ $('colorScope').textContent=profile().label+' · '+(published?'Shared five-study scale':scenario.options[scenario.selectedIndex].textContent)+' · '+currentDays()+' days';
  $('legendExplanation').textContent=published
-  ?'Uniform benchmark across ALL exposed faces. Min = max; a single color is intentional because the study did not measure a spatial pit field on your drum. Different studies are not directly comparable.'
-  :field.value==='wall'?'Cyan = more wall remaining, red = less wall remaining. Hypothetical localized field; end plates and hubs have no wall assessment.'
-  :field.value==='rate'?'Cyan = minimum assumed rate; red = maximum hypothetical localized rate for this material.'
-  :'Cyan = minimum assumed penetration; red = maximum hypothetical penetration for this material.';
- const bar=document.querySelector('.grad');
- bar.style.background=published?'#38b7cc':'linear-gradient(90deg,#22c5e7 0%,#f4bd4f 52%,#f05a49 100%)';
+  ?'Cyan = lower published/derived rate; red = higher rate. One uniform color per material, with boosted tone (gamma 0.55). IMPORTANT: results are from DIFFERENT experiments; this is NOT a same-condition sour-service ranking.'
+  :field.value==='wall'?'Cyan = more wall remaining; red = less wall. Visual contrast combines local hotspot severity (72%) and assumed cross-material rate differences (28%). No physical hotspot prediction.'
+  :'Cyan = lower modeled corrosion; red = higher modeled corrosion. Visual contrast combines local hotspot severity (72%) and assumed cross-material rate differences (28%). Calculated values are unchanged.';
+ const gradient=[],bar=document.querySelector('.grad');
+ for(let k=0;k<=16;k++){
+  const rate=range.min+(range.max-range.min)*k/16;
+  gradient.push(severityColor(materialSeverity(rate)).getStyle()+' '+(k*100/16).toFixed(2)+'%');
+ }
+ bar.style.background='linear-gradient(90deg,'+gradient.join(',')+')';
  $('activefield').textContent=(field.value==='rate'?'Assigned corrosion rate':field.value==='loss'?'Calculated metal loss':'Remaining chamber wall')+' · '+unit;
  $('durationLabel').textContent='Exposure: '+currentDays()+' days · '+(published?'uniform research benchmark transferred to CAD':'common sour sensitivity assumption');
  const body=$('chamberrows');body.innerHTML='';
@@ -242,7 +269,8 @@ function updateMetrics(){
  for(const [key,p] of Object.entries(profiles.materials)){
   const r=uniformRate(key),max=published?r:r*PITTING_SENSITIVITY,tr=document.createElement('tr');
   if(key===material.value)tr.classList.add('active');
-  tr.innerHTML=`<td>${p.label}</td><td>${fmt(r,5)}</td><td>${fmt(integrateLoss(r),5)}</td><td>${fmt(integrateLoss(max),5)}</td><td>${fmt(Math.max(0,10-integrateLoss(max)-integrateLoss(r)),5)}</td>`;
+  const midRate=published?r:r*(1+(PITTING_SENSITIVITY-1)*0.4),swatch=severityColor(materialSeverity(midRate,key)).getStyle();
+  tr.innerHTML=`<td><span class="material-swatch" style="background:${swatch}"></span>${p.label}</td><td>${fmt(r,5)}</td><td>${fmt(integrateLoss(r),5)}</td><td>${fmt(integrateLoss(max),5)}</td><td>${fmt(Math.max(0,10-integrateLoss(max)-integrateLoss(r)),5)}</td>`;
   tr.title=published?benchmark(key).environment:'Scenario assumptions; confidence '+p.confidence;
   tr.addEventListener('click',()=>{material.value=key;updateModeUI();loadModel()});compare.appendChild(tr);
  }
