@@ -1,40 +1,45 @@
-# H₂S Reference-Field / Numerical 3D Viewer — Revolver Pig Magazine
+# H₂S Sour-Service Reference Mapping — Six-Chamber Revolver Drum
 
-This package upgrades the earlier GitHub-ready `.glb` drum viewer with face-by-face numerical readouts. Select each proposed material label (Al 6061-T6, Al 7075-T6, AISI 1020 normalized, AISI 304, AISI 316), choose a view field, and click the 3D surface for a local reading.
+**Version 3.0: all surfaces exposed**, internal and external, across the uploaded 10-solid STEP assembly. Interactive 3D viewer and numerical reference fields for six chambers, both end plates, and two hubs.
 
-## How to open
+**Live viewer:** https://hammadi-314.github.io/drum-corrosion-simulation/
 
-This is a static site suitable for GitHub Pages. Extract the ZIP and upload all of `index.html`, `models/`, and `data/` to a repository. In repository **Settings → Pages**, select **Deploy from a branch**, `main`, root. The site loads THREE.js from a CDN, so internet access is required. Local `file://` often blocks the `fetch` call for the numerical data. To view locally, run `python -m http.server 8000` inside this directory and visit `http://localhost:8000`.
+## What changed
 
-## How the numerical values were obtained
+The earlier assumption that external faces and drum supports were dry has been removed. **Every one of the 12,080 triangular CAD faces is treated as contacting sour service**, including the outside and inside of all six chambers and every modeled exterior surface of the end plates and hubs. This is an exposure **assumption provided by the project**, not a fluid-dynamics prediction.
 
-**These are numeric values calculated from a mapped 316L literature reference field, not an electrochemical corrosion simulation of the five alloys.**  The uploaded STEP was tessellated into 12,080 triangles, retaining the 10 individual solids. Each face of the triangulated CAD model was matched to the GLB mesh by its center (maximum matching distance less than 0.001 mm). The existing surface-field data (`drum_AISI_316_REFERENCE_NOT_PREDICTION.vtp`) supplies an assumed corrosion rate for each triangle.
+- Exposed mesh area (triangulated): **27.293367 m²**.
+- Assigned everywhere: **0.70 mm/year** uniform corrosion-rate reference from a **316L** seven-day sour-service study.
+- On selected lower-interior chamber triangles: a previously supplied **illustrative spatial hotspot** ranges up to **2.399351 mm/year**, capped by a separately reported **2.4 mm/year maximum pit-penetration rate**. **Neither its location nor geometry is independently predicted.** All other exterior and interior faces use the 0.70 mm/year baseline.
+- Min/max of the numerical field: **0.70–2.399351 mm/year**, reflecting the **assumed field**, not solved electrochemistry.
+- Penetration in mm = rate (mm/year) × duration (days)/365.
+- Six chamber tubes: nominal 10 mm initial wall; example remaining wall estimate = 10 − assigned penetration. This is a single-surface arithmetic illustration **not** a pressure-rating, structural-strength, cracking or remaining-life assessment.
+- For end plates and hubs, remaining wall is deliberately marked **N/A**, since their thickness is not assumed to be 10 mm.
+- Default 7 days matches the research duration. Longer durations are **unvalidated linear what-if calculations**, not service-life predictions.
 
-- Assumed dry external faces: `0 mm/year` *only because we assume they do not contact sour liquid*; this is not intrinsic material resistance.
-- Assumed wet chamber faces: reference rate from `0.70` to `~2.39935 mm/year`, according to a hypothetical lower-interior-chamber hotspot interpolation (maximum published PIT rate 2.4 mm/year). This spatial interpolation is **not** a model of fluid mechanics or electrochemistry.
-- Penetration (mm): rate(mm/year) × exposure days / 365.
-- Remaining chamber wall (mm): nominal 10.0 mm − penetration (mm). This assumes simple one-sided metal loss and ignores geometric redistribution, stress, cracks, and corrosion products.
-- The min/max refer to **wetted triangle samples on the selected chamber(s)**, not the global min including dry faces (which is 0).
-- Default: 7 days. 30, 90, and 365-day options are **illustrative linear what-if cases**, not time-evolving predictions.
-- All five material selections use **the same** field and therefore must not be interpreted as an alloy ranking.
+## Open and use
 
-## What the viewer provides
+GitHub Pages serves `index.html` from the root. `face_fields.json` and the five `drum_...glb` models are stored in the **root of this repository**. The website also supports an alternate `data/` and `models/` layout as fallback.
 
-1. 3D GLB models for all five candidate material labels.
-2. Minimum and maximum local corrosion reference rate (mm/year), penetration (mm), or nominal remaining wall thickness (mm).
-3. Minimum remaining chamber wall, maximum penetration, and six-chamber comparison table.
-4. Click-to-inspect local reference rate, penetration, wall thickness, surface location, exposure assumption, and triangle ID.
-5. Numeric color bar and CSV export of the displayed assumptions.
-6. Numerical triangle-by-triangle CSV (`data/triangle_reference_field.csv`) and exact source field arrays (`data/face_fields.json`).
+Choose a material label, output field, exposure duration, and inspected part. You can orbit and zoom the 3D assembly; click surfaces to see an individual triangle's assigned rate, penetration and coordinates. The front end plate is initially hidden in the visualization to make the chamber interiors visible; it **remains included in the exposure dataset**, and you can toggle it back on.
 
-## Benchmark research
+The **10-body table** reports minimum and maximum assigned penetration and the exposed surface area. **Export readings CSV** exports all 10 parts. Other datasets:
 
-Shah et al., **Corrosion Behavior of AISI 316L Stainless Steel in a Highly Sour Environment**, Trends in Sciences, 2022, https://doi.org/10.48048/tis.2022.4642 . Their sour test was at 60°C, 3 bar partial H₂S, 30 bar total, 5 wt% NaCl + 0.5 wt% acetic acid, ~7 days. 316L uniform corrosion rate = 0.70 ± 0.03 mm/year; deepest pit = 46.81 µm in 7 days; pit penetration rate ~2.4 mm/year. **316L is not identical to AISI 316**.
+- `face_fields.json`: reference rates and assumed exposure classes for each of 12,080 triangles.
+- `triangle_reference_field.csv`: matching face-by-face values and triangle areas, now updated to all-surface exposure.
+- `chamber_summary_7d.csv`: 7-day reference summary, including the plates and hubs.
+- `drum_*.glb`: original triangulated geometry used by the webpage; **no physical corrosion erosion has been generated**.
 
-Independent conditions reference: https://pmc.ncbi.nlm.nih.gov/articles/PMC7399776/ .
+## What the five material selections do *not* mean
 
-## What this is NOT
+Material dropdown labels: **Al 6061-T6, Al 7075-T6, AISI 1020 normalized, AISI 304 and AISI 316.** Each displays the same 316L-sourced corrosion-reference field; the model **cannot** compare corrosion resistance of these materials. The reference material **316L is not identical to AISI 316**. No material-specific electrochemical H₂S analysis has been run.
 
-No genuine galvanic/electrochemical FEA, CFD, finite-element stress/displacement, H₂S sulfide-stress cracking, hydrogen-induced cracking, verified corrosion behavior for Al 6061-T6 / Al 7075-T6 / AISI 1020 normalized / AISI 304 / AISI 316, physical metal removal from original CAD, service-life prediction, or ISO 15156 sour qualification. The tool is explicitly a *reference-field sensitivity visualization* for identifying potentially vulnerable chamber surfaces and for planning follow-up tests.
+## Research basis and limitations
 
-Do not call these numbers five **material-specific simulation results** in a scientific report. Real comparative material results require matched sour-water test rates/kinetics or a validated material-specific corrosion model.
+Shah et al., *Corrosion Behavior of AISI 316L Stainless Steel in a Highly Sour Environment*, Trends in Sciences, 2022: https://doi.org/10.48048/tis.2022.4642
+
+Literature test conditions cited by the viewer: **60 °C, 3 bar H₂S partial pressure, 30 bar total pressure, 5 wt% NaCl, 0.5 wt% acetic acid, approximately 7 days**; 316L corrosion rate approximately **0.70 ± 0.03 mm/year**, measured deepest pit **0.04681 mm** after seven days, approximately **2.4 mm/year** pit rate.
+
+**Not performed:** electrochemical FEM, fluid/wetting CFD, pitting initiation prediction, material-specific sour corrosion kinetics, H₂S sulfide-stress cracking or hydrogen-induced cracking evaluation, structural FEA, real material removal, ISO 15156 sour-service qualification, or lifetime prediction.
+
+The purpose is an **illustrative full-coverage corrosion-reference visualization** for identifying exposed areas and planning additional engineering tests, not proof of sour-service suitability or a ranking of materials.
