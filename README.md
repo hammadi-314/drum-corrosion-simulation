@@ -1,4 +1,4 @@
-# Revolver Drum — Dual-Mode 3D Corrosion Viewer (v5.2)
+# Revolver Drum — Dual-Mode 3D Corrosion Viewer (v5.3)
 
 **Live viewer:** https://hammadi-314.github.io/drum-corrosion-simulation/?v=5
 
@@ -66,6 +66,8 @@ All inner and outer surfaces are exposed. The hottest spatial locations are **as
 - `Export readings CSV` includes mode, tested grade, research URL, experiment environment, calculated loss and limitations for all 10 components.
 - Time integration assumes a **constant corrosion rate**, so 30/90/365-day scenarios are mathematically linear extrapolations, not verified service-life estimates.
 - Neither mode performs electrochemical FEM, sour-service cracking analysis, CFD, geometric erosion, structural pressure calculations or ISO 15156 qualification.
+
+**Mode 2 selected-material tick marks:** The fixed global color gradient remains unchanged. Rather than labeling the 0 and full-global-max endpoints, the viewer now draws **two thin vertical ticks** at the chosen material's **actual minimum and maximum field values** within that same global scale. Their values (mm/year or mm) are shown **above/below** the bar to avoid collision. The positions are computed from the *linear normalized numerical field*, matching the location on the gradient (even though the gradient uses an additional visual gamma transformation). For remaining-wall mode, the left tick labels maximum wall remaining and the right tick minimum wall remaining. If a plate or hub is isolated while viewing wall thickness, the ticks are hidden because those parts have no assessed wall thickness. The tick labels update with selected material, part, rate scenario, exposure duration and displayed field. **No model rates or results were changed.**
 
 ## Files and reproducibility
 
