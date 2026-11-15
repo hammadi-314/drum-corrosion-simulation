@@ -29,7 +29,7 @@
       "high": 3,
       "basis": "Uncalibrated wet-sour design sensitivity. Literature comparing 7075-T6 to 6061-T6 finds 7075 more susceptible in chloride exposure; NO matched sour rate reported.",
       "confidence": "VERY LOW",
-      "source": "https://doi.org/10.1016/j.electacta.2016.05.138"
+      "source": "https://www.sciencedirect.com/science/article/pii/S0013468616306946"
     },
     "1020_NORMALIZED": {
       "label": "AISI 1020 normalized",
