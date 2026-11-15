@@ -80,7 +80,7 @@ button:hover{background:#e9f3fb}
 <div class="control"><label for="studyMode">Analysis mode</label><select id="studyMode"><option value="literature" selected>Mode 1 — published research benchmarks</option><option value="sensitivity">Mode 2 — common sour-service sensitivity</option></select></div>
 <div class="control"><label for="material">Proposed material</label><select id="material"><option value="6061_T6">Al 6061-T6</option><option value="7075_T6">Al 7075-T6</option><option value="1020_NORMALIZED">AISI 1020 — normalized</option><option value="AISI_304">AISI 304</option><option value="AISI_316" selected>AISI 316</option></select></div>
 <div class="control" id="scenarioControl"><label for="scenario">Material corrosion scenario (assumptions)</label><select id="scenario"><option value="low">Low-rate sensitivity</option><option value="central" selected>Central-rate sensitivity</option><option value="high">High-rate sensitivity</option></select></div><div class="control"><label for="field">Displayed field (numerical readout)</label><select id="field"><option value="rate">Assigned local corrosion rate · mm/year</option><option value="loss" selected>Calculated metal penetration · mm</option><option value="wall">Estimated remaining chamber wall · mm</option></select></div>
-<div class="control"><label for="days">Exposure duration</label><select id="days"><option value="7" selected>7 days — published test duration</option><option value="30">30 days — linear what-if</option><option value="90">90 days — linear what-if</option><option value="365">365 days — linear what-if</option></select></div>
+<div class="control"><label for="days">Exposure duration</label><select id="days"><option value="7" selected>7 days — comparison interval (may be extrapolated)</option><option value="30">30 days — linear what-if</option><option value="90">90 days — linear what-if</option><option value="365">365 days — linear what-if</option></select></div>
 <div class="control"><label for="part">Inspect component</label><select id="part"><option value="all">All 10 bodies — all surfaces exposed</option><option value="chamber_1">Chamber 1</option><option value="chamber_2">Chamber 2</option><option value="chamber_3">Chamber 3</option><option value="chamber_4">Chamber 4</option><option value="chamber_5">Chamber 5</option><option value="chamber_6">Chamber 6</option><option value="front_end_plate">Front end plate</option><option value="rear_end_plate">Rear end plate</option><option value="hub_1">Hub 1</option><option value="hub_2">Hub 2</option></select></div>
 <label class="check"><input type="checkbox" id="front" /> Show front end plate (uncheck to see chamber interiors)</label>
 <div class="ctlrow"><button id="reset">Reset camera</button><button id="export">Export readings CSV</button></div>
@@ -253,11 +253,12 @@ function updateMetrics(){
   :'Mode 2 · '+profile().label+' · baseline '+fmt(uniformRate(),3)+' mm/year, common 60°C/3 bar H₂S screening scenario. Inputs and hotspots are hypothetical.';
 }
 function showProbe(name,faceIndex,point){
- if(!source||!profiles||!name||faceIndex===null)return;
+ if(!source||!profiles||!benchmarks||!name||faceIndex===null)return;
  const info=source.meshes[name];if(!info||faceIndex>=info.rate.length)return;
  const r=triangleRate(name,faceIndex),o=fieldsForRate(r),isChamber=name.startsWith('chamber_');
- const coord=point?`${fmt(point.x,0)}, ${fmt(point.y,0)}, ${fmt(point.z,0)}`:'—';
- probe.innerHTML=`<b>Component:</b> ${name.replaceAll('_',' ')}<br><b>Triangle:</b> ${faceIndex.toLocaleString()}<br><b>Position:</b> ${coord} mm<br><b>Material:</b> ${profile().label}<br><b>Scenario:</b> ${scenario.value}<br><b>Assigned local rate:</b> ${fmt(r,4)} mm/year<br><b>Integrated metal loss:</b> ${fmt(o.loss,5)} mm<br><b>Remaining chamber wall (inner hotspot + outer uniform):</b> ${isChamber?fmt(o.wall,5)+' mm':'N/A'}<br><b>Hypothetical hotspot intensity:</b> ${fmt(100*hotspot(info.rate[faceIndex]),1)}%<br><span class="muted">Numerical screening scenario, not measured/predicted material-specific H₂S corrosion.</span>`;
+ const xyz=point?`${fmt(point.x,0)}, ${fmt(point.y,0)}, ${fmt(point.z,0)}`:'—';
+ const published=isResearch();
+ probe.innerHTML=`<b>Mode:</b> ${published?'1 · literature benchmark':'2 · sour sensitivity'}<br><b>Component:</b> ${name.replaceAll('_',' ')}<br><b>Triangle:</b> ${faceIndex.toLocaleString()}<br><b>Position:</b> ${xyz} mm<br><b>Selected material:</b> ${profile().label}<br><b>Assigned local rate:</b> ${fmt(r,5)} mm/year<br><b>Calculated loss:</b> ${fmt(o.loss,6)} mm<br><b>Nominal remaining chamber wall (two sides):</b> ${isChamber?fmt(o.wall,6)+' mm':'N/A'}<br><span class="muted">${published?'Uniform rate from a published coupon study of DIFFERENT conditions, not measured here.':'Hypothetical localized intensity: '+fmt(100*hotspot(info.rate[faceIndex]),1)+'%; not a predicted pit location.'}</span>`;
 }
 function updateAll(){updateMaterialVisibility();updateMetrics();}
 function setSize(){const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return;renderer.setSize(rect.width,rect.height,false);camera.aspect=rect.width/rect.height;camera.updateProjectionMatrix();}
@@ -291,10 +292,17 @@ async function loadModel(){const serial=++objectSequence;
  source=await resp.json();
  const p=await fetch('./material_scenarios_v4.json?v=4',{cache:'no-store'});
  if(!p.ok)throw Error('material_scenarios_v4.json missing: HTTP '+p.status);
- profiles=await p.json();await loadModel();
+ profiles=await p.json();
+ const q=await fetch('./research_benchmarks_v5.json?v=5',{cache:'no-store'});
+ if(!q.ok)throw Error('research_benchmarks_v5.json missing: HTTP '+q.status);
+ benchmarks=await q.json();
+ updateModeUI();await loadModel();
  }catch(err){loading.textContent='Numerical dataset failed to load. '+err.message;console.error(err);}
 })();
-material.addEventListener('change',loadModel);scenario.addEventListener('change',()=>{buildNumericalColors();updateMetrics()});part.addEventListener('change',updateAll);front.addEventListener('change',updateAll);
+studyMode.addEventListener('change',()=>{if(!benchmarks)return;updateModeUI();buildNumericalColors();updateMetrics();});
+material.addEventListener('change',()=>{if(!benchmarks)return;updateModeUI();loadModel()});
+scenario.addEventListener('change',()=>{if(!benchmarks)return;updateModeUI();buildNumericalColors();updateMetrics()});
+part.addEventListener('change',updateAll);front.addEventListener('change',updateAll);
 field.addEventListener('change',()=>{buildNumericalColors();updateMetrics()});days.addEventListener('change',()=>{buildNumericalColors();updateMetrics()});
 $('reset').addEventListener('click',()=>{camera.position.copy(originalPos);controls.target.copy(target);controls.update()});
 canvas.addEventListener('pointerdown',e=>{dragging={x:e.clientX,y:e.clientY}});
@@ -304,17 +312,19 @@ canvas.addEventListener('pointerup',e=>{if(!dragging||Math.hypot(e.clientX-dragg
  if(intersects.length){const h=intersects[0];hasPick=true;pickName=h.object.userData.fieldName;pickFace=h.faceIndex;pickPosition=h.point.clone();showProbe(pickName,pickFace,pickPosition);}
 });
 $('export').addEventListener('click',()=>{
- if(!source||!profiles)return;
- const rows=[['material','rate_scenario','component','days','assumed_min_rate_mm_per_year','assumed_max_rate_mm_per_year','integrated_min_loss_mm','integrated_max_loss_mm','min_nominal_wall_mm_or_na','exposed_surface_area_m2','interpretation']];
+ if(!source||!profiles||!benchmarks)return;
+ const published=isResearch();
+ const rows=[['analysis_mode','material_candidate','source_tested_grade','rate_scenario','component','days','local_min_rate_mm_per_year','local_max_rate_mm_per_year','min_loss_mm','max_loss_mm','min_remaining_chamber_wall_mm_or_NA','exposed_area_m2','paper_or_input_file','study_environment_or_assumption','scientific_limitation']];
  for(const [key,p] of Object.entries(profiles.materials)){
+  const ref=benchmark(key);
   for(const [name,s] of Object.entries(source.partStats)){
-   const lo=materialRate(s.rateMin,key),hi=materialRate(s.rateMax,key);
-   rows.push([p.label,scenario.value,name,currentDays(),lo,hi,integrateLoss(lo),integrateLoss(hi),name.startsWith('chamber_')?Math.max(0,10-integrateLoss(hi)-integrateLoss(baseRate(key))):'N/A',s.wetArea_m2,'Unvalidated comparative sensitivity; material rates not from matched five-grade H2S experiment']);
+   const lo=materialRate(s.rateMin,key),hi=materialRate(s.rateMax,key),outer=uniformRate(key);
+   rows.push([published?'MODE_1_PUBLISHED_UNMATCHED':'MODE_2_COMMON_H2S_SENSITIVITY',p.label,published?ref.testedGrade:p.label,published?'original benchmark':scenario.value,name,currentDays(),lo,hi,integrateLoss(lo),integrateLoss(hi),name.startsWith('chamber_')?Math.max(0,10-integrateLoss(hi)-integrateLoss(outer)):'N/A',s.wetArea_m2,published?ref.sourceUrl:'material_scenarios_v4.json',published?ref.environment:'60C,3bar H2S,30bar total,5% NaCl,0.5% acetic acid (assumed rate)',published?ref.limit:'Unvalidated assumed rates and illustrative localized attack']);
   }
  }
  const csv=rows.map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\n');
  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
- const link=document.createElement('a');link.href=url;link.download='Sour_Drum_5Material_'+scenario.value+'_'+currentDays()+'days.csv';
+ const link=document.createElement('a');link.href=url;link.download='Drum_'+(published?'Mode1_ResearchBenchmarks':'Mode2_SourSensitivity')+'_'+currentDays()+'days.csv';
  document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
 });
 
