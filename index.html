@@ -160,13 +160,11 @@ function updateMetrics(){
  status.textContent='All '+source.meshTriangleCount.toLocaleString()+' faces exposed · one-day numerical integration · '+profile().label+' · '+scenario.value+' base '+fmt(baseRate(),3)+' mm/year. Evidence: '+profile().confidence+'.';
 }
 function showProbe(name,faceIndex,point){
- if(!source||!name||faceIndex===null)return;
- const f=source.meshes[name];if(!f||faceIndex>=f.rate.length)return;
- const rate=f.rate[faceIndex],values=fieldsForRate(rate),chamber=name.startsWith('chamber_');
- const label=name.replaceAll('_',' ');
+ if(!source||!profiles||!name||faceIndex===null)return;
+ const info=source.meshes[name];if(!info||faceIndex>=info.rate.length)return;
+ const r=triangleRate(name,faceIndex),o=fieldsForRate(r),isChamber=name.startsWith('chamber_');
  const coord=point?`${fmt(point.x,0)}, ${fmt(point.y,0)}, ${fmt(point.z,0)}`:'—';
- const assumption=f.wetClass[faceIndex]===3?'Full exposure · 316L uniform baseline':'Full exposure · hypothetical chamber hotspot';
- probe.innerHTML=`<b>Part:</b> ${label}<br><b>Triangle #:</b> ${faceIndex.toLocaleString()}<br><b>Position (X, Y, Z):</b> ${coord} mm<br><b>Reference rate:</b> ${fmt(rate,4)} mm/year<br><b>Reference penetration:</b> ${fmt(values.loss,5)} mm<br><b>Remaining nominal chamber wall:</b> ${chamber?fmt(values.wall,5)+' mm':'N/A — plate/hub thickness not evaluated'}<br><b>Exposure:</b> ${assumption}<br><span class="muted">Assigned 316L literature field, not simulation-predicted measurements.</span>`;
+ probe.innerHTML=`<b>Component:</b> ${name.replaceAll('_',' ')}<br><b>Triangle:</b> ${faceIndex.toLocaleString()}<br><b>Position:</b> ${coord} mm<br><b>Material:</b> ${profile().label}<br><b>Scenario:</b> ${scenario.value}<br><b>Assigned local rate:</b> ${fmt(r,4)} mm/year<br><b>Integrated metal loss:</b> ${fmt(o.loss,5)} mm<br><b>Remaining nominal chamber wall:</b> ${isChamber?fmt(o.wall,5)+' mm':'N/A'}<br><b>Hypothetical hotspot intensity:</b> ${fmt(100*hotspot(info.rate[faceIndex]),1)}%<br><span class="muted">Numerical screening scenario, not measured/predicted material-specific H₂S corrosion.</span>`;
 }
 function updateAll(){updateMaterialVisibility();updateMetrics();}
 function setSize(){const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return;renderer.setSize(rect.width,rect.height,false);camera.aspect=rect.width/rect.height;camera.updateProjectionMatrix();}
@@ -197,10 +195,13 @@ async function loadModel(){const serial=++objectSequence;
 }
 (async()=>{try{
  let resp=null,lastDataError='';for(const dataPath of ['./face_fields.json?v=3','./data/face_fields.json?v=3']){try{const r=await fetch(dataPath,{cache:'no-store'});if(r.ok){resp=r;break}lastDataError=dataPath+': HTTP '+r.status}catch(e){lastDataError=e.message}} if(!resp)throw Error('Could not load numerical data from root or data/. '+lastDataError);
- source=await resp.json();await loadModel();
+ source=await resp.json();
+ const p=await fetch('./material_scenarios_v4.json?v=4',{cache:'no-store'});
+ if(!p.ok)throw Error('material_scenarios_v4.json missing: HTTP '+p.status);
+ profiles=await p.json();await loadModel();
  }catch(err){loading.textContent='Numerical dataset failed to load. '+err.message;console.error(err);}
 })();
-material.addEventListener('change',loadModel);part.addEventListener('change',updateAll);front.addEventListener('change',updateAll);
+material.addEventListener('change',loadModel);scenario.addEventListener('change',()=>{buildNumericalColors();updateMetrics()});part.addEventListener('change',updateAll);front.addEventListener('change',updateAll);
 field.addEventListener('change',updateMetrics);days.addEventListener('change',updateMetrics);
 $('reset').addEventListener('click',()=>{camera.position.copy(originalPos);controls.target.copy(target);controls.update()});
 canvas.addEventListener('pointerdown',e=>{dragging={x:e.clientX,y:e.clientY}});
@@ -210,16 +211,19 @@ canvas.addEventListener('pointerup',e=>{if(!dragging||Math.hypot(e.clientX-dragg
  if(intersects.length){const h=intersects[0];hasPick=true;pickName=h.object.userData.fieldName;pickFace=h.faceIndex;pickPosition=h.point.clone();showProbe(pickName,pickFace,pickPosition);}
 });
 $('export').addEventListener('click',()=>{
- if(!source)return;
- const chosen=material.selectedOptions[0].textContent, nowDays=currentDays(), k=nowDays/365;
- const rows=[['material_label','component','exposure_days','reference_min_rate_mm_y','reference_max_rate_mm_y','reference_min_penetration_mm','reference_max_penetration_mm','nominal_min_wall_mm_or_NA','exposed_area_m2','scientific_status']];
- for(const [name,s] of Object.entries(source.partStats)){
-   rows.push([chosen,name,nowDays,s.rateMin,s.rateMax,fmt(s.rateMin*k,6),fmt(s.rateMax*k,6),name.startsWith('chamber_')?fmt(10-s.rateMax*k,6):'N/A',s.wetArea_m2,'Full sour exposure: assigned 316L literature reference, NOT material-specific corrosion prediction']);
+ if(!source||!profiles)return;
+ const rows=[['material','rate_scenario','component','days','assumed_min_rate_mm_per_year','assumed_max_rate_mm_per_year','integrated_min_loss_mm','integrated_max_loss_mm','min_nominal_wall_mm_or_na','exposed_surface_area_m2','interpretation']];
+ for(const [key,p] of Object.entries(profiles.materials)){
+  for(const [name,s] of Object.entries(source.partStats)){
+   const lo=materialRate(s.rateMin,key),hi=materialRate(s.rateMax,key);
+   rows.push([p.label,scenario.value,name,currentDays(),lo,hi,integrateLoss(lo),integrateLoss(hi),name.startsWith('chamber_')?10-integrateLoss(hi):'N/A',s.wetArea_m2,'Unvalidated comparative sensitivity; material rates not from matched five-grade H2S experiment']);
+  }
  }
- const csv=rows.map(row=>row.map(x=>'"'+String(x).replaceAll('"','""')+'"').join(',')).join('\n');
+ const csv=rows.map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\n');
  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
- const link=document.createElement('a');link.href=url;link.download='H2S_All_Surfaces_Reference_'+material.value+'_'+nowDays+'days.csv';
+ const link=document.createElement('a');link.href=url;link.download='Sour_Drum_5Material_'+scenario.value+'_'+currentDays()+'days.csv';
  document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
 });
+
 function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();
 </script></body></html>
