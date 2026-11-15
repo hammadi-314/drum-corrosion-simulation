@@ -69,7 +69,7 @@ button:hover{background:#e9f3fb}
 .statuslabel{background:#e5f2fa;color:#1c5579}
 .hint{color:#43596b}
 .warning{color:#805300}
-#researchInfo[hidden],#sourConditionChips[hidden],#scenarioControl[hidden]{display:none!important}
+#researchInfo[hidden],#sourConditionChips[hidden]{display:none!important}
 #researchPaper{color:#1665a5;font-weight:700;text-decoration:underline}
 #researchDetails b{color:#162b3c}
 #comparisonNote{font-size:12px;line-height:1.6}
@@ -77,23 +77,23 @@ button:hover{background:#e9f3fb}
 </style>
 </head>
 <body><main>
-<header class="header"><div><div class="eyebrow">MEEN 401 · ENGINEERING EVALUATION</div><h1>Drum corrosion | five-material sour sensitivity</h1><p class="subtitle">Compare published corrosion benchmarks separately from a common sour-service sensitivity scenario. All ten CAD bodies are included; experimental study conditions are shown for every material.</p></div></header>
-<div class="chips" id="sourConditionChips"><span class="chip">60°C</span><span class="chip">H₂S partial pressure 3 bar</span><span class="chip">30 bar total</span><span class="chip">5 wt% NaCl</span><span class="chip">0.5 wt% acetic acid</span><span class="chip">Nominal wall 10 mm</span><span class="chip">Viewer v5.3</span></div>
-<div class="notice" id="modeNotice"><b>Five-material corrosion sensitivity simulation — not H₂S service qualification.</b> Different grade readings now use low/central/high engineering rate assumptions. Only the 316L rate is closely backed by the reference sour experiment; other values are hypotheses informed by research in differing environments. The location of possible localized attack is illustrative, not predicted. Do not use these numerical rankings as certified material-selection data.</div>
+<header class="header"><div><div class="eyebrow">MEEN 401 · ENGINEERING EVALUATION</div><h1>Drum corrosion | paper-supported material study</h1><p class="subtitle">One traceable corrosion benchmark per material. Mode 1 shows uniform coupon-data transfer; Mode 2 adds clearly hypothetical localized attack to the same published/derived rates. Papers differ in test conditions and cannot provide an identical-condition H₂S ranking.</p></div></header>
+<div class="chips" id="sourConditionChips"><span class="chip">10 mm nominal chamber wall</span><span class="chip">5 study benchmarks · different laboratory conditions</span><span class="chip">12,080 CAD faces</span><span class="chip">Viewer v6.0</span></div>
+<div class="notice" id="modeNotice"><b>Paper-based numerical benchmarks, NOT matched H₂S material testing.</b> Each material uses a traceable published or calculated rate under its own experimental conditions. Mode 2 adds hypothetical localized effects; none of the five are confirmed comparatively at the same sour-service environment.</div>
 <div class="viewgrid">
 <section class="viewport" aria-label="Interactive drum surface mapping"><canvas id="view"></canvas><div class="viewporttop"><span class="overlaytag">3D CAD mesh · 10 bodies</span><span class="overlaytag" id="activefield">Corrosion rate · mm/year</span></div><div class="viewportbottom">Drag to rotate · Scroll to zoom · Right-drag to pan · Click surface to probe</div><div id="loading" class="loading">Loading 3D assembly and numerical surface data…</div></section>
 <aside>
 <section class="panel"><h2>Analysis controls</h2>
-<div class="control"><label for="studyMode">Analysis mode</label><select id="studyMode"><option value="literature" selected>Mode 1 — published research benchmarks</option><option value="sensitivity">Mode 2 — common sour-service sensitivity</option></select></div>
+<div class="control"><label for="studyMode">Analysis mode</label><select id="studyMode"><option value="literature">Mode 1 — uniform literature benchmark</option><option value="sensitivity" selected>Mode 2 — literature rate + illustrative hotspots</option></select></div>
 <div class="control"><label for="material">Proposed material</label><select id="material"><option value="6061_T6">Al 6061-T6</option><option value="7075_T6">Al 7075-T6</option><option value="1020_NORMALIZED">AISI 1020 — normalized</option><option value="AISI_304">AISI 304</option><option value="AISI_316" selected>AISI 316</option></select></div>
-<div class="control" id="scenarioControl"><label for="scenario">Material corrosion scenario (assumptions)</label><select id="scenario"><option value="low">Low-rate sensitivity</option><option value="central" selected>Central-rate sensitivity</option><option value="high">High-rate sensitivity</option></select></div><div class="control"><label for="field">Displayed field (numerical readout)</label><select id="field"><option value="rate">Assigned local corrosion rate · mm/year</option><option value="loss" selected>Calculated metal penetration · mm</option><option value="wall">Estimated remaining chamber wall · mm</option></select></div>
+<div class="control"><label for="field">Displayed field (numerical readout)</label><select id="field"><option value="rate">Assigned local corrosion rate · mm/year</option><option value="loss" selected>Calculated metal penetration · mm</option><option value="wall">Estimated remaining chamber wall · mm</option></select></div>
 <div class="control"><label for="days">Exposure duration</label><select id="days"><option value="7" selected>7 days — comparison interval (may be extrapolated)</option><option value="30">30 days — linear what-if</option><option value="90">90 days — linear what-if</option><option value="365">365 days — linear what-if</option></select></div>
 <div class="control"><label for="part">Inspect component</label><select id="part"><option value="all">All 10 bodies — all surfaces exposed</option><option value="chamber_1">Chamber 1</option><option value="chamber_2">Chamber 2</option><option value="chamber_3">Chamber 3</option><option value="chamber_4">Chamber 4</option><option value="chamber_5">Chamber 5</option><option value="chamber_6">Chamber 6</option><option value="front_end_plate">Front end plate</option><option value="rear_end_plate">Rear end plate</option><option value="hub_1">Hub 1</option><option value="hub_2">Hub 2</option></select></div>
 <label class="check"><input type="checkbox" id="front" /> Show front end plate (uncheck to see chamber interiors)</label>
 <div class="ctlrow"><button id="reset">Reset camera</button><button id="export">Export readings CSV</button></div>
 </section>
-<section class="panel" id="researchInfo" hidden><h2>Source study and validity</h2><div id="researchDetails" class="hint"></div><p class="note"><a id="researchPaper" href="#" target="_blank" rel="noopener noreferrer">Open published source ↗</a></p></section>
-<section class="panel"><div class="statheader"><h2 id="colorTitle">Color scale · visual comparison</h2><span class="statuslabel" id="colorModeLabel">Enhanced</span></div><div class="hint" id="colorScope">Selected material · Central-rate sensitivity</div><div class="grad" id="gradientBar">
+<section class="panel" id="researchInfo"><h2>Selected material · published evidence</h2><div id="researchDetails" class="hint"></div><p class="note"><a id="researchPaper" href="#" target="_blank" rel="noopener noreferrer">Open published source ↗</a></p></section>
+<section class="panel"><div class="statheader"><h2 id="colorTitle">Color scale · visual comparison</h2><span class="statuslabel" id="colorModeLabel">Enhanced</span></div><div class="hint" id="colorScope">Literature benchmark · local spatial mapping</div><div class="grad" id="gradientBar">
   <span class="range-tick" id="rangeMinTick" hidden></span>
   <span class="range-tick" id="rangeMaxTick" hidden></span>
   <span class="range-label range-label-min" id="rangeMinLabel" hidden></span>
@@ -114,13 +114,13 @@ button:hover{background:#e9f3fb}
 <table class="data-table"><thead><tr><th>Chamber</th><th>Min loss (mm)</th><th>Max loss (mm)</th><th>Min wall (mm)</th><th>Exposed area (m²)</th></tr></thead><tbody id="chamberrows"></tbody></table>
 <p class="note">All interior and exterior CAD surfaces are assigned sour exposure. Only six chambers have a modelled 10 mm wall; the conservative wall scenario subtracts corrosion on both sides. End plates and hubs have no assessed thickness.</p></section>
 <section class="tablepanel"><h2>Interpretation and limitations</h2>
-<p class="hint"><b>What is actually calculated?</b> Mode 1 maps published or converted uniform corrosion benchmarks to a common visual scale. <b>Mode 2 uses one fixed absolute color scale for all five materials</b> in the selected rate scenario and exposure duration; each CAD face still receives its assumed local corrosion rate. Chamber-wall loss includes both sides. A gamma of 0.70 increases color contrast without changing numerical results.</p>
+<p class="hint"><b>What is actually calculated?</b> Both modes use <b>one published or transparently calculated corrosion-rate benchmark per candidate</b>. Mode 1 applies it uniformly across the CAD. Mode 2 uses a shared illustrative hotspot field (not observed for these drum faces) and a fixed numerical color scale across five materials. Linear penetration = rate × days/365; chamber-wall estimates subtract both faces. The colors use gamma 0.70 for visibility only.</p>
 <div class="rule"></div><p class="hint"><b>What is not calculated?</b> No H₂S electrochemical solution, material-specific kinetics, fluid pooling, pit initiation probability, crack growth, or structural stresses/deflections. All 10 CAD bodies are treated as exposed; high-rate zones are hypothetical and not predicted. <span class="warning">Do not extrapolate the 7-day rate to real service life or claim sour-service qualification.</span></p>
-<div class="rule"></div><p class="hint">The source 316L study reported a deepest pit of <b>0.04681 mm after seven days</b>. Spatial hotspot positions here remain hypothetical. Mode 1 study conditions differ, so color differences are <b>not</b> proof of better sour performance. Mode 2 uses a consistent scale across materials, but its rates and hotspot locations remain hypothetical. Colors are numerically comparable only <b>within the same mode, scenario, duration and displayed field</b>.</p>
+<div class="rule"></div><p class="hint"><b>Research basis and limitations:</b> Source studies differ in pH, electrolyte, temperature, presence of H₂S and specimen grade/finish. Only the 316L source has the shown 3-bar H₂S exposure. An additional 316L paper reported 2.4 mm/year deepest-pit penetration; Mode 2 uses its ratio to the separate 0.74 mm/year uniform result as an <b>unvalidated illustrative multiplier for other materials</b>, not a measured pit rate or location. Neither mode establishes a suitable oil-and-gas material.</p>
 </section>
 </div>
 <section class="tablepanel" style="margin-top:14px"><div class="rowhead"><h2 id="comparisonTitle">Material benchmark comparison · full drum</h2><span class="secondary" id="compareCase">Central-rate scenario</span></div><table class="data-table"><thead><tr><th>Material</th><th id="baseRateHeader">Rate (mm/y)</th><th>Minimum loss (mm)</th><th>Maximum loss (mm)</th><th>Min chamber wall (mm)</th></tr></thead><tbody id="materialRows"></tbody></table><p class="note" id="comparisonNote">Published studies were conducted in DIFFERENT environments. This table documents the evidence and cannot be used as a single-condition alloy ranking. Click a row to change material.</p></section>
-<footer class="sources"><b>Research:</b> <a href="https://tis.wu.ac.th/index.php/tis/article/view/4642" target="_blank" rel="noreferrer">Shah et al., 2022 — 316L sour corrosion and pitting</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7399776/" target="_blank" rel="noreferrer">Shah et al., 2020 — sour exposure conditions</a>. <b>CAD:</b> user-supplied <code>DRUM_COMPLETE_MULTI_BODY.step</code>; numerical field: full-surface CAD reference map in <code>face_fields.json</code>, material assumptions in <a href='material_scenarios_v4.json'>material_scenarios_v4.json</a>. Open over GitHub Pages or a local HTTP server so the model and data can load.</footer>
+<footer class="sources"><b>Data and methods:</b> <a href="literature_inputs_v6.json">Literature inputs, tested grades and paper links</a> · <a href="https://store.astm.org/standards/g102" target="_blank" rel="noreferrer">ASTM G102 conversion</a> · <a href="https://tis.wu.ac.th/index.php/tis/article/view/4642" target="_blank" rel="noreferrer">316L pit-rate study</a>. <b>CAD:</b> user-supplied <code>DRUM_COMPLETE_MULTI_BODY.step</code>, numerical face template <code>face_fields.json</code>. No calculated metal erosion or electrochemical FEM.</footer>
 </main>
 <script type="module">
 import * as THREE from 'three';
@@ -128,7 +128,7 @@ import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 
 const $=id=>document.getElementById(id);
-const studyMode=$('studyMode'),material=$('material'),scenario=$('scenario'),field=$('field'),days=$('days'),part=$('part'),front=$('front'),probe=$('probe');
+const studyMode=$('studyMode'),material=$('material'),field=$('field'),days=$('days'),part=$('part'),front=$('front'),probe=$('probe');
 const canvas=$('view'),loading=$('loading'),status=$('status');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2)); renderer.outputColorSpace=THREE.SRGBColorSpace;
@@ -146,17 +146,16 @@ const raycaster=new THREE.Raycaster(); const pointer=new THREE.Vector2();
 let source=null,profiles=null,benchmarks=null,group=null,meshes=[],hasPick=false,pickPosition=null,pickName=null,pickFace=null;
 let objectSequence=0;let dragging=null;
 function currentDays(){return Number(days.value)}
-const RATE_ANCHOR=0.7,MAX_REFERENCE=2.399351,PITTING_SENSITIVITY=2.4/0.74;
+const RATE_ANCHOR=0.7,MAX_REFERENCE=2.399351,PITTING_SENSITIVITY=2.4/0.74; // 316L-only published ratio applied illustratively
 function isResearch(){return studyMode.value==='literature'}
 function benchmark(key=material.value){return benchmarks.materials[key]}
 function profile(){return profiles.materials[material.value]}
-function baseRate(key=material.value){return profiles.materials[key][scenario.value]}
+function baseRate(key=material.value){return benchmark(key).rate_mm_per_year}
 function hotspot(ref){return Math.max(0,Math.min(1,(ref-RATE_ANCHOR)/(MAX_REFERENCE-RATE_ANCHOR)))}
-function uniformRate(key=material.value){return isResearch()?benchmark(key).rate_mm_per_year:baseRate(key)}
+function uniformRate(key=material.value){return baseRate(key)}
 function materialRate(ref,key=material.value){return isResearch()?uniformRate(key):baseRate(key)*(1+(PITTING_SENSITIVITY-1)*hotspot(ref))}
 function triangleRate(name,idx){return materialRate(source.meshes[name].rate[idx])}
 function integrateLoss(rate){let loss=0;for(let d=0;d<currentDays();d++)loss+=rate/365;return loss}
-function maxComparisonRate(){return Math.max(...Object.keys(profiles.materials).map(key=>baseRate(key)))*PITTING_SENSITIVITY}
 function fieldsForRate(r){const loss=integrateLoss(r);return {rate:r,loss,wall:Math.max(0,10-loss-integrateLoss(uniformRate()))};}
 function unitForField(){return field.value==='rate'?'mm/year':'mm'}
 function displayValue(rate){const o=fieldsForRate(rate);return o[field.value]}
@@ -164,23 +163,15 @@ function precisionForField(){return field.value==='rate'?3:4}
 function fmt(v,p=4){return Number(v).toFixed(p)}
 function severityColor(x){const a=new THREE.Color();if(x<=.5){a.copy(low).lerp(mid,x*2)}else{a.copy(mid).lerp(high,(x-.5)*2)}return a}
 function updateMaterialVisibility(){const isolate=part.value;for(const mesh of meshes){const nm=mesh.userData.fieldName;mesh.visible=isolate==='all' ? (nm!=='front_end_plate'||front.checked) : nm===isolate;}}
-// Mode 1 uses a shared literature-benchmark range. Mode 2 uses one fixed
-// field scale for ALL five materials within the selected scenario and duration.
-function selectedColorRateRange(key=material.value){
- const base=uniformRate(key);
- return {min:base,max:isResearch()?base:base*PITTING_SENSITIVITY};
-}
+// Mode 1 and Mode 2 use the same paper-based baseline. Mode 2 has one fixed
+// color scale for all five materials at each exposure duration and display field.
 // Visual contrast only: no corrosion input or numerical calculation is altered.
 function researchRateRange(){
  const rates=Object.values(benchmarks.materials).map(x=>x.rate_mm_per_year);
  return {min:Math.min(...rates),max:Math.max(...rates)};
 }
-// All five candidate grades share the SAME numeric color endpoints in Mode 2.
-// A material change cannot move these limits. Scenario and duration can.
-function mode2SharedRateRange(){
- const bases=Object.keys(profiles.materials).map(key=>baseRate(key));
- return {min:0,max:Math.max(...bases)*PITTING_SENSITIVITY};
-}
+// Mode 2 uses the SAME numeric color endpoints for all five materials.
+// Switching material never rescales the gradient; exposure time/field may.
 function mode2FieldRange(){
  const all=Object.keys(profiles.materials).map(key=>baseRate(key));
  const maxBase=Math.max(...all),maxRate=maxBase*PITTING_SENSITIVITY;
