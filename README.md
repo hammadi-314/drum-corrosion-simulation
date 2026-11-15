@@ -35,22 +35,22 @@ hotspot_i  = clamp((previous_reference_rate_i - 0.700) / (2.399351 - 0.700), 0, 
 common_pit_ratio = 2.4 / 0.74 = 3.243243
 local_rate_i = assumed_uniform_rate_[m,c] * (1 + (common_pit_ratio - 1) * hotspot_i)
 loss_i(t+1 day) = loss_i(t) + local_rate_i / 365
-remaining_nominal_chamber_wall_i = 10.0 - loss_i
+remaining_nominal_chamber_wall = max(0, 10.0 - loss_inner_local - loss_outer_uniform)
 ```
 
-The common pitting multiplier uses two separate reported 316L measurements and is a **what-if multiplier**, NOT a universal material-specific pit rate. The 10 mm thickness is the uploaded chamber CAD wall; the end plates and hubs do not inherit this wall thickness. The computation uses constant rates over selected durations, **not electrochemical PDE/FEM, process-fluid CFD, metal geometry erosion or structural FEA**.
+The common pitting multiplier uses two separate reported 316L measurements and is a **what-if multiplier**, NOT a universal material-specific pit rate. The 10 mm thickness is the uploaded chamber CAD wall; both its inner and outer surfaces are treated as exposed. The wall estimate subtracts the chosen inner-local loss plus the outside uniform baseline, without geometrically pairing the two sides of the wall. The end plates and hubs do not inherit this wall thickness. A zero result indicates only a hypothetical thickness-exhaustion scenario and is NOT a pressure-integrity prediction. The computation uses constant rates over selected durations, **not electrochemical PDE/FEM, process-fluid CFD, metal geometry erosion or structural FEA**.
 
 > Any 30, 90 or 365 day result is a constant-rate sensitivity extrapolation far beyond the 7 day reference, not a tested life forecast.
 
 ## Seven-day results — CENTRAL sensitivity case
 
-| Material | Min uniform loss (mm) | Max localized-sensitivity loss (mm) | Min remaining chamber wall (mm) |
+| Material | Min uniform loss (mm) | Max localized-sensitivity loss (mm) | Minimum remaining chamber wall (mm, both faces) |
 | --- | ---: | ---: | ---: |
-| Al 6061-T6 | 0.0096 | 0.0311 | 9.9689 |
-| Al 7075-T6 | 0.0173 | 0.0560 | 9.9440 |
-| AISI 1020 normalized | 0.0575 | 0.1866 | 9.8134 |
-| AISI 304 | 0.0230 | 0.0746 | 9.9254 |
-| AISI 316 | 0.0142 | 0.0460 | 9.9540 |
+| Al 6061-T6 | 0.0096 | 0.0311 | 9.9593 |
+| Al 7075-T6 | 0.0173 | 0.0560 | 9.9268 |
+| AISI 1020 normalized | 0.0575 | 0.1866 | 9.7559 |
+| AISI 304 | 0.0230 | 0.0746 | 9.9023 |
+| AISI 316 | 0.0142 | 0.0460 | 9.9398 |
 
 **Do not interpret this order as a measured five-alloy corrosion ranking.** In particular, the favorable-looking 6061 scenario is not an evidence-based demonstration of 6061 performance in wet H₂S.
 
