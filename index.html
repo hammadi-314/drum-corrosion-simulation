@@ -30,7 +30,7 @@ aside{display:flex;flex-direction:column;gap:12px}.panel{background:#0e1e2e;bord
 </head>
 <body><main>
 <header class="header"><div><div class="eyebrow">MEEN 401 · ENGINEERING EVALUATION</div><h1>Drum corrosion | numerical 3D viewer</h1><p class="subtitle">Inspect maximum and minimum corrosion-reference values on your actual six-chamber revolver drum geometry. Click any surface to read the mapped local value and its position.</p></div></header>
-<div class="chips"><span class="chip">60°C</span><span class="chip">H₂S partial pressure 3 bar</span><span class="chip">30 bar total</span><span class="chip">5 wt% NaCl</span><span class="chip">0.5 wt% acetic acid</span><span class="chip">Nominal wall 10 mm</span></div>
+<div class="chips"><span class="chip">60°C</span><span class="chip">H₂S partial pressure 3 bar</span><span class="chip">30 bar total</span><span class="chip">5 wt% NaCl</span><span class="chip">0.5 wt% acetic acid</span><span class="chip">Nominal wall 10 mm</span><span class="chip">Viewer v2.1</span></div>
 <div class="notice"><b>Research-based reference mapping — not a material-specific corrosion prediction.</b> The 0.70 mm/year uniform rate and 2.4 mm/year peak pit rate are published results for <b>316L</b>, not the five proposed alloys. Their spatial distribution across the CAD is an illustrative lower-chamber wetting assumption, not electrochemical FEM. Material choices share the same field and cannot be ranked using these results. Surface geometry has not been eroded.</div>
 <div class="viewgrid">
 <section class="viewport" aria-label="Interactive drum surface mapping"><canvas id="view"></canvas><div class="viewporttop"><span class="overlaytag">3D CAD mesh · 10 bodies</span><span class="overlaytag" id="activefield">Corrosion rate · mm/year</span></div><div class="viewportbottom">Drag to rotate · Scroll to zoom · Right-drag to pan · Click surface to probe</div><div id="loading" class="loading">Loading 3D assembly and numerical surface data…</div></section>
@@ -145,9 +145,9 @@ const loader=new GLTFLoader();
 async function loadModel(){const serial=++objectSequence;
  loading.classList.remove('hidden');loading.textContent='Loading 3D geometry…';
  const slug=material.value;
- const path=`drum_${slug}_SOUR_REFERENCE.glb`;
+ const paths=[`./drum_${slug}_SOUR_REFERENCE.glb?v=2`,`./models/drum_${slug}_SOUR_REFERENCE.glb?v=2`];
  try{
-  const gltf=await loader.loadAsync(path);if(serial!==objectSequence)return;
+  let gltf=null,lastLoadError=null;for(const path of paths){try{gltf=await loader.loadAsync(path);break}catch(err){lastLoadError=err}} if(!gltf)throw Error('GLB not found in repository root or models/: '+(lastLoadError?.message||''));if(serial!==objectSequence)return;
   if(group){scene.remove(group);group.traverse(m=>{if(m.isMesh){m.geometry?.dispose?.();m.material?.dispose?.()}})}
   group=gltf.scene;meshes=[];
   group.traverse(m=>{if(!m.isMesh)return;
@@ -160,14 +160,15 @@ async function loadModel(){const serial=++objectSequence;
    if(fc!==source.meshes[n].rate.length)throw Error(`Triangle count mismatch for ${n}: ${fc}`);
    m.frustumCulled=false;meshes.push(m);
   });
+  if(meshes.length===0)throw Error('GLB loaded without a recognized 3D mesh');
   scene.add(group);buildNumericalColors();updateAll();
   loading.classList.add('hidden');
  }catch(err){loading.textContent='Could not load geometry or numeric field: '+err.message;console.error(err);}
 }
 (async()=>{try{
- const resp=await fetch('face_fields.json');if(!resp.ok)throw Error('HTTP '+resp.status);
+ let resp=null,lastDataError='';for(const dataPath of ['./face_fields.json?v=2','./data/face_fields.json?v=2']){try{const r=await fetch(dataPath,{cache:'no-store'});if(r.ok){resp=r;break}lastDataError=dataPath+': HTTP '+r.status}catch(e){lastDataError=e.message}} if(!resp)throw Error('Could not load numerical data from root or data/. '+lastDataError);
  source=await resp.json();await loadModel();
- }catch(err){loading.textContent='Data unavailable. Open this package using GitHub Pages or a local HTTP server. '+err.message;console.error(err);}
+ }catch(err){loading.textContent='Numerical dataset failed to load. '+err.message;console.error(err);}
 })();
 material.addEventListener('change',loadModel);part.addEventListener('change',updateAll);front.addEventListener('change',updateAll);
 field.addEventListener('change',updateMetrics);days.addEventListener('change',updateMetrics);
