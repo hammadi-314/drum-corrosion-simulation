@@ -29,9 +29,9 @@ aside{display:flex;flex-direction:column;gap:12px}.panel{background:#0e1e2e;bord
 </style>
 </head>
 <body><main>
-<header class="header"><div><div class="eyebrow">MEEN 401 · ENGINEERING EVALUATION</div><h1>Drum corrosion | numerical 3D viewer</h1><p class="subtitle">Inspect maximum and minimum corrosion-reference values on your actual six-chamber revolver drum geometry. Click any surface to read the mapped local value and its position.</p></div></header>
-<div class="chips"><span class="chip">60°C</span><span class="chip">H₂S partial pressure 3 bar</span><span class="chip">30 bar total</span><span class="chip">5 wt% NaCl</span><span class="chip">0.5 wt% acetic acid</span><span class="chip">Nominal wall 10 mm</span><span class="chip">Viewer v2.1</span></div>
-<div class="notice"><b>Research-based reference mapping — not a material-specific corrosion prediction.</b> The 0.70 mm/year uniform rate and 2.4 mm/year peak pit rate are published results for <b>316L</b>, not the five proposed alloys. Their spatial distribution across the CAD is an illustrative lower-chamber wetting assumption, not electrochemical FEM. Material choices share the same field and cannot be ranked using these results. Surface geometry has not been eroded.</div>
+<header class="header"><div><div class="eyebrow">MEEN 401 · ENGINEERING EVALUATION</div><h1>Drum corrosion | numerical 3D viewer</h1><p class="subtitle">All interior and exterior surfaces of all ten drum bodies are assigned sour exposure. Click any surface to inspect the reference rate, loss and location.</p></div></header>
+<div class="chips"><span class="chip">60°C</span><span class="chip">H₂S partial pressure 3 bar</span><span class="chip">30 bar total</span><span class="chip">5 wt% NaCl</span><span class="chip">0.5 wt% acetic acid</span><span class="chip">Nominal wall 10 mm</span><span class="chip">Viewer v3.0</span></div>
+<div class="notice"><b>All surfaces exposed — literature-based reference mapping, NOT electrochemical corrosion simulation.</b> Every interior/exterior surface of all 10 CAD bodies now has the <b>0.70 mm/year 316L uniform-rate reference</b>. An illustrative higher-rate area remains in selected lower chamber interiors (up to the separately published 2.4 mm/year pit benchmark). <b>Hotspot positions are assumptions, not predictions.</b> All five material labels use the same field; do not rank them or predict service life from it. The geometry has not been eroded.</div>
 <div class="viewgrid">
 <section class="viewport" aria-label="Interactive drum surface mapping"><canvas id="view"></canvas><div class="viewporttop"><span class="overlaytag">3D CAD mesh · 10 bodies</span><span class="overlaytag" id="activefield">Corrosion rate · mm/year</span></div><div class="viewportbottom">Drag to rotate · Scroll to zoom · Right-drag to pan · Click surface to probe</div><div id="loading" class="loading">Loading 3D assembly and numerical surface data…</div></section>
 <aside>
@@ -39,31 +39,31 @@ aside{display:flex;flex-direction:column;gap:12px}.panel{background:#0e1e2e;bord
 <div class="control"><label for="material">Proposed material</label><select id="material"><option value="6061_T6">Al 6061-T6</option><option value="7075_T6">Al 7075-T6</option><option value="1020_NORMALIZED">AISI 1020 — normalized</option><option value="AISI_304">AISI 304</option><option value="AISI_316" selected>AISI 316</option></select></div>
 <div class="control"><label for="field">Displayed field (numerical readout)</label><select id="field"><option value="rate">Local reference corrosion rate · mm/year</option><option value="loss" selected>Reference metal penetration · mm</option><option value="wall">Remaining nominal chamber wall · mm</option></select></div>
 <div class="control"><label for="days">Exposure duration</label><select id="days"><option value="7" selected>7 days — published test duration</option><option value="30">30 days — linear what-if</option><option value="90">90 days — linear what-if</option><option value="365">365 days — linear what-if</option></select></div>
-<div class="control"><label for="part">Inspect component</label><select id="part"><option value="all">All six chambers and supports</option><option value="chamber_1">Chamber 1</option><option value="chamber_2">Chamber 2</option><option value="chamber_3">Chamber 3</option><option value="chamber_4">Chamber 4</option><option value="chamber_5">Chamber 5</option><option value="chamber_6">Chamber 6</option></select></div>
-<label class="check"><input type="checkbox" id="front" /> Show front end plate (hides interiors)</label>
+<div class="control"><label for="part">Inspect component</label><select id="part"><option value="all">All 10 bodies — all surfaces exposed</option><option value="chamber_1">Chamber 1</option><option value="chamber_2">Chamber 2</option><option value="chamber_3">Chamber 3</option><option value="chamber_4">Chamber 4</option><option value="chamber_5">Chamber 5</option><option value="chamber_6">Chamber 6</option><option value="front_end_plate">Front end plate</option><option value="rear_end_plate">Rear end plate</option><option value="hub_1">Hub 1</option><option value="hub_2">Hub 2</option></select></div>
+<label class="check"><input type="checkbox" id="front" /> Show front end plate (uncheck to see chamber interiors)</label>
 <div class="ctlrow"><button id="reset">Reset camera</button><button id="export">Export readings CSV</button></div>
 </section>
-<section class="panel"><div class="statheader"><h2>Color scale · mapped field</h2><span class="statuslabel">Face-by-face</span></div><div class="grad"></div><div class="gradnums"><span id="legendMin">0.0134 mm</span><span id="legendMax">0.0460 mm</span></div><div class="note"><span style="display:inline-block;background:#718096;width:13px;height:13px;border-radius:3px;vertical-align:-2px;margin-right:6px"></span>Gray = assumed not exposed, not zero intrinsic corrosion resistance. Warmer colors = greater modeled reference penetration. <b>Colors are not a calibrated corrosion probability.</b></div></section>
-<section class="panel"><h2>Click-to-probe reading</h2><div id="probe" class="probe">Click a chamber surface in the 3D model to inspect its numerical field values and surface coordinates.</div><div class="rule"></div><div id="status" class="hint">Preparing numerical field…</div></section>
+<section class="panel"><div class="statheader"><h2>Color scale · mapped field</h2><span class="statuslabel">Face-by-face</span></div><div class="grad"></div><div class="gradnums"><span id="legendMin">0.0134 mm</span><span id="legendMax">0.0460 mm</span></div><div class="note"><span style="display:inline-block;background:#718096;width:13px;height:13px;border-radius:3px;vertical-align:-2px;margin-right:6px"></span>All mesh surfaces receive sour exposure (minimum 0.70 mm/year assigned reference). Warmer colors show hypothetical higher-rate chamber regions, <b>not predicted pit locations</b>. No material-specific simulation has been performed.</div></section>
+<section class="panel"><h2>Click-to-probe reading</h2><div id="probe" class="probe">Click any chamber, plate, or hub surface to inspect reference values and coordinates.</div><div class="rule"></div><div id="status" class="hint">Preparing numerical field…</div></section>
 </aside>
 </div>
 <section class="metrics" aria-label="Minimum and maximum numerical metrics">
-<div class="metric"><div class="label">Minimum wetted-surface reference value</div><div class="val" id="minValue">—</div><div class="unit" id="minUnit">mm</div></div>
-<div class="metric"><div class="label">Maximum wetted-surface reference value</div><div class="val" id="maxValue">—</div><div class="unit" id="maxUnit">mm</div></div>
+<div class="metric"><div class="label">Minimum exposed-surface reference value</div><div class="val" id="minValue">—</div><div class="unit" id="minUnit">mm</div></div>
+<div class="metric"><div class="label">Maximum exposed-surface reference value</div><div class="val" id="maxValue">—</div><div class="unit" id="maxUnit">mm</div></div>
 <div class="metric"><div class="label">Minimum remaining chamber wall</div><div class="val" id="minWall">—</div><div class="unit">mm · 10 mm original</div></div>
 <div class="metric"><div class="label">Maximum reference penetration</div><div class="val" id="maxLoss">—</div><div class="unit">mm · exposed chamber regions</div></div>
 </section>
 <div class="twocol">
-<section class="tablepanel"><div class="rowhead"><h2>Numerical results — all six chambers</h2><span class="secondary" id="durationLabel">Reference exposure: 7 days</span></div>
-<table class="data-table"><thead><tr><th>Chamber</th><th>Min loss (mm)</th><th>Max loss (mm)</th><th>Min wall (mm)</th><th>Wet area (m²)</th></tr></thead><tbody id="chamberrows"></tbody></table>
-<p class="note">Rows are evaluated from the face-by-face reference field on the original CAD mesh. Chambers have the same reference ranges because the hypothetical local wetting rule is repeated on each chamber.</p></section>
+<section class="tablepanel"><div class="rowhead"><h2>Numerical results — all 10 bodies</h2><span class="secondary" id="durationLabel">Reference exposure: 7 days</span></div>
+<table class="data-table"><thead><tr><th>Chamber</th><th>Min loss (mm)</th><th>Max loss (mm)</th><th>Min wall (mm)</th><th>Exposed area (m²)</th></tr></thead><tbody id="chamberrows"></tbody></table>
+<p class="note">All interior and exterior CAD surfaces are assigned sour exposure. Chamber wall remaining is evaluated only for six chamber tubes (nominal wall 10 mm); end plates and hubs have no assumed 10 mm thickness.</p></section>
 <section class="tablepanel"><h2>Interpretation and limitations</h2>
-<p class="hint"><b>What is actually calculated?</b> Local rates from an assigned 316L experimental benchmark are mapped to the imported triangulated STEP surfaces. Depth is computed as <b>rate × (days/365)</b>; nominal remaining wall is <b>10 mm − depth</b>. The minimum and maximum are calculated across the <b>wetted triangle samples</b> in the selected components.</p>
-<div class="rule"></div><p class="hint"><b>What is not calculated?</b> No H₂S electrochemical solution, material-specific kinetics, fluid pooling, pit initiation probability, crack growth, or structural stresses/deflections. The hottest locations are illustrative, not independently predicted. <span class="warning">Do not extrapolate the 7-day rate to real service life or claim sour-service qualification.</span></p>
-<div class="rule"></div><p class="hint">The measured deepest pit in the original 316L experiment was <b>0.04681 mm after seven days</b>. Your displayed per-face maximum is close but not exactly equal because it comes from discretized CAD hotspot interpolation, rather than the actual measured pit coordinates.</p>
+<p class="hint"><b>What is actually calculated?</b> A 316L literature rate is assigned to every triangulated STEP surface, with illustrative sensitivity hotspots in chamber interiors. Depth is computed as <b>rate × (days/365)</b>; nominal remaining wall is <b>10 mm − depth</b>. The minimum and maximum are calculated across <b>all surface triangle samples</b> in the selected components.</p>
+<div class="rule"></div><p class="hint"><b>What is not calculated?</b> No H₂S electrochemical solution, material-specific kinetics, fluid pooling, pit initiation probability, crack growth, or structural stresses/deflections. All 10 CAD bodies are treated as exposed; high-rate zones are hypothetical and not predicted. <span class="warning">Do not extrapolate the 7-day rate to real service life or claim sour-service qualification.</span></p>
+<div class="rule"></div><p class="hint">The measured deepest pit in the original 316L experiment was <b>0.04681 mm after seven days</b>. The display maximum is below the published pit-rate reference because its hypothetical hotspot field is discretized; those triangle positions were not observed experimentally.</p>
 </section>
 </div>
-<footer class="sources"><b>Research:</b> <a href="https://tis.wu.ac.th/index.php/tis/article/view/4642" target="_blank" rel="noreferrer">Shah et al., 2022 — 316L sour corrosion and pitting</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7399776/" target="_blank" rel="noreferrer">Shah et al., 2020 — sour exposure conditions</a>. <b>CAD:</b> user-supplied <code>DRUM_COMPLETE_MULTI_BODY.step</code>; numerical field: face-mapped reference dataset in <code>face_fields.json</code>. Open over GitHub Pages or a local HTTP server so the model and data can load.</footer>
+<footer class="sources"><b>Research:</b> <a href="https://tis.wu.ac.th/index.php/tis/article/view/4642" target="_blank" rel="noreferrer">Shah et al., 2022 — 316L sour corrosion and pitting</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7399776/" target="_blank" rel="noreferrer">Shah et al., 2020 — sour exposure conditions</a>. <b>CAD:</b> user-supplied <code>DRUM_COMPLETE_MULTI_BODY.step</code>; numerical field: full-surface face-mapped reference dataset in <code>face_fields.json</code>. Open over GitHub Pages or a local HTTP server so the model and data can load.</footer>
 </main>
 <script type="module">
 import * as THREE from 'three';
@@ -109,34 +109,42 @@ function buildNumericalColors(){if(!source)return;
   m.material?.dispose?.();m.material=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.85,metalness:.04,side:THREE.DoubleSide});
  }
 }
-function updateMetrics(){if(!source)return;const selected=part.value;
- const entries=Object.entries(source.partStats).filter(([name,s])=>name.startsWith('chamber_')&&(selected==='all'||selected===name));
- const mn=Math.min(...entries.map(([_,s])=>s.rateMin)),mx=Math.max(...entries.map(([_,s])=>s.rateMax));
- const day=currentDays(),lossMin=mn*day/365,lossMax=mx*day/365;
- let lowValue,hiValue;
- if(field.value==='wall'){lowValue=10-lossMax;hiValue=10-lossMin;} else {lowValue=displayValue(mn);hiValue=displayValue(mx);}
- const digits=precisionForField(),unit=unitForField();
- $('minValue').textContent=fmt(lowValue,digits);$('maxValue').textContent=fmt(hiValue,digits);
- $('minUnit').textContent=unit;$('maxUnit').textContent=unit;
- $('minWall').textContent=fmt(10-lossMax,4);$('maxLoss').textContent=fmt(lossMax,4);
- $('legendMin').textContent=fmt(field.value==='wall'?hiValue:lowValue,digits)+' '+unit;$('legendMax').textContent=fmt(field.value==='wall'?lowValue:hiValue,digits)+' '+unit;
- $('activefield').textContent=(field.value==='rate'?'Reference rate':field.value==='loss'?'Penetration':'Remaining wall')+' · '+unit;
- $('durationLabel').textContent='Exposure: '+day+' days'+(day!==7?' (linear what-if)':' (reference test length)');
- const body=$('chamberrows');body.innerHTML='';for(let i=1;i<=6;i++){
-  const name='chamber_'+i,s=source.partStats[name];const tr=document.createElement('tr');
-  if(part.value===name)tr.classList.add('active');
-  tr.innerHTML=`<td>Chamber ${i}</td><td>${fmt(s.rateMin*day/365,4)}</td><td>${fmt(s.rateMax*day/365,4)}</td><td>${fmt(10-s.rateMax*day/365,4)}</td><td>${fmt(s.wetArea_m2,3)}</td>`;
+function updateMetrics(){
+ if(!source)return;
+ const selected=part.value, entries=Object.entries(source.partStats).filter(([n])=>selected==='all'||selected===n);
+ const mn=Math.min(...entries.map(([_,s])=>s.rateMin)), mx=Math.max(...entries.map(([_,s])=>s.rateMax));
+ const day=currentDays(),scale=day/365, isChamber=selected==='all'||selected.startsWith('chamber_');
+ const low=field.value==='wall'?(isChamber?10-mx*scale:null):displayValue(mn);
+ const high=field.value==='wall'?(isChamber?10-mn*scale:null):displayValue(mx);
+ const pretty=v=>v===null?'N/A':fmt(v,precisionForField()),unit=unitForField();
+ $('minValue').textContent=pretty(low);$('maxValue').textContent=pretty(high);
+ $('minUnit').textContent=field.value==='wall'&&!isChamber?'not applicable':unit;
+ $('maxUnit').textContent=field.value==='wall'&&!isChamber?'not applicable':unit;
+ const ch=entries.filter(([n])=>n.startsWith('chamber_')).map(([_,s])=>s.rateMax);
+ $('minWall').textContent=ch.length?fmt(10-Math.max(...ch)*scale,4):'N/A';
+ $('maxLoss').textContent=fmt(mx*scale,4);
+ $('legendMin').textContent=pretty(field.value==='wall'?high:low)+' '+unit;
+ $('legendMax').textContent=pretty(field.value==='wall'?low:high)+' '+unit;
+ $('activefield').textContent=(field.value==='rate'?'Reference rate':field.value==='loss'?'Reference penetration':'Reference remaining wall')+' · '+unit;
+ $('durationLabel').textContent='Exposure: '+day+' days'+(day!==7?' (linear what-if)':' (reference duration)');
+ const body=$('chamberrows');body.innerHTML='';
+ for(const [name,s] of Object.entries(source.partStats)){
+  const chamber=name.startsWith('chamber_'),tr=document.createElement('tr');
+  if(selected===name)tr.classList.add('active');
+  tr.innerHTML=`<td>${s.label||name.replaceAll('_',' ')}</td><td>${fmt(s.rateMin*scale,4)}</td><td>${fmt(s.rateMax*scale,4)}</td><td>${chamber?fmt(10-s.rateMax*scale,4):'N/A'}</td><td>${fmt(s.wetArea_m2,3)}</td>`;
   tr.addEventListener('click',()=>{part.value=part.value===name?'all':name;updateAll()});body.appendChild(tr);
  }
  if(hasPick)showProbe(pickName,pickFace,pickPosition);
- status.textContent=day===7?'All statistics computed from 12,080 original CAD triangles.':'Linear what-if only — published 316L experiment was seven days; longer exposure results are NOT validated forecasts.';
+ status.textContent='Full sour exposure: '+source.coverageExposedTriangles.toLocaleString()+'/'+source.meshTriangleCount.toLocaleString()+' triangles, '+fmt(source.coverageExposedArea_m2,3)+' m². '+(day===7?'316L 7-day literature reference.':'Linear arithmetic only — not a validated long-term prediction.');
 }
-function showProbe(name,faceIndex,point){if(!source||!name||faceIndex===null)return;
+function showProbe(name,faceIndex,point){
+ if(!source||!name||faceIndex===null)return;
  const f=source.meshes[name];if(!f||faceIndex>=f.rate.length)return;
- const rate=f.rate[faceIndex],wet=f.wetClass[faceIndex]>0,values=fieldsForRate(rate);
+ const rate=f.rate[faceIndex],values=fieldsForRate(rate),chamber=name.startsWith('chamber_');
  const label=name.replaceAll('_',' ');
  const coord=point?`${fmt(point.x,0)}, ${fmt(point.y,0)}, ${fmt(point.z,0)}`:'—';
- probe.innerHTML=`<b>Part:</b> ${label}<br><b>Triangle #:</b> ${faceIndex.toLocaleString()}<br><b>Position (X, Y, Z):</b> ${coord} mm<br><b>Reference rate:</b> ${fmt(rate,4)} mm/year<br><b>Penetration:</b> ${fmt(values.loss,5)} mm<br><b>Remaining wall:</b> ${wet&&name.startsWith('chamber_')?fmt(values.wall,5)+' mm':'Not evaluated'}<br><b>Exposure class:</b> ${wet?(f.wetClass[faceIndex]===2?'Assumed inner-wall wetting':'Assumed wet end region'):'Assumed unexposed (gray)'}<br><span class="muted">These are mapped reference samples, not experimental probe measurements.</span>`;
+ const assumption=f.wetClass[faceIndex]===3?'Full exposure · 316L uniform baseline':'Full exposure · hypothetical chamber hotspot';
+ probe.innerHTML=`<b>Part:</b> ${label}<br><b>Triangle #:</b> ${faceIndex.toLocaleString()}<br><b>Position (X, Y, Z):</b> ${coord} mm<br><b>Reference rate:</b> ${fmt(rate,4)} mm/year<br><b>Reference penetration:</b> ${fmt(values.loss,5)} mm<br><b>Remaining nominal chamber wall:</b> ${chamber?fmt(values.wall,5)+' mm':'N/A — plate/hub thickness not evaluated'}<br><b>Exposure:</b> ${assumption}<br><span class="muted">Assigned 316L literature field, not simulation-predicted measurements.</span>`;
 }
 function updateAll(){updateMaterialVisibility();updateMetrics();}
 function setSize(){const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return;renderer.setSize(rect.width,rect.height,false);camera.aspect=rect.width/rect.height;camera.updateProjectionMatrix();}
@@ -166,7 +174,7 @@ async function loadModel(){const serial=++objectSequence;
  }catch(err){loading.textContent='Could not load geometry or numeric field: '+err.message;console.error(err);}
 }
 (async()=>{try{
- let resp=null,lastDataError='';for(const dataPath of ['./face_fields.json?v=2','./data/face_fields.json?v=2']){try{const r=await fetch(dataPath,{cache:'no-store'});if(r.ok){resp=r;break}lastDataError=dataPath+': HTTP '+r.status}catch(e){lastDataError=e.message}} if(!resp)throw Error('Could not load numerical data from root or data/. '+lastDataError);
+ let resp=null,lastDataError='';for(const dataPath of ['./face_fields.json?v=3','./data/face_fields.json?v=3']){try{const r=await fetch(dataPath,{cache:'no-store'});if(r.ok){resp=r;break}lastDataError=dataPath+': HTTP '+r.status}catch(e){lastDataError=e.message}} if(!resp)throw Error('Could not load numerical data from root or data/. '+lastDataError);
  source=await resp.json();await loadModel();
  }catch(err){loading.textContent='Numerical dataset failed to load. '+err.message;console.error(err);}
 })();
