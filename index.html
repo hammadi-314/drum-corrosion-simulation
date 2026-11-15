@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="description" content="3D CAD-based corrosion reference field and numeric surface readouts for a six-chamber pigging drum" />
+<title>Drum H₂S — Numerical 3D Corrosion Viewer</title>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"}}
+</script>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#e8f1fa;background:#081320;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:#081320}main{max-width:1600px;margin:auto;padding:25px 24px 42px}
+.header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}.eyebrow{font-weight:750;text-transform:uppercase;color:#85bce6;font-size:11px;letter-spacing:.14em}h1{margin:6px 0 7px;font-size:clamp(23px,2.4vw,33px);letter-spacing:-.035em;font-weight:770}p{margin:0}.subtitle{color:#a9bed1;line-height:1.6;max-width:980px;font-size:13px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:15px}.chip{font-size:11px;color:#bed2e4;background:#132536;border:1px solid #314d66;border-radius:20px;padding:5px 10px}
+.notice{margin:15px 0 17px;background:#2e261b;border:1px solid #79633e;border-radius:10px;padding:12px 15px;color:#f3d6a2;font-size:12px;line-height:1.55}
+.viewgrid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;align-items:start}.viewport{height:min(67vw,655px);min-height:450px;border:1px solid #30475c;border-radius:12px;position:relative;overflow:hidden;background:radial-gradient(ellipse at 48% 37%,#233f59,#09131e 75%)}#view{width:100%;height:100%;display:block;outline:none}
+.viewporttop{position:absolute;left:15px;top:13px;display:flex;gap:7px;pointer-events:none;flex-wrap:wrap}.overlaytag{padding:6px 9px;border:1px solid #375169;border-radius:6px;background:#0c1928dc;color:#e1edf9;font-size:11px}
+.viewportbottom{position:absolute;left:15px;bottom:14px;pointer-events:none;font-size:11px;color:#a8c1d8;background:#0b1928d9;padding:7px 10px;border-radius:6px}.loading{position:absolute;inset:0;background:#0d1d2bcb;display:grid;place-items:center;color:#d4e4f3;text-align:center;font-size:14px}.hidden{display:none!important}
+aside{display:flex;flex-direction:column;gap:12px}.panel{background:#0e1e2e;border:1px solid #2b4359;border-radius:10px;padding:14px}.panel h2{font-size:13px;font-weight:750;margin:0 0 11px;color:#e6f1fc;letter-spacing:.01em}
+.control{margin-bottom:12px}.control:last-child{margin-bottom:0}label{display:block;color:#9fb5ca;font-size:11px;font-weight:670;margin-bottom:6px}select,button,input[type=range]{width:100%}select,button{background:#162a3f;border:1px solid #3c5a73;color:#f1f6fb;border-radius:7px;padding:10px 11px;font-size:12px;font-family:inherit}button{cursor:pointer;font-weight:700}button:hover{background:#234665}.ctlrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}.check{display:flex;align-items:center;gap:7px;color:#cbd8e5;font-size:12px;margin:12px 0}.check input{accent-color:#56a9fa}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:14px}.metric{background:#0f2030;border:1px solid #30475b;border-radius:9px;padding:14px}.metric .label{font-size:11px;color:#a7c1d7;font-weight:600;min-height:30px}.metric .val{font-size:clamp(18px,2.1vw,26px);letter-spacing:-.04em;font-weight:790;margin-top:5px}.metric .unit{font-size:11px;color:#86a7c1;margin-top:2px}
+.rowhead{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}.secondary{color:#90a9bf;font-size:11px}.twocol{display:grid;grid-template-columns:1.1fr .9fr;gap:13px;margin-top:14px}.tablepanel{border:1px solid #31465a;border-radius:10px;background:#102032;padding:14px;min-width:0}.tablepanel h2{font-size:14px;margin:0 0 11px}.data-table{width:100%;border-collapse:collapse;font-size:12px}.data-table th{font-size:11px;text-align:right;color:#9fb7cc;border-bottom:1px solid #35495f;font-weight:660;padding:9px 6px}.data-table th:first-child,.data-table td:first-child{text-align:left}.data-table td{padding:9px 6px;border-bottom:1px solid #253d51;text-align:right;font-variant-numeric:tabular-nums}.data-table tbody tr:last-child td{border-bottom:0}.data-table tbody tr{cursor:pointer}.data-table tbody tr:hover{background:#172f43}.data-table tbody tr.active{background:#1c4255}
+.grad{width:100%;height:14px;border-radius:6px;background:linear-gradient(90deg,#22c5e7 0%,#f4bd4f 52%,#f05a49 100%);border:1px solid #637a8a;margin:10px 0 5px}.gradnums{display:flex;justify-content:space-between;color:#b7ccdd;font-size:11px;font-variant-numeric:tabular-nums}.probe{font-size:12px;line-height:1.8;color:#c0d3e5}.probe b{color:white}.note{font-size:11px;color:#96aabf;line-height:1.65;margin-top:11px}.dry{color:#a7bdd1}
+.rule{height:1px;background:#2a465b;margin:12px 0}.sources{font-size:11px;line-height:1.65;color:#94acc0;margin-top:16px}.sources a{color:#8cccff}
+.statheader{display:flex;justify-content:space-between;align-items:center}.statuslabel{background:#23465a;color:#c0e8fe;border-radius:5px;padding:4px 6px;font-size:10px;font-weight:700}.hint{color:#bad5e9;font-size:11px;line-height:1.6}.muted{color:#899fb3}.warning{color:#ffdb9a}
+@media(max-width:1150px){.viewgrid{grid-template-columns:minmax(0,1fr) 300px}.metrics{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:780px){main{padding:16px 12px}.viewgrid,.twocol{grid-template-columns:1fr}.viewport{min-height:375px;height:58vh}.metrics{grid-template-columns:repeat(2,1fr)}.metric .label{min-height:0}}
+</style>
+</head>
+<body><main>
+<header class="header"><div><div class="eyebrow">MEEN 401 · ENGINEERING EVALUATION</div><h1>Drum corrosion | numerical 3D viewer</h1><p class="subtitle">Inspect maximum and minimum corrosion-reference values on your actual six-chamber revolver drum geometry. Click any surface to read the mapped local value and its position.</p></div></header>
+<div class="chips"><span class="chip">60°C</span><span class="chip">H₂S partial pressure 3 bar</span><span class="chip">30 bar total</span><span class="chip">5 wt% NaCl</span><span class="chip">0.5 wt% acetic acid</span><span class="chip">Nominal wall 10 mm</span></div>
+<div class="notice"><b>Research-based reference mapping — not a material-specific corrosion prediction.</b> The 0.70 mm/year uniform rate and 2.4 mm/year peak pit rate are published results for <b>316L</b>, not the five proposed alloys. Their spatial distribution across the CAD is an illustrative lower-chamber wetting assumption, not electrochemical FEM. Material choices share the same field and cannot be ranked using these results. Surface geometry has not been eroded.</div>
+<div class="viewgrid">
+<section class="viewport" aria-label="Interactive drum surface mapping"><canvas id="view"></canvas><div class="viewporttop"><span class="overlaytag">3D CAD mesh · 10 bodies</span><span class="overlaytag" id="activefield">Corrosion rate · mm/year</span></div><div class="viewportbottom">Drag to rotate · Scroll to zoom · Right-drag to pan · Click surface to probe</div><div id="loading" class="loading">Loading 3D assembly and numerical surface data…</div></section>
+<aside>
+<section class="panel"><h2>Analysis controls</h2>
+<div class="control"><label for="material">Proposed material</label><select id="material"><option value="6061_T6">Al 6061-T6</option><option value="7075_T6">Al 7075-T6</option><option value="1020_NORMALIZED">AISI 1020 — normalized</option><option value="AISI_304">AISI 304</option><option value="AISI_316" selected>AISI 316</option></select></div>
+<div class="control"><label for="field">Displayed field (numerical readout)</label><select id="field"><option value="rate">Local reference corrosion rate · mm/year</option><option value="loss" selected>Reference metal penetration · mm</option><option value="wall">Remaining nominal chamber wall · mm</option></select></div>
+<div class="control"><label for="days">Exposure duration</label><select id="days"><option value="7" selected>7 days — published test duration</option><option value="30">30 days — linear what-if</option><option value="90">90 days — linear what-if</option><option value="365">365 days — linear what-if</option></select></div>
+<div class="control"><label for="part">Inspect component</label><select id="part"><option value="all">All six chambers and supports</option><option value="chamber_1">Chamber 1</option><option value="chamber_2">Chamber 2</option><option value="chamber_3">Chamber 3</option><option value="chamber_4">Chamber 4</option><option value="chamber_5">Chamber 5</option><option value="chamber_6">Chamber 6</option></select></div>
+<label class="check"><input type="checkbox" id="front" /> Show front end plate (hides interiors)</label>
+<div class="ctlrow"><button id="reset">Reset camera</button><button id="export">Export readings CSV</button></div>
+</section>
+<section class="panel"><div class="statheader"><h2>Color scale · mapped field</h2><span class="statuslabel">Face-by-face</span></div><div class="grad"></div><div class="gradnums"><span id="legendMin">0.0134 mm</span><span id="legendMax">0.0460 mm</span></div><div class="note"><span style="display:inline-block;background:#718096;width:13px;height:13px;border-radius:3px;vertical-align:-2px;margin-right:6px"></span>Gray = assumed not exposed, not zero intrinsic corrosion resistance. Warmer colors = greater modeled reference penetration. <b>Colors are not a calibrated corrosion probability.</b></div></section>
+<section class="panel"><h2>Click-to-probe reading</h2><div id="probe" class="probe">Click a chamber surface in the 3D model to inspect its numerical field values and surface coordinates.</div><div class="rule"></div><div id="status" class="hint">Preparing numerical field…</div></section>
+</aside>
+</div>
+<section class="metrics" aria-label="Minimum and maximum numerical metrics">
+<div class="metric"><div class="label">Minimum wetted-surface reference value</div><div class="val" id="minValue">—</div><div class="unit" id="minUnit">mm</div></div>
+<div class="metric"><div class="label">Maximum wetted-surface reference value</div><div class="val" id="maxValue">—</div><div class="unit" id="maxUnit">mm</div></div>
+<div class="metric"><div class="label">Minimum remaining chamber wall</div><div class="val" id="minWall">—</div><div class="unit">mm · 10 mm original</div></div>
+<div class="metric"><div class="label">Maximum reference penetration</div><div class="val" id="maxLoss">—</div><div class="unit">mm · exposed chamber regions</div></div>
+</section>
+<div class="twocol">
+<section class="tablepanel"><div class="rowhead"><h2>Numerical results — all six chambers</h2><span class="secondary" id="durationLabel">Reference exposure: 7 days</span></div>
+<table class="data-table"><thead><tr><th>Chamber</th><th>Min loss (mm)</th><th>Max loss (mm)</th><th>Min wall (mm)</th><th>Wet area (m²)</th></tr></thead><tbody id="chamberrows"></tbody></table>
+<p class="note">Rows are evaluated from the face-by-face reference field on the original CAD mesh. Chambers have the same reference ranges because the hypothetical local wetting rule is repeated on each chamber.</p></section>
+<section class="tablepanel"><h2>Interpretation and limitations</h2>
+<p class="hint"><b>What is actually calculated?</b> Local rates from an assigned 316L experimental benchmark are mapped to the imported triangulated STEP surfaces. Depth is computed as <b>rate × (days/365)</b>; nominal remaining wall is <b>10 mm − depth</b>. The minimum and maximum are calculated across the <b>wetted triangle samples</b> in the selected components.</p>
+<div class="rule"></div><p class="hint"><b>What is not calculated?</b> No H₂S electrochemical solution, material-specific kinetics, fluid pooling, pit initiation probability, crack growth, or structural stresses/deflections. The hottest locations are illustrative, not independently predicted. <span class="warning">Do not extrapolate the 7-day rate to real service life or claim sour-service qualification.</span></p>
+<div class="rule"></div><p class="hint">The measured deepest pit in the original 316L experiment was <b>0.04681 mm after seven days</b>. Your displayed per-face maximum is close but not exactly equal because it comes from discretized CAD hotspot interpolation, rather than the actual measured pit coordinates.</p>
+</section>
+</div>
+<footer class="sources"><b>Research:</b> <a href="https://tis.wu.ac.th/index.php/tis/article/view/4642" target="_blank" rel="noreferrer">Shah et al., 2022 — 316L sour corrosion and pitting</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7399776/" target="_blank" rel="noreferrer">Shah et al., 2020 — sour exposure conditions</a>. <b>CAD:</b> user-supplied <code>DRUM_COMPLETE_MULTI_BODY.step</code>; numerical field: face-mapped reference dataset in <code>data/face_fields.json</code>. Open over GitHub Pages or a local HTTP server so the model and data can load.</footer>
+</main>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+
+const $=id=>document.getElementById(id);
+const material=$('material'),field=$('field'),days=$('days'),part=$('part'),front=$('front'),probe=$('probe');
+const canvas=$('view'),loading=$('loading'),status=$('status');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2)); renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+const scene=new THREE.Scene();
+scene.add(new THREE.HemisphereLight(0xf1f6ff,0x21364e,2.5));
+const key=new THREE.DirectionalLight(0xffffff,3);key.position.set(-900,1300,2500);scene.add(key);
+const fill=new THREE.DirectionalLight(0x84c8ff,1.0);fill.position.set(1200,-1300,600);scene.add(fill);
+const camera=new THREE.PerspectiveCamera(42,1,2,12000);camera.up.set(0,0,1);
+const target=new THREE.Vector3(470,0,0);camera.position.set(-1850,2350,1120);
+const controls=new OrbitControls(camera,canvas);controls.target.copy(target);controls.enableDamping=true;controls.dampingFactor=.08;controls.minDistance=520;controls.maxDistance=6200;controls.update();
+const originalPos=camera.position.clone();
+const low=new THREE.Color('#23cbe7'),mid=new THREE.Color('#f5b94c'),high=new THREE.Color('#fa604e'),dryCol=new THREE.Color('#748398');
+const raycaster=new THREE.Raycaster(); const pointer=new THREE.Vector2();
+let source=null,group=null,meshes=[],hasPick=false,pickPosition=null,pickName=null,pickFace=null;
+let objectSequence=0;let dragging=null;
+function currentDays(){return Number(days.value)}
+function fieldsForRate(r){const k=currentDays()/365;return {rate:r,loss:r*k,wall:10-r*k};}
+function unitForField(){return field.value==='rate'?'mm/year':'mm'}
+function displayValue(rate){const o=fieldsForRate(rate);return o[field.value]}
+function precisionForField(){return field.value==='rate'?3:4}
+function fmt(v,p=4){return Number(v).toFixed(p)}
+function severityColor(x){const a=new THREE.Color();if(x<=.5){a.copy(low).lerp(mid,x*2)}else{a.copy(mid).lerp(high,(x-.5)*2)}return a}
+function updateMaterialVisibility(){const isolate=part.value;for(const mesh of meshes){const nm=mesh.userData.fieldName;mesh.visible=isolate==='all' ? (nm!=='front_end_plate'||front.checked) : nm===isolate;}}
+function buildNumericalColors(){if(!source)return;
+ let min=source.mappedWetMin_mmperyr,max=source.mappedWetMax_mmperyr;
+ for(const m of meshes){const info=source.meshes[m.userData.fieldName];if(!info)continue;
+  const geo=m.geometry,n=info.rate.length;
+  const colors=new Float32Array(n*9);
+  for(let faceId=0;faceId<n;faceId++){
+    const r=info.rate[faceId],col=r>0?severityColor(Math.max(0,Math.min(1,(r-min)/(max-min)))):dryCol;
+    const j=faceId*9;for(let k=0;k<3;k++){colors[j+3*k]=col.r;colors[j+3*k+1]=col.g;colors[j+3*k+2]=col.b;}
+  }
+  geo.setAttribute('color',new THREE.BufferAttribute(colors,3));
+  m.material?.dispose?.();m.material=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.85,metalness:.04,side:THREE.DoubleSide});
+ }
+}
+function updateMetrics(){if(!source)return;const selected=part.value;
+ const entries=Object.entries(source.partStats).filter(([name,s])=>name.startsWith('chamber_')&&(selected==='all'||selected===name));
+ const mn=Math.min(...entries.map(([_,s])=>s.rateMin)),mx=Math.max(...entries.map(([_,s])=>s.rateMax));
+ const day=currentDays(),lossMin=mn*day/365,lossMax=mx*day/365;
+ let lowValue,hiValue;
+ if(field.value==='wall'){lowValue=10-lossMax;hiValue=10-lossMin;} else {lowValue=displayValue(mn);hiValue=displayValue(mx);}
+ const digits=precisionForField(),unit=unitForField();
+ $('minValue').textContent=fmt(lowValue,digits);$('maxValue').textContent=fmt(hiValue,digits);
+ $('minUnit').textContent=unit;$('maxUnit').textContent=unit;
+ $('minWall').textContent=fmt(10-lossMax,4);$('maxLoss').textContent=fmt(lossMax,4);
+ $('legendMin').textContent=fmt(field.value==='wall'?hiValue:lowValue,digits)+' '+unit;$('legendMax').textContent=fmt(field.value==='wall'?lowValue:hiValue,digits)+' '+unit;
+ $('activefield').textContent=(field.value==='rate'?'Reference rate':field.value==='loss'?'Penetration':'Remaining wall')+' · '+unit;
+ $('durationLabel').textContent='Exposure: '+day+' days'+(day!==7?' (linear what-if)':' (reference test length)');
+ const body=$('chamberrows');body.innerHTML='';for(let i=1;i<=6;i++){
+  const name='chamber_'+i,s=source.partStats[name];const tr=document.createElement('tr');
+  if(part.value===name)tr.classList.add('active');
+  tr.innerHTML=`<td>Chamber ${i}</td><td>${fmt(s.rateMin*day/365,4)}</td><td>${fmt(s.rateMax*day/365,4)}</td><td>${fmt(10-s.rateMax*day/365,4)}</td><td>${fmt(s.wetArea_m2,3)}</td>`;
+  tr.addEventListener('click',()=>{part.value=part.value===name?'all':name;updateAll()});body.appendChild(tr);
+ }
+ if(hasPick)showProbe(pickName,pickFace,pickPosition);
+ status.textContent=day===7?'All statistics computed from 12,080 original CAD triangles.':'Linear what-if only — published 316L experiment was seven days; longer exposure results are NOT validated forecasts.';
+}
+function showProbe(name,faceIndex,point){if(!source||!name||faceIndex===null)return;
+ const f=source.meshes[name];if(!f||faceIndex>=f.rate.length)return;
+ const rate=f.rate[faceIndex],wet=f.wetClass[faceIndex]>0,values=fieldsForRate(rate);
+ const label=name.replaceAll('_',' ');
+ const coord=point?`${fmt(point.x,0)}, ${fmt(point.y,0)}, ${fmt(point.z,0)}`:'—';
+ probe.innerHTML=`<b>Part:</b> ${label}<br><b>Triangle #:</b> ${faceIndex.toLocaleString()}<br><b>Position (X, Y, Z):</b> ${coord} mm<br><b>Reference rate:</b> ${fmt(rate,4)} mm/year<br><b>Penetration:</b> ${fmt(values.loss,5)} mm<br><b>Remaining wall:</b> ${wet&&name.startsWith('chamber_')?fmt(values.wall,5)+' mm':'Not evaluated'}<br><b>Exposure class:</b> ${wet?(f.wetClass[faceIndex]===2?'Assumed inner-wall wetting':'Assumed wet end region'):'Assumed unexposed (gray)'}<br><span class="muted">These are mapped reference samples, not experimental probe measurements.</span>`;
+}
+function updateAll(){updateMaterialVisibility();updateMetrics();}
+function setSize(){const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return;renderer.setSize(rect.width,rect.height,false);camera.aspect=rect.width/rect.height;camera.updateProjectionMatrix();}
+new ResizeObserver(setSize).observe(canvas);
+const loader=new GLTFLoader();
+async function loadModel(){const serial=++objectSequence;
+ loading.classList.remove('hidden');loading.textContent='Loading 3D geometry…';
+ const slug=material.value;
+ const path=`models/drum_${slug}_SOUR_REFERENCE.glb`;
+ try{
+  const gltf=await loader.loadAsync(path);if(serial!==objectSequence)return;
+  if(group){scene.remove(group);group.traverse(m=>{if(m.isMesh){m.geometry?.dispose?.();m.material?.dispose?.()}})}
+  group=gltf.scene;meshes=[];
+  group.traverse(m=>{if(!m.isMesh)return;
+   let n=m.name; // trimesh GLB nodes carry source part names
+   if(!source.meshes[n]&&m.parent?.name&&source.meshes[m.parent.name])n=m.parent.name;
+   if(!source.meshes[n])throw Error('Could not link 3D mesh '+m.name+' to numerical samples');
+   m.userData.fieldName=n;
+   if(m.geometry.index)m.geometry=m.geometry.toNonIndexed();
+   const fc=m.geometry.attributes.position.count/3;
+   if(fc!==source.meshes[n].rate.length)throw Error(`Triangle count mismatch for ${n}: ${fc}`);
+   m.frustumCulled=false;meshes.push(m);
+  });
+  scene.add(group);buildNumericalColors();updateAll();
+  loading.classList.add('hidden');
+ }catch(err){loading.textContent='Could not load geometry or numeric field: '+err.message;console.error(err);}
+}
+(async()=>{try{
+ const resp=await fetch('data/face_fields.json');if(!resp.ok)throw Error('HTTP '+resp.status);
+ source=await resp.json();await loadModel();
+ }catch(err){loading.textContent='Data unavailable. Open this package using GitHub Pages or a local HTTP server. '+err.message;console.error(err);}
+})();
+material.addEventListener('change',loadModel);part.addEventListener('change',updateAll);front.addEventListener('change',updateAll);
+field.addEventListener('change',updateMetrics);days.addEventListener('change',updateMetrics);
+$('reset').addEventListener('click',()=>{camera.position.copy(originalPos);controls.target.copy(target);controls.update()});
+canvas.addEventListener('pointerdown',e=>{dragging={x:e.clientX,y:e.clientY}});
+canvas.addEventListener('pointerup',e=>{if(!dragging||Math.hypot(e.clientX-dragging.x,e.clientY-dragging.y)>6){dragging=null;return}dragging=null;
+ const r=canvas.getBoundingClientRect();pointer.x=((e.clientX-r.left)/r.width)*2-1;pointer.y=-((e.clientY-r.top)/r.height)*2+1;
+ raycaster.setFromCamera(pointer,camera);const intersects=raycaster.intersectObjects(meshes.filter(m=>m.visible),false);
+ if(intersects.length){const h=intersects[0];hasPick=true;pickName=h.object.userData.fieldName;pickFace=h.faceIndex;pickPosition=h.point.clone();showProbe(pickName,pickFace,pickPosition);}
+});
+$('export').addEventListener('click',()=>{if(!source)return;
+ const mats=material.selectedOptions[0].textContent,nowDays=currentDays(),entries=Object.entries(source.partStats).filter(([nm,s])=>nm.startsWith('chamber_'));
+ const rows=[['material_label','component','exposure_days','mapped_min_reference_rate_mm_y','mapped_max_reference_rate_mm_y','min_reference_penetration_mm','max_reference_penetration_mm','minimum_wall_thickness_mm','wet_area_m2','scientific_status']];
+ for(const [name,s]of entries)rows.push([mats,name,nowDays,s.rateMin,s.rateMax,fmt(s.rateMin*nowDays/365,6),fmt(s.rateMax*nowDays/365,6),fmt(10-s.rateMax*nowDays/365,6),s.wetArea_m2,'316L benchmark remapped, NOT alloy-specific corrosion prediction']);
+ const csv=rows.map(row=>row.map(x=>'"'+String(x).replaceAll('"','""')+'"').join(',')).join('\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));const a=document.createElement('a');a.href=url;a.download='H2S_Drum_Reference_Readings_'+material.value+'_'+nowDays+'days.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+});
+function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();
+</script></body></html>

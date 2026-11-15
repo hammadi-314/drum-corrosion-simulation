@@ -1,0 +1,7 @@
+component,wetted_min_rate_mm_per_year,wetted_max_rate_mm_per_year,min_metal_loss_7d_mm,max_metal_loss_7d_mm,min_remaining_wall_7d_mm,max_remaining_wall_7d_mm,total_wet_area_m2,note
+chamber_1,0.7,2.39935,0.013425,0.046015,9.953985,9.986575,1.7343,Same 316L-based reference field regardless of candidate alloy
+chamber_2,0.7,2.39935,0.013425,0.046015,9.953985,9.986575,1.7343,Same 316L-based reference field regardless of candidate alloy
+chamber_3,0.7,2.39935,0.013425,0.046015,9.953985,9.986575,1.7343,Same 316L-based reference field regardless of candidate alloy
+chamber_4,0.7,2.399351,0.013425,0.046015,9.953985,9.986575,1.7343,Same 316L-based reference field regardless of candidate alloy
+chamber_5,0.7,2.39935,0.013425,0.046015,9.953985,9.986575,1.7343,Same 316L-based reference field regardless of candidate alloy
+chamber_6,0.7,2.39935,0.013425,0.046015,9.953985,9.986575,1.7343,Same 316L-based reference field regardless of candidate alloy
