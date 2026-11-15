@@ -1,0 +1,91 @@
+{
+  "version": "5.0",
+  "mode": "Research measurements from DIFFERENT experimental environments. The numbers are NOT a matched sour-service comparison and must NEVER be described as 60 C / 3 bar H2S predictions for every material.",
+  "uniformCorrosionOnly": true,
+  "materials": {
+    "6061_T6": {
+      "label": "Al 6061-T6",
+      "testedGrade": "Al 6061-T6",
+      "rate_mm_per_year": 0.1031524,
+      "paperValue": "9.47 µA/cm²",
+      "paperUnit": "corrosion current density",
+      "rateMethod": "CALCULATED, not reported: 0.00327 × i_corr(µA/cm²) × (26.9815385/3 g/equiv) / 2.70 g/cm³ (Al3+ simplified)",
+      "environment": "3.5 wt% NaCl aqueous solution; no added H₂S. Uncoated reference specimen from Table 3 (*) in cited publication; electrochemical CPPC.",
+      "temperature": "Not established as the 60°C sour scenario",
+      "H2S": "None reported",
+      "salinity": "3.5 wt% NaCl",
+      "sourceTitle": "Effect of Citric Acid Hard Anodizing on the Mechanical Properties and Corrosion Resistance of Different Aluminum Alloys (2024)",
+      "sourceUrl": "https://doi.org/10.3390/ma17174285",
+      "limit": "Equivalent penetration assumes uniform dissolution and approximate Al3+ stoichiometry; electrochemical conversion ignores localized pitting and alloy element valence. No H2S exposure; not validated for wet sour service."
+    },
+    "7075_T6": {
+      "label": "Al 7075-T6",
+      "testedGrade": "Al 7075-T6",
+      "rate_mm_per_year": 0.0032445,
+      "paperValue": "0.31 µA/cm²",
+      "paperUnit": "corrosion current density",
+      "rateMethod": "CALCULATED, not reported: 0.00327 × i_corr(µA/cm²) × (26.9815385/3 g/equiv) / 2.81 g/cm³ (Al3+ simplified)",
+      "environment": "Same 3.5 wt% NaCl aqueous solution without added H₂S, same paper/Table 3, uncoated reference specimen (*)",
+      "temperature": "Not established as the 60°C sour scenario",
+      "H2S": "None reported",
+      "salinity": "3.5 wt% NaCl",
+      "sourceTitle": "Effect of Citric Acid Hard Anodizing on the Mechanical Properties and Corrosion Resistance of Different Aluminum Alloys (2024)",
+      "sourceUrl": "https://doi.org/10.3390/ma17174285",
+      "limit": "Equivalent penetration assumes uniform dissolution and Al3+ chemistry despite a multicomponent alloy; no matched H2S test. Low current under this chloride experiment does not establish superior sour-service resistance."
+    },
+    "1020_NORMALIZED": {
+      "label": "AISI 1020 normalized candidate",
+      "testedGrade": "AISI 1020, normalization state not specified",
+      "rate_mm_per_year": 0.58,
+      "paperValue": "0.58–0.92 mm/year",
+      "paperUnit": "weight-loss corrosion rate over surface finishes",
+      "rateMethod": "DIRECT published weight-loss result; lower 0.58 mm/y smoother-finish specimen is visualized. 0.92 mm/y is higher-roughness reference, NOT pitting rate.",
+      "environment": "25°C, CO₂-saturated 3 wt% NaCl, pH ~5, static glass cell, weight-loss immersion 168 h (7 days)",
+      "temperature": "25°C",
+      "H2S": "No H₂S; CO₂ only",
+      "salinity": "3 wt% NaCl",
+      "sourceTitle": "Mechanistic Role of Surface Roughness on CO₂ Corrosion Kinetics and Pitting Susceptibility of AISI 1020 Carbon Steel (2026)",
+      "sourceUrl": "https://doi.org/10.18280/ijdne.210410",
+      "limit": "Not tested in sour H2S. Normalized heat treatment not established. Surface roughness alters results. 0.58 is the lower measured finish, not a sour-service minimum."
+    },
+    "AISI_304": {
+      "label": "AISI 304",
+      "testedGrade": "304 stainless steel substrate (uncoated)",
+      "rate_mm_per_year": 0.17,
+      "paperValue": "0.17 mm/year",
+      "paperUnit": "substrate corrosion rate (paper abstract)",
+      "rateMethod": "DIRECT paper-reported uncoated 304 stainless steel substrate benchmark",
+      "environment": "H₂S-containing simulated oil-and-gas-field medium; the accessible abstract does not state the complete pressure, temperature, electrolyte or immersion duration. Paper compares HVOF-coated with uncoated substrate.",
+      "temperature": "Not verified in accessible abstract",
+      "H2S": "H₂S environment (pressure not verified)",
+      "salinity": "Not verified in accessible abstract",
+      "sourceTitle": "Assessment of Sulfide Corrosion and Wear Behavior of HVOF-Sprayed Cr3C2–25NiCr Coating on 304 Stainless Steels in H2S Environment (2023)",
+      "sourceUrl": "https://doi.org/10.1007/s12666-023-02986-2",
+      "limit": "Abstract provides 0.17 mm/year substrate benchmark but not complete test conditions; cannot assume 60°C/3 bar H2S; coating result not used."
+    },
+    "AISI_316": {
+      "label": "AISI 316 candidate, 316L proxy",
+      "testedGrade": "AISI 316L (NOT AISI 316)",
+      "rate_mm_per_year": 0.74,
+      "paperValue": "0.74 mm/year",
+      "paperUnit": "weight-loss corrosion rate",
+      "rateMethod": "DIRECT measured 316L coupon weight-loss rate; used only as explicitly labeled proxy for AISI 316 grade",
+      "environment": "60°C, H₂S partial pressure 3 bar, total 30 bar (H₂S 3 bar + N₂ 27 bar), 5 wt% NaCl + 0.5 wt% acetic acid, pH ~3, ~7 days",
+      "temperature": "60°C",
+      "H2S": "3 bar partial pressure",
+      "salinity": "5 wt% NaCl + 0.5 wt% acetic acid",
+      "sourceTitle": "The Effect of H₂S Pressure on the Formation of Multiple Corrosion Products on 316L Stainless Steel Surface (Shah et al., 2020)",
+      "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7399776/",
+      "limit": "316L is a different grade than AISI 316 and may not be treated as guaranteed equal. The reported 0.74 mm/y uniform corrosion cannot establish pitting damage or cracking suitability."
+    }
+  },
+  "conversionReference": {
+    "method": "Faraday law per ASTM G102",
+    "formula": "CR (mm/year) = 0.00327 × i_corr (µA/cm²) × equivalent_weight (g/equiv) / density (g/cm³)",
+    "equivalentWeightAssumption": "Aluminum dominant dissolution Al→Al3+ +3e, 26.9815385/3 g/equiv; approximate for aluminum alloys",
+    "density_6061_g_cm3": 2.7,
+    "density_7075_g_cm3": 2.81,
+    "sourceUrl": "https://ecommerce.sist.si/catalog/standards/astm/6fd59c55-07d4-42ad-8512-bfc5f750a993/astm-g102-23"
+  },
+  "note": "Mode 1 distributes the selected study's UNIFORM corrosion benchmark over 100% of triangulated CAD faces. Because papers did not measure this drum's spatial corrosion field, no pitting hotspot is created in Mode 1. Calculated penetration after t days and two-sided wall thinning are hypothetical transfers from coupon measurements to the model geometry. Not valid for ranking all five under the same field conditions."
+}
