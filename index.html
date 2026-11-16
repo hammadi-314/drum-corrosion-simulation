@@ -1,423 +1,450 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<meta name="description" content="3D CAD-based corrosion reference field and numeric surface readouts for a six-chamber pigging drum" />
-<title>Drum H₂S — Numerical 3D Corrosion Viewer</title>
-<script type="importmap">
-{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"}}
-</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Marine corrosion literature benchmarks and qualitative offshore 3D exposure mapping for a six-chamber pig magazine. No process H2S.">
+<title>Offshore Magazine | Marine Corrosion Design Review</title>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"}}</script>
 <style>
-:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#e8f1fa;background:#081320;color-scheme:dark}
-*{box-sizing:border-box}body{margin:0;background:#081320}main{max-width:1600px;margin:auto;padding:25px 24px 42px}
-.header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}.eyebrow{font-weight:750;text-transform:uppercase;color:#85bce6;font-size:11px;letter-spacing:.14em}h1{margin:6px 0 7px;font-size:clamp(23px,2.4vw,33px);letter-spacing:-.035em;font-weight:770}p{margin:0}.subtitle{color:#a9bed1;line-height:1.6;max-width:980px;font-size:13px}
-.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:15px}.chip{font-size:11px;color:#bed2e4;background:#132536;border:1px solid #314d66;border-radius:20px;padding:5px 10px}
-.notice{margin:15px 0 17px;background:#2e261b;border:1px solid #79633e;border-radius:10px;padding:12px 15px;color:#f3d6a2;font-size:12px;line-height:1.55}
-.viewgrid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;align-items:start}.viewport{height:min(67vw,655px);min-height:450px;border:1px solid #30475c;border-radius:12px;position:relative;overflow:hidden;background:radial-gradient(ellipse at 48% 37%,#233f59,#09131e 75%)}#view{width:100%;height:100%;display:block;outline:none}
-.viewporttop{position:absolute;left:15px;top:13px;display:flex;gap:7px;pointer-events:none;flex-wrap:wrap}.overlaytag{padding:6px 9px;border:1px solid #375169;border-radius:6px;background:#0c1928dc;color:#e1edf9;font-size:11px}
-.viewportbottom{position:absolute;left:15px;bottom:14px;pointer-events:none;font-size:11px;color:#a8c1d8;background:#0b1928d9;padding:7px 10px;border-radius:6px}.loading{position:absolute;inset:0;background:#0d1d2bcb;display:grid;place-items:center;color:#d4e4f3;text-align:center;font-size:14px}.hidden{display:none!important}
-aside{display:flex;flex-direction:column;gap:12px}.panel{background:#0e1e2e;border:1px solid #2b4359;border-radius:10px;padding:14px}.panel h2{font-size:13px;font-weight:750;margin:0 0 11px;color:#e6f1fc;letter-spacing:.01em}
-.control{margin-bottom:12px}.control:last-child{margin-bottom:0}label{display:block;color:#9fb5ca;font-size:11px;font-weight:670;margin-bottom:6px}select,button,input[type=range]{width:100%}select,button{background:#162a3f;border:1px solid #3c5a73;color:#f1f6fb;border-radius:7px;padding:10px 11px;font-size:12px;font-family:inherit}button{cursor:pointer;font-weight:700}button:hover{background:#234665}.ctlrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}.check{display:flex;align-items:center;gap:7px;color:#cbd8e5;font-size:12px;margin:12px 0}.check input{accent-color:#56a9fa}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:14px}.metric{background:#0f2030;border:1px solid #30475b;border-radius:9px;padding:14px}.metric .label{font-size:11px;color:#a7c1d7;font-weight:600;min-height:30px}.metric .val{font-size:clamp(18px,2.1vw,26px);letter-spacing:-.04em;font-weight:790;margin-top:5px}.metric .unit{font-size:11px;color:#86a7c1;margin-top:2px}
-.rowhead{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}.secondary{color:#90a9bf;font-size:11px}.twocol{display:grid;grid-template-columns:1.1fr .9fr;gap:13px;margin-top:14px}.tablepanel{border:1px solid #31465a;border-radius:10px;background:#102032;padding:14px;min-width:0}.tablepanel h2{font-size:14px;margin:0 0 11px}.data-table{width:100%;border-collapse:collapse;font-size:12px}.data-table th{font-size:11px;text-align:right;color:#9fb7cc;border-bottom:1px solid #35495f;font-weight:660;padding:9px 6px}.data-table th:first-child,.data-table td:first-child{text-align:left}.data-table td{padding:9px 6px;border-bottom:1px solid #253d51;text-align:right;font-variant-numeric:tabular-nums}.data-table tbody tr:last-child td{border-bottom:0}.data-table tbody tr{cursor:pointer}.data-table tbody tr:hover{background:#172f43}.data-table tbody tr.active{background:#1c4255}
-.grad{width:100%;height:14px;border-radius:6px;background:linear-gradient(90deg,#22c5e7 0%,#f4bd4f 52%,#f05a49 100%);border:1px solid #637a8a;margin:10px 0 5px}.gradnums{display:flex;justify-content:space-between;color:#b7ccdd;font-size:11px;font-variant-numeric:tabular-nums}.probe{font-size:12px;line-height:1.8;color:#c0d3e5}.probe b{color:white}.note{font-size:11px;color:#96aabf;line-height:1.65;margin-top:11px}.dry{color:#a7bdd1}
-.rule{height:1px;background:#2a465b;margin:12px 0}.sources{font-size:11px;line-height:1.65;color:#94acc0;margin-top:16px}.sources a{color:#8cccff}
-.statheader{display:flex;justify-content:space-between;align-items:center}.statuslabel{background:#23465a;color:#c0e8fe;border-radius:5px;padding:4px 6px;font-size:10px;font-weight:700}.hint{color:#bad5e9;font-size:11px;line-height:1.6}.muted{color:#899fb3}.warning{color:#ffdb9a}
-@media(max-width:1150px){.viewgrid{grid-template-columns:minmax(0,1fr) 300px}.metrics{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:780px){main{padding:16px 12px}.viewgrid,.twocol{grid-template-columns:1fr}.viewport{min-height:375px;height:58vh}.metrics{grid-template-columns:repeat(2,1fr)}.metric .label{min-height:0}}
-
-/* Viewer v4.2 — white presentation theme. Numerical corrosion calculations unchanged. */
-:root{background:#ffffff;color:#172333;color-scheme:light}
-body{background:#ffffff;color:#172333}
-.eyebrow{color:#21618a}
-.subtitle{color:#536578}
-.chip{background:#f5f8fb;border-color:#d9e2ea;color:#40566b}
-.notice{background:#fffaf0;border-color:#e7ce94;color:#684e21}
-.viewport{background:#ffffff;border-color:#d3dde7;box-shadow:0 1px 7px #1c3d5b0a}
-.overlaytag{background:#ffffffea;color:#2c455a;border-color:#d1dde7}
-.viewportbottom{background:#ffffffea;color:#3b556b;border:1px solid #e0e6ec}
-.loading{background:#fffffff2;color:#33485c}
-.panel,.metric,.tablepanel{background:#ffffff;border-color:#d8e1e9;box-shadow:0 2px 8px #223f5709}
-.panel h2,.tablepanel h2{color:#172333}
-label{color:#4e6073}
-select,button{background:#ffffff;border-color:#bdccd8;color:#1d3347}
-select:focus-visible,button:focus-visible{outline:2px solid #2a74b5;outline-offset:2px}
-button:hover{background:#e9f3fb}
-.check{color:#364d62}
-.metric .label{color:#596a79}
-.metric .val{color:#172333}
-.metric .unit{color:#61798c}
-.secondary,.note,.muted{color:#607386}
-.data-table th{color:#4e6375;border-bottom-color:#cdd8e2}
-.data-table td{border-bottom-color:#e4eaf0}
-.data-table tbody tr:hover{background:#f1f7fc}
-.data-table tbody tr.active{background:#e5f2fa}
-.grad{border-color:#aebdca;height:18px;position:relative;overflow:visible}
-.grad.marked{margin-top:40px;margin-bottom:42px}
-.range-tick{position:absolute;top:-5px;height:calc(100% + 10px);width:2.5px;background:#1e293b;box-shadow:0 0 0 1px #ffffffcc;border-radius:2px;transform:translateX(-50%);pointer-events:none;z-index:2}
-.range-label{position:absolute;transform:translateX(-50%);font-size:11px;font-weight:750;line-height:1.25;white-space:nowrap;color:#192e41;background:#ffffff;border:1px solid #c4d1dc;border-radius:5px;box-shadow:0 1px 3px #253f561b;padding:3px 6px;pointer-events:none;z-index:3;font-variant-numeric:tabular-nums}
-.range-label-min{bottom:calc(100% + 12px)}
-.range-label-max{top:calc(100% + 12px)}
-.range-tick[hidden],.range-label[hidden],.gradnums[hidden]{display:none!important}
-.material-swatch{display:inline-block;width:12px;height:12px;border:1px solid #4a647744;border-radius:3px;vertical-align:-1px;margin-right:8px}
-.gradnums,.probe{color:#405569}
-.probe b{color:#162b3c}
-.rule{background:#e1e7ed}
-.sources{color:#576c7e}
-.sources a{color:#146aa4}
-.statuslabel{background:#e5f2fa;color:#1c5579}
-.hint{color:#43596b}
-.warning{color:#805300}
-#researchInfo[hidden],#sourConditionChips[hidden]{display:none!important}
-#researchPaper{color:#1665a5;font-weight:700;text-decoration:underline}
-#researchDetails b{color:#162b3c}
-#comparisonNote{font-size:12px;line-height:1.6}
-
-</style>
-</head>
-<body><main>
-<header class="header"><div><div class="eyebrow">MEEN 401 · ENGINEERING EVALUATION</div><h1>Drum corrosion | paper-supported material study</h1><p class="subtitle">One traceable corrosion benchmark per material. Mode 1 shows uniform coupon-data transfer; Mode 2 adds clearly hypothetical localized attack to the same published/derived rates. Papers differ in test conditions and cannot provide an identical-condition H₂S ranking.</p></div></header>
-<div class="chips" id="sourConditionChips"><span class="chip">10 mm nominal chamber wall</span><span class="chip">5 study benchmarks · different laboratory conditions</span><span class="chip">12,080 CAD faces</span><span class="chip">Viewer v6.0</span></div>
-<div class="notice" id="modeNotice"><b>Paper-based numerical benchmarks, NOT matched H₂S material testing.</b> Each material uses a traceable published or calculated rate under its own experimental conditions. Mode 2 adds hypothetical localized effects; none of the five are confirmed comparatively at the same sour-service environment.</div>
-<div class="viewgrid">
-<section class="viewport" aria-label="Interactive drum surface mapping"><canvas id="view"></canvas><div class="viewporttop"><span class="overlaytag">3D CAD mesh · 10 bodies</span><span class="overlaytag" id="activefield">Corrosion rate · mm/year</span></div><div class="viewportbottom">Drag to rotate · Scroll to zoom · Right-drag to pan · Click surface to probe</div><div id="loading" class="loading">Loading 3D assembly and numerical surface data…</div></section>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:#f6f8fb;color:#172c40;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:#f6f8fb}
+button,select{font:inherit}
+main{max-width:1640px;margin:0 auto;padding:25px 27px 58px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding-bottom:15px;border-bottom:1px solid #dce5ed}
+.brand{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:850;color:#236b87}
+.toplabel{font-size:11px;color:#647a8a;font-weight:700}
+.head{margin:24px 0 19px}
+.head h1{font-size:clamp(27px,3.0vw,43px);letter-spacing:-.048em;line-height:1.14;margin:0 0 11px;color:#102b42}
+.head p{font-size:13px;line-height:1.7;max-width:1040px;margin:0;color:#587084}
+.pills{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0 18px}
+.pill{font-size:10px;letter-spacing:.02em;color:#3f6479;border:1px solid #d1e1e8;border-radius:50px;background:#fff;padding:6px 10px;font-weight:750}
+.pill.primary{color:#12685e;background:#e4f6f2;border-color:#a9ded3}
+.banner{border:1px solid #e7dcbf;background:#fffaf0;border-left:4px solid #d1a24d;padding:12px 16px;border-radius:9px;margin:0 0 16px;color:#695936;font-size:12px;line-height:1.6}
+.modebar{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}
+.modebtn{border-radius:11px;border:1px solid #d7e2ea;background:#fff;text-align:left;padding:13px 17px;flex:1;min-width:220px;cursor:pointer;color:#334b60;box-shadow:0 1px 2px #19384c08}
+.modebtn strong{display:block;font-size:13px;margin-bottom:5px}.modebtn span{font-size:11px;color:#6e8191}
+.modebtn.active{border-color:#2e8791;box-shadow:inset 0 0 0 1px #2e8791;background:#f0fcfa}
+.modelgrid{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:15px;align-items:stretch}
+.viewport{height:610px;border:1px solid #d4e0e8;background:radial-gradient(ellipse at 52% 38%,#fff 20%,#edf3f8 100%);border-radius:15px;position:relative;overflow:hidden}
+#view{height:100%;width:100%;display:block;outline:none}
+.viewport-header{position:absolute;top:14px;left:14px;right:14px;display:flex;flex-wrap:wrap;gap:6px;pointer-events:none}
+.surface-tag{font-size:10px;letter-spacing:.025em;font-weight:750;border:1px solid #c8d8e4;background:#ffffffec;color:#35556b;border-radius:7px;padding:7px 10px}
+.viewport-bottom{position:absolute;bottom:14px;left:14px;right:14px;display:flex;align-items:end;justify-content:space-between;gap:10px;pointer-events:none}
+.viewport-note{max-width:450px;background:#fffffff0;border:1px solid #dce6ec;border-radius:7px;padding:8px 11px;font-size:10px;color:#5c7586;line-height:1.6}
+.load{position:absolute;inset:0;display:grid;place-items:center;background:#f2f6faed;color:#3c6680;text-align:center;padding:20px;font-size:14px;font-weight:750}
+.hidden{display:none!important}
+aside{display:flex;flex-direction:column;gap:12px}
+.panel,.stat,.section{background:#fff;border:1px solid #dce5ed;border-radius:13px;box-shadow:0 1px 2px #183a5007}
+.panel{padding:16px}
+.panel h2,.section h2{margin:0 0 12px;font-size:13px;letter-spacing:-.01em;color:#203d53}
+label{display:block;font-size:11px;color:#657a8b;font-weight:700;margin:0 0 5px}
+.control{margin-bottom:12px}
+select,button.small{border:1px solid #ccdce6;border-radius:8px;padding:10px 11px;background:#fff;width:100%;color:#28465b;font-size:12px}
+select:focus-visible,button:focus-visible{outline:2px solid #238c98;outline-offset:2px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
+button.small{cursor:pointer;font-weight:760;font-size:11px}
+button.small:hover{background:#f0f8fa}
+.checkline{display:flex;align-items:center;gap:7px;font-size:11px;color:#526c7f;font-weight:650;margin-top:7px}
+.checkline input{accent-color:#247d8e}
+.tiny{font-size:11px;line-height:1.55;color:#687e8f}
+.tiny b{color:#284358}
+.source-card{font-size:11px;line-height:1.65;color:#536b7d}
+.source-card b{color:#253c50}
+.source-card a,.refs a,.rulebox a{color:#146d8a;text-decoration:underline}
+.source-card .point{margin-bottom:6px}
+.badge{display:inline-block;font-size:10px;padding:4px 7px;border-radius:5px;background:#e7f1f9;color:#276082;font-weight:760}
+.vbar-wrap{position:relative;margin:31px 0 24px}
+.grad{position:relative;height:17px;border-radius:7px;background:linear-gradient(90deg,#25bace,#f0bd59,#e46c52);border:1px solid #bbd0dc}
+.tick{position:absolute;top:-5px;height:27px;width:3px;border-radius:2px;background:#1f4056;box-shadow:0 0 0 1px #fff;transform:translateX(-50%)}
+.ticktext{position:absolute;transform:translateX(-50%);white-space:nowrap;background:#fff;border:1px solid #cddce6;border-radius:5px;padding:3px 5px;font-size:10px;font-weight:820;color:#203e51;box-shadow:0 2px 4px #0b355414;font-variant-numeric:tabular-nums}
+.ticktext.above{bottom:calc(100% + 10px)}.ticktext.below{top:calc(100% + 11px)}
+.range-ends{display:flex;justify-content:space-between;font-size:10px;font-weight:750;color:#4e657a;margin-top:8px;font-variant-numeric:tabular-nums}
+#color-caption{font-size:11px;color:#677e8e;line-height:1.55}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin:15px 0}
+.stat{padding:17px 18px}
+.stat label{font-size:11px;color:#637b8e;margin-bottom:8px;min-height:27px}
+.stat .num{font-weight:850;font-size:clamp(19px,2vw,27px);letter-spacing:-.04em;color:#173953}
+.stat small{font-size:10px;line-height:1.5;display:block;color:#7590a0;margin-top:5px}
+.contentgrid{display:grid;grid-template-columns:1.04fr .96fr;gap:14px;margin-top:4px}
+.section{padding:19px}
+.sectionhead{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:13px}
+.sectionhead h2{margin:0}
+.barrows{display:flex;flex-direction:column;gap:10px}
+.bar-item{display:grid;grid-template-columns:133px minmax(80px,1fr) 80px;align-items:center;gap:10px;border:1px solid transparent;border-radius:7px;padding:4px 6px;background:transparent;text-align:left;cursor:pointer;width:100%}
+.bar-item:hover{background:#f3f8fa}.bar-item.selected{background:#ebf7f7;border-color:#bde1e0}
+.bar-name{font-size:11px;color:#3b5265;font-weight:700}
+.bar-track{height:9px;border-radius:20px;background:#edf1f5;overflow:hidden}
+.bar-fill{height:100%;min-width:3px;border-radius:20px;background:linear-gradient(90deg,#32bbd0,#e7ac51)}
+.bar-value{font-size:11px;font-weight:790;text-align:right;color:#294a60;font-variant-numeric:tabular-nums}
+.rulebox{background:#f5f9fb;border:1px solid #e0e9ee;border-radius:9px;padding:12px 13px;font-size:11px;color:#536c7e;line-height:1.7;margin-bottom:11px}
+.rulebox strong{color:#24495d}
+.rulegrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rulecard{border:1px solid #e0e9ee;border-radius:9px;padding:12px}
+.rulecard .name{font-size:12px;font-weight:830;color:#20425a}
+.rulecard .big{font-size:20px;font-weight:830;color:#1d556a;margin:5px 0}
+.rulecard p{font-size:10px;color:#668092;line-height:1.5;margin:0}
+.radiobar{display:flex;gap:6px;margin-bottom:10px}
+.radiobar button{flex:1;border:1px solid #d6e3ec;background:#fff;border-radius:7px;cursor:pointer;padding:9px 11px;color:#496a7a;font-size:11px;font-weight:800}
+.radiobar button.active{background:#e9f7f5;border-color:#2c8995;color:#176474}
+.legenditems{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.legenditems span{font-size:10px;color:#6b8392}
+.dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px}
+.explain{margin:0;color:#516d80;font-size:11px;line-height:1.8}
+.probe{font-size:11px;color:#5b7284;line-height:1.8}
+.refs{font-size:11px;line-height:1.8;color:#6d8191;margin-top:15px}
+.refs a{margin-right:7px}
+footer{margin:20px 0 0;color:#71899b;font-size:10px;line-height:1.7}
+@media(max-width:1200px){.modelgrid{grid-template-columns:minmax(0,1fr) 310px}.viewport{height:540px}}
+@media(max-width:830px){main{padding:15px 12px 35px}.modelgrid,.contentgrid{grid-template-columns:1fr}.viewport{height:57vh;min-height:350px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.bar-item{grid-template-columns:115px minmax(70px,1fr) 72px}.modelgrid aside{display:grid;grid-template-columns:1fr 1fr}.panel{min-width:0}}
+@media(max-width:570px){.modelgrid aside{grid-template-columns:1fr}.viewport{height:48vh;min-height:320px}.stat{padding:13px}.head h1{font-size:27px}.rulegrid{grid-template-columns:1fr 1fr}.bar-item{grid-template-columns:97px 1fr 71px;gap:7px}.bar-name{font-size:10px}}
+</style></head><body>
+<main>
+<div class="topbar"><div class="brand">MEEN 401 · SENIOR DESIGN ENGINEERING REVIEW</div><div class="toplabel">6-chamber revolver magazine · CAD-based assessment · v7.0</div></div>
+<section class="head"><h1>Offshore marine corrosion<br>and exposure assessment</h1><p>External pig-loading magazine exposed to offshore salt, humidity and possible spray — not internal pipeline fluid. A literature-traceable material screening and geometry-based inspection-priority visualization.</p></section>
+<div class="pills"><span class="pill primary">EXTERNAL MAGAZINE · NO ASSUMED PROCESS H₂S</span><span class="pill">Marine atmosphere / intermittent salt wetting</span><span class="pill">ISO 9223 · C5 / CX reference</span><span class="pill">10 CAD bodies · 12,080 surface faces</span><span class="pill">10 mm nominal chamber wall</span></div>
+<div class="banner"><strong>Engineering validity:</strong> The papers used different electrolytes, specimen grades, exposure methods and temperatures. Experimental and derived coupon rates are <strong>not</strong> matched offshore corrosion rates. The marine-wetting 3D view is an <strong>inspection-attention heuristic</strong>, not a corrosion simulation or pit forecast. ISO C5/CX categories are reference scenarios until site corrosivity is established.</div>
+<div class="modebar">
+<button class="modebtn active" id="modeBenchmark" type="button"><strong>01 · Published chloride benchmarks</strong><span>Five paper-linked rates · uniform recession illustration · comparable color scale</span></button>
+<button class="modebtn" id="modeExposure" type="button"><strong>02 · Offshore surface attention map</strong><span>3D geometry-informed salt/deposit and low-elevation attention · qualitative only</span></button>
+</div>
+<div class="modelgrid">
+<section class="viewport" aria-label="Interactive CAD-based offshore corrosion visualization">
+<canvas id="view"></canvas>
+<div class="viewport-header"><span class="surface-tag">Original six-chamber CAD · 10 solid bodies</span><span class="surface-tag" id="viewBadge">PAPER-BASED UNIFORM RATE</span></div>
+<div class="viewport-bottom"><div class="viewport-note">Drag: rotate · Scroll: zoom · Right-drag: pan · Click a face: numerical reading / inspection index</div><div class="surface-tag">Fixed global color scale</div></div>
+<div class="load" id="loading">Loading drum geometry and marine study evidence…</div>
+</section>
 <aside>
-<section class="panel"><h2>Analysis controls</h2>
-<div class="control"><label for="studyMode">Analysis mode</label><select id="studyMode"><option value="literature">Mode 1 — uniform literature benchmark</option><option value="sensitivity" selected>Mode 2 — literature rate + illustrative hotspots</option></select></div>
-<div class="control"><label for="material">Proposed material</label><select id="material"><option value="6061_T6">Al 6061-T6</option><option value="7075_T6">Al 7075-T6</option><option value="1020_NORMALIZED">AISI 1020 — normalized</option><option value="AISI_304">AISI 304</option><option value="AISI_316" selected>AISI 316</option></select></div>
-<div class="control"><label for="field">Displayed field (numerical readout)</label><select id="field"><option value="rate">Assigned local corrosion rate · mm/year</option><option value="loss" selected>Calculated metal penetration · mm</option><option value="wall">Estimated remaining chamber wall · mm</option></select></div>
-<div class="control"><label for="days">Exposure duration</label><select id="days"><option value="7" selected>7 days — comparison interval (may be extrapolated)</option><option value="30">30 days — linear what-if</option><option value="90">90 days — linear what-if</option><option value="365">365 days — linear what-if</option></select></div>
-<div class="control"><label for="part">Inspect component</label><select id="part"><option value="all">All 10 bodies — all surfaces exposed</option><option value="chamber_1">Chamber 1</option><option value="chamber_2">Chamber 2</option><option value="chamber_3">Chamber 3</option><option value="chamber_4">Chamber 4</option><option value="chamber_5">Chamber 5</option><option value="chamber_6">Chamber 6</option><option value="front_end_plate">Front end plate</option><option value="rear_end_plate">Rear end plate</option><option value="hub_1">Hub 1</option><option value="hub_2">Hub 2</option></select></div>
-<label class="check"><input type="checkbox" id="front" /> Show front end plate (uncheck to see chamber interiors)</label>
-<div class="ctlrow"><button id="reset">Reset camera</button><button id="export">Export readings CSV</button></div>
+<section class="panel">
+<h2>Analysis controls</h2>
+<div class="control"><label for="material">Drum candidate material</label><select id="material"><option value="6061_T6">Al 6061-T6</option><option value="7075_T6">Al 7075-T6</option><option value="1020_NORMALIZED">AISI 1020 (normalized candidate)</option><option value="AISI_304">AISI 304</option><option value="AISI_316" selected>AISI 316 (316L research proxy)</option></select></div>
+<div class="control" id="timeControl"><label for="days">Illustrative equal-rate exposure interval</label><select id="days"><option value="7" selected>7 days · what-if</option><option value="30">30 days · what-if</option><option value="90">90 days · what-if</option><option value="365">365 days · unvalidated extrapolation</option></select></div>
+<div class="control" id="fieldControl"><label for="field">Display numerical field</label><select id="field"><option value="rate">Paper-based rate · mm/year</option><option value="loss" selected>Uniform-equivalent surface recession · mm</option><option value="wall">One-side 10 mm wall illustration · mm</option></select></div>
+<div class="control"><label for="part">Focus CAD component</label><select id="part"><option value="all">All 10 bodies</option><option value="chamber_1">Chamber 1</option><option value="chamber_2">Chamber 2</option><option value="chamber_3">Chamber 3</option><option value="chamber_4">Chamber 4</option><option value="chamber_5">Chamber 5</option><option value="chamber_6">Chamber 6</option><option value="front_end_plate">Front end plate</option><option value="rear_end_plate">Rear end plate</option><option value="hub_1">Hub 1</option><option value="hub_2">Hub 2</option></select></div>
+<label class="checkline"><input type="checkbox" id="front"> Show front plate (hidden by default to reveal chambers)</label>
+<div class="actions"><button class="small" type="button" id="reset">Reset view</button><button class="small" type="button" id="capture">Save 3D image</button></div>
+<div class="actions"><button class="small" type="button" id="export">Export results CSV</button><button class="small" type="button" id="viewTop">View from above</button></div>
 </section>
-<section class="panel" id="researchInfo"><h2>Selected material · published evidence</h2><div id="researchDetails" class="hint"></div><p class="note"><a id="researchPaper" href="#" target="_blank" rel="noopener noreferrer">Open published source ↗</a></p></section>
-<section class="panel"><div class="statheader"><h2 id="colorTitle">Color scale · visual comparison</h2><span class="statuslabel" id="colorModeLabel">Enhanced</span></div><div class="hint" id="colorScope">Literature benchmark · local spatial mapping</div><div class="grad" id="gradientBar">
-  <span class="range-tick" id="rangeMinTick" hidden></span>
-  <span class="range-tick" id="rangeMaxTick" hidden></span>
-  <span class="range-label range-label-min" id="rangeMinLabel" hidden></span>
-  <span class="range-label range-label-max" id="rangeMaxLabel" hidden></span>
-</div>
-<div class="gradnums" id="legendNumbers"><span id="legendMin">—</span><span id="legendMax">—</span></div><div class="note" id="legendExplanation">Blue = less corrosion. Red = more corrosion. Scale automatically adjusts to the selected material and rate scenario.</div><div class="note"><span style="display:inline-block;background:#718096;width:13px;height:13px;border-radius:3px;vertical-align:-2px;margin-right:6px"></span>Gray with remaining-wall mode = end plates/hubs have no assessed wall thickness; <b>they are still exposed</b>. Hotspots are hypothetical and not predicted.</div></section>
-<section class="panel"><h2>Click-to-probe reading</h2><div id="probe" class="probe">Click any chamber, plate, or hub surface to inspect reference values and coordinates.</div><div class="rule"></div><div id="status" class="hint">Preparing numerical field…</div></section>
-</aside>
-</div>
-<section class="metrics" aria-label="Minimum and maximum numerical metrics">
-<div class="metric"><div class="label">Minimum selected material value</div><div class="val" id="minValue">—</div><div class="unit" id="minUnit">mm</div></div>
-<div class="metric"><div class="label">Maximum selected material value</div><div class="val" id="maxValue">—</div><div class="unit" id="maxUnit">mm</div></div>
-<div class="metric"><div class="label">Minimum remaining chamber wall</div><div class="val" id="minWall">—</div><div class="unit">mm · 10 mm original</div></div>
-<div class="metric"><div class="label">Maximum scenario penetration</div><div class="val" id="maxLoss">—</div><div class="unit">mm · exposed chamber regions</div></div>
+<section class="panel"><h2 id="legendTitle">Corrosion rate · five-study range</h2><div class="tiny" id="legendSubtitle">Same colors across five paper inputs, despite different experimental conditions</div>
+<div class="vbar-wrap"><div class="grad" id="gradientBar"><span class="tick" id="minTick"></span><span class="tick" id="maxTick"></span><span class="ticktext above" id="minTickLabel">—</span><span class="ticktext below" id="maxTickLabel">—</span></div></div>
+<p id="color-caption">Two dark ticks identify the selected material on the shared five-paper range.</p>
 </section>
-<div class="twocol">
-<section class="tablepanel"><div class="rowhead"><h2>Numerical results — all 10 bodies</h2><span class="secondary" id="durationLabel">Reference exposure: 7 days</span></div>
-<table class="data-table"><thead><tr><th>Chamber</th><th>Min loss (mm)</th><th>Max loss (mm)</th><th>Min wall (mm)</th><th>Exposed area (m²)</th></tr></thead><tbody id="chamberrows"></tbody></table>
-<p class="note">All interior and exterior CAD surfaces are assigned sour exposure. Only six chambers have a modelled 10 mm wall; the conservative wall scenario subtracts corrosion on both sides. End plates and hubs have no assessed thickness.</p></section>
-<section class="tablepanel"><h2>Interpretation and limitations</h2>
-<p class="hint"><b>What is actually calculated?</b> Both modes use <b>one published or transparently calculated corrosion-rate benchmark per candidate</b>. Mode 1 applies it uniformly across the CAD. Mode 2 uses a shared illustrative hotspot field (not observed for these drum faces) and a fixed numerical color scale across five materials. Linear penetration = rate × days/365; chamber-wall estimates subtract both faces. The colors use gamma 0.70 for visibility only.</p>
-<div class="rule"></div><p class="hint"><b>What is not calculated?</b> No H₂S electrochemical solution, material-specific kinetics, fluid pooling, pit initiation probability, crack growth, or structural stresses/deflections. All 10 CAD bodies are treated as exposed; high-rate zones are hypothetical and not predicted. <span class="warning">Do not extrapolate the 7-day rate to real service life or claim sour-service qualification.</span></p>
-<div class="rule"></div><p class="hint"><b>Research basis and limitations:</b> Source studies differ in pH, electrolyte, temperature, presence of H₂S and specimen grade/finish. Only the 316L source has the shown 3-bar H₂S exposure. An additional 316L paper reported 2.4 mm/year deepest-pit penetration; Mode 2 uses its ratio to the separate 0.74 mm/year uniform result as an <b>unvalidated illustrative multiplier for other materials</b>, not a measured pit rate or location. Neither mode establishes a suitable oil-and-gas material.</p>
-</section>
+<section class="panel"><h2 id="paperHeading">Supporting paper · selected material</h2><div class="source-card" id="paperInfo">Loading verified study record…</div><a href="#" id="paperLink" target="_blank" rel="noopener noreferrer" class="tiny">Open original study</a></section>
+<section class="panel"><h2>Click-to-probe information</h2><div class="probe" id="probe">Click a face on the 3D drum to inspect its current display value.</div></section>
+</aside></div>
+<div class="stats">
+<div class="stat"><label id="k1label">Published / derived rate</label><div class="num" id="k1">—</div><small id="k1unit">mm/year</small></div>
+<div class="stat"><label id="k2label">Uniform-equivalent metal loss</label><div class="num" id="k2">—</div><small id="k2unit">mm · illustrative interval</small></div>
+<div class="stat"><label id="k3label">Remaining nominal wall</label><div class="num" id="k3">—</div><small id="k3unit">mm · illustrative one-side subtraction</small></div>
+<div class="stat"><label id="k4label">Surface coverage</label><div class="num" id="k4">27.29</div><small id="k4unit">m² · all triangulated faces</small></div>
 </div>
-<section class="tablepanel" style="margin-top:14px"><div class="rowhead"><h2 id="comparisonTitle">Material benchmark comparison · full drum</h2><span class="secondary" id="compareCase">Central-rate scenario</span></div><table class="data-table"><thead><tr><th>Material</th><th id="baseRateHeader">Rate (mm/y)</th><th>Minimum loss (mm)</th><th>Maximum loss (mm)</th><th>Min chamber wall (mm)</th></tr></thead><tbody id="materialRows"></tbody></table><p class="note" id="comparisonNote">Published studies were conducted in DIFFERENT environments. This table documents the evidence and cannot be used as a single-condition alloy ranking. Click a row to change material.</p></section>
-<footer class="sources"><b>Data and methods:</b> <a href="literature_inputs_v6.json">Literature inputs, tested grades and paper links</a> · <a href="https://store.astm.org/standards/g102" target="_blank" rel="noreferrer">ASTM G102 conversion</a> · <a href="https://tis.wu.ac.th/index.php/tis/article/view/4642" target="_blank" rel="noreferrer">316L pit-rate study</a>. <b>CAD:</b> user-supplied <code>DRUM_COMPLETE_MULTI_BODY.step</code>, numerical face template <code>face_fields.json</code>. No calculated metal erosion or electrochemical FEM.</footer>
+<div class="contentgrid">
+<section class="section"><div class="sectionhead"><h2 id="resultsTitle">Five-material literature benchmarks</h2><span class="badge" id="resultsBadge">Unmatched test conditions</span></div><div class="barrows" id="materialBars"></div><p class="tiny" id="barNote">Bars use one shared numerical scale but do not represent controlled tests in the same marine exposure.</p></section>
+<section class="section"><div class="sectionhead"><h2>Offshore standards and design basis</h2><span class="badge">Classification ≠ material test</span></div>
+<div class="rulebox"><strong>ISO 9223:2012</strong> — Atmospheric corrosivity classification using standard specimen first-year loss and salt deposition, humidity/time of wetness and pollution. This project has <b>not measured</b> its exact offshore C-category. <a href="https://www.iso.org/standard/53499.html" target="_blank" rel="noopener noreferrer">Official ISO reference</a>.</div>
+<div class="radiobar"><button id="catC5" type="button" class="active">C5 · very high</button><button id="catCX" type="button">CX · extreme offshore</button></div>
+<div class="rulegrid"><div class="rulecard"><div class="name" id="catName">C5 · Reference scenario</div><div class="big" id="catRange">0.08–0.20</div><p>mm uniform loss, first year · <b>standard reference carbon-steel specimen only</b></p></div>
+<div class="rulecard"><div class="name">ISO 12944-9:2018</div><div class="big">Coatings</div><p>Offshore high-durability protective paint systems for <b>carbon steel</b>; not direct certification of aluminum or stainless grades. <a href="https://www.iso.org/standard/64832.html" target="_blank" rel="noopener noreferrer">ISO standard</a></p></div></div>
+<p class="tiny" style="margin-bottom:0">ISO category ranges are <b>independent of the five paper-rate bars</b>. They cannot be substituted for alloy-specific rates or used as measured magazine lifetime.</p>
+</section></div>
+<section class="section" style="margin-top:14px"><div class="sectionhead"><h2>Engineering interpretation for the senior design report</h2><span class="badge">Not H₂S service</span></div><p class="explain" id="interpretation">The external magazine must be assessed for marine atmospheric exposure. The 3D field does not predict actual corrosion or material failure. Confirm site wetting, exposure, drainage, coating selection and crevice configuration before selecting a material.</p></section>
+<div class="refs"><strong>Study / reference sources:</strong> <a href="https://doi.org/10.3390/ma17174285" target="_blank" rel="noopener noreferrer">6061/7075 · chloride polarization</a><a href="https://doi.org/10.5151/2594-5327-43868" target="_blank" rel="noopener noreferrer">1020 · NaCl weight loss</a><a href="https://doi.org/10.3390/met11101543" target="_blank" rel="noopener noreferrer">304 · intermittent NaCl</a><a href="https://doi.org/10.3390/app13074366" target="_blank" rel="noopener noreferrer">316L · unsulfided seawater control</a><a href="marine_evidence_v7.json">Methodology JSON</a></div>
+<footer>MEEN 401 · Oil & gas pig magazine (external to launcher). Marine literature comparison and qualitative exposure inspection map. All rates are source-specific; one-sided wall subtraction and equivalent times are illustrative only; geometry is not corroded physically. Source CAD: original user-supplied STEP. ISO classifications are not field-verified.</footer>
 </main>
 <script type="module">
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
-
 const $=id=>document.getElementById(id);
-const studyMode=$('studyMode'),material=$('material'),field=$('field'),days=$('days'),part=$('part'),front=$('front'),probe=$('probe');
-const canvas=$('view'),loading=$('loading'),status=$('status');
-const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2)); renderer.outputColorSpace=THREE.SRGBColorSpace;
-renderer.toneMapping=THREE.ACESFilmicToneMapping;
-const scene=new THREE.Scene();
-scene.add(new THREE.HemisphereLight(0xf1f6ff,0x21364e,2.5));
-const key=new THREE.DirectionalLight(0xffffff,3);key.position.set(-900,1300,2500);scene.add(key);
-const fill=new THREE.DirectionalLight(0x84c8ff,1.0);fill.position.set(1200,-1300,600);scene.add(fill);
-const camera=new THREE.PerspectiveCamera(42,1,2,12000);camera.up.set(0,0,1);
-const target=new THREE.Vector3(470,0,0);camera.position.set(-1850,2350,1120);
-const controls=new OrbitControls(camera,canvas);controls.target.copy(target);controls.enableDamping=true;controls.dampingFactor=.08;controls.minDistance=520;controls.maxDistance=6200;controls.update();
-const originalPos=camera.position.clone();
-const low=new THREE.Color('#23cbe7'),mid=new THREE.Color('#f5b94c'),high=new THREE.Color('#fa604e'),dryCol=new THREE.Color('#748398');
-const raycaster=new THREE.Raycaster(); const pointer=new THREE.Vector2();
-let source=null,profiles=null,benchmarks=null,group=null,meshes=[],hasPick=false,pickPosition=null,pickName=null,pickFace=null;
-let objectSequence=0;let dragging=null;
-function currentDays(){return Number(days.value)}
-const RATE_ANCHOR=0.7,MAX_REFERENCE=2.399351,PITTING_SENSITIVITY=2.4/0.74; // 316L-only published ratio applied illustratively
-function isResearch(){return studyMode.value==='literature'}
-function benchmark(key=material.value){return benchmarks.materials[key]}
-function profile(){return benchmark()}
-function baseRate(key=material.value){return benchmark(key).rate_mm_per_year}
-function hotspot(ref){return Math.max(0,Math.min(1,(ref-RATE_ANCHOR)/(MAX_REFERENCE-RATE_ANCHOR)))}
-function uniformRate(key=material.value){return baseRate(key)}
-function materialRate(ref,key=material.value){return isResearch()?uniformRate(key):baseRate(key)*(1+(PITTING_SENSITIVITY-1)*hotspot(ref))}
-function triangleRate(name,idx){return materialRate(source.meshes[name].rate[idx])}
-function integrateLoss(rate){let loss=0;for(let d=0;d<currentDays();d++)loss+=rate/365;return loss}
-function fieldsForRate(r){const loss=integrateLoss(r);return {rate:r,loss,wall:Math.max(0,10-loss-integrateLoss(uniformRate()))};}
-function unitForField(){return field.value==='rate'?'mm/year':'mm'}
-function displayValue(rate){const o=fieldsForRate(rate);return o[field.value]}
-function precisionForField(){return field.value==='rate'?3:4}
-function fmt(v,p=4){return Number(v).toFixed(p)}
-function severityColor(x){const a=new THREE.Color();if(x<=.5){a.copy(low).lerp(mid,x*2)}else{a.copy(mid).lerp(high,(x-.5)*2)}return a}
-function updateMaterialVisibility(){const isolate=part.value;for(const mesh of meshes){const nm=mesh.userData.fieldName;mesh.visible=isolate==='all' ? (nm!=='front_end_plate'||front.checked) : nm===isolate;}}
-// Mode 1 and Mode 2 use the same paper-based baseline. Mode 2 has one fixed
-// color scale for all five materials at each exposure duration and display field.
-// Visual contrast only: no corrosion input or numerical calculation is altered.
-function researchRateRange(){
- const rates=Object.values(benchmarks.materials).map(x=>x.rate_mm_per_year);
- return {min:Math.min(...rates),max:Math.max(...rates)};
+const state={mode:'benchmark',category:'C5',source:null,geom:null,material:'AISI_316',meshes:[],group:null,hasPick:false,serial:0};
+const canvas=$('view');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuffer:true,powerPreference:'high-performance'});
+renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.toneMapping=THREE.ACESFilmicToneMapping;
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(42,1,2,12000);
+camera.up.set(0,0,1);
+scene.add(new THREE.HemisphereLight(0xffffff,0xabc0cf,2.2));
+const lamp=new THREE.DirectionalLight(0xffffff,2.8);lamp.position.set(-600,1600,2800);scene.add(lamp);
+const sidelight=new THREE.DirectionalLight(0xe4f5ff,1.2);sidelight.position.set(1000,-1100,800);scene.add(sidelight);
+const target=new THREE.Vector3(470,0,0);camera.position.set(-1850,2350,1200);
+const originalCam=camera.position.clone();
+const controls=new OrbitControls(camera,canvas);
+controls.target.copy(target);controls.enableDamping=true;controls.dampingFactor=.085;controls.minDistance=520;controls.maxDistance=6600;controls.update();
+const pickRay=new THREE.Raycaster(),pickPointer=new THREE.Vector2();
+const cold=new THREE.Color('#2bbad1'),mild=new THREE.Color('#eebf5d'),hot=new THREE.Color('#e46951');
+const unknown=new THREE.Color('#8d9faa');
+let downPt=null,probeData=null;
+function clamp(x){return Math.max(0,Math.min(1,x))}
+function fmt(x,d=5){return Number(x).toFixed(d)}
+function isBench(){return state.mode==='benchmark'}
+function material(){return state.source.materials[state.material]}
+function rate(key=state.material){return state.source.materials[key].rate_mm_per_year}
+function days(){return Number($('days').value)}
+function loss(r){return r*days()/365}
+function valueUnit(){return $('field').value==='rate'?'mm/year':'mm'}
+function singleSideWall(r){return Math.max(0,10-loss(r))}
+function severityColor(x){const c=new THREE.Color();const y=clamp(x);return y<=.5?c.copy(cold).lerp(mild,y*2):c.copy(mild).lerp(hot,(y-.5)*2)}
+function maxBase(){return Math.max(...Object.values(state.source.materials).map(x=>x.rate_mm_per_year))}
+function fieldMetric(r){const field=$('field').value;return field==='rate'?r:field==='loss'?loss(r):singleSideWall(r)}
+function fieldRange(){
+ const max=maxBase();
+ if($('field').value==='rate')return {min:0,max};
+ if($('field').value==='loss')return {min:0,max:loss(max)};
+ return {min:singleSideWall(max),max:10};
 }
-// Mode 2 uses the SAME numeric color endpoints for all five materials.
-// Switching material never rescales the gradient; exposure time/field may.
-function mode2FieldRange(){
- const all=Object.keys(profiles.materials).map(key=>baseRate(key));
- const maxBase=Math.max(...all),maxRate=maxBase*PITTING_SENSITIVITY;
- if(field.value==='rate')return {min:0,max:maxRate};
- if(field.value==='loss')return {min:0,max:integrateLoss(maxRate)};
- return {min:Math.max(0,10-integrateLoss(maxRate)-integrateLoss(maxBase)),max:10};
+function paperSeverity(r){
+ const b=fieldRange(),v=fieldMetric(r),f=$('field').value==='wall'
+  ?(b.max-v)/Math.max(1e-12,b.max-b.min)
+  :(v-b.min)/Math.max(1e-12,b.max-b.min);
+ return Math.pow(clamp(f),.78);
 }
-function clamp01(v){return Math.max(0,Math.min(1,v))}
-function fieldValueForColor(rate,key=material.value){
- if(field.value==='rate')return rate;
- if(field.value==='loss')return integrateLoss(rate);
- return Math.max(0,10-integrateLoss(rate)-integrateLoss(baseRate(key)));
+function expoIndex(mesh,faceIndex){
+ const values=mesh.userData.expo;
+ return values?values[faceIndex]:25;
 }
-// Gamma is VISUAL ONLY. One input magnitude always produces one color,
-// independently of which alloy is selected. No hypothetical added damage.
-const MODE2_COLOR_GAMMA=0.70;
-function materialSeverity(rate,key=material.value){
- if(isResearch()){
-  const bounds=researchRateRange();
-  return Math.pow(clamp01((rate-bounds.min)/Math.max(1e-12,bounds.max-bounds.min)),0.55);
+function faceColors(mesh){
+ const name=mesh.userData.part,geo=mesh.geometry;
+ const total=geo.attributes.position.count/3;
+ const colors=new Float32Array(total*9);
+ const isWallUnsupported=geo&&$('field').value==='wall'&&!name.startsWith('chamber_')&&isBench();
+ const basic=paperSeverity(rate());
+ for(let i=0;i<total;i++){
+  const c=isWallUnsupported?unknown:isBench()?severityColor(basic):severityColor(Math.pow(clamp(expoIndex(mesh,i)/100),.9));
+  for(let k=0;k<3;k++){
+   const o=i*9+k*3;colors[o]=c.r;colors[o+1]=c.g;colors[o+2]=c.b;
+  }
  }
- const bounds=mode2FieldRange(),v=fieldValueForColor(rate,key);
- const fraction=field.value==='wall'
-  ?(bounds.max-v)/Math.max(1e-12,bounds.max-bounds.min)
-  :(v-bounds.min)/Math.max(1e-12,bounds.max-bounds.min);
- return Math.pow(clamp01(fraction),MODE2_COLOR_GAMMA);
+ geo.setAttribute('color',new THREE.BufferAttribute(colors,3));
+ mesh.material?.dispose?.();
+ mesh.material=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.86,metalness:.03,side:THREE.DoubleSide});
 }
-function buildNumericalColors(){
- if(!source||!profiles||!benchmarks)return;
- for(const mesh of meshes){
-  const name=mesh.userData.fieldName,info=source.meshes[name];
-  if(!info)continue;
-  const n=info.rate.length,colors=new Float32Array(n*9);
+function buildExposureIndex(){
+ // All geometry enters in world coordinate frame. This is a simple orientation /
+ // elevation inspection heuristic, NOT a hydrodynamic or corrosivity solver.
+ let lowZ=Infinity,highZ=-Infinity;const vec=new THREE.Vector3();
+ state.group.updateMatrixWorld(true);
+ for(const m of state.meshes){
+  const att=m.geometry.attributes.position;
+  for(let i=0;i<att.count;i++){
+   vec.fromBufferAttribute(att,i).applyMatrix4(m.matrixWorld);
+   lowZ=Math.min(lowZ,vec.z);highZ=Math.max(highZ,vec.z);
+  }
+ }
+ const dz=Math.max(1e-6,highZ-lowZ);
+ const a=new THREE.Vector3(),b=new THREE.Vector3(),c=new THREE.Vector3();
+ const v1=new THREE.Vector3(),v2=new THREE.Vector3(),v3=new THREE.Vector3(),normal=new THREE.Vector3(),center=new THREE.Vector3();
+ for(const m of state.meshes){
+  const position=m.geometry.attributes.position,n=Math.floor(position.count/3),vals=new Float32Array(n);
+  const chamber=m.userData.part.startsWith('chamber_');
   for(let i=0;i<n;i++){
-   const r=materialRate(info.rate[i]);
-   const color=field.value==='wall'&&!name.startsWith('chamber_')?dryCol:severityColor(materialSeverity(r));
-   for(let v=0;v<3;v++){
-    const j=i*9+3*v;colors[j]=color.r;colors[j+1]=color.g;colors[j+2]=color.b;
-   }
+   a.fromBufferAttribute(position,i*3).applyMatrix4(m.matrixWorld);
+   b.fromBufferAttribute(position,i*3+1).applyMatrix4(m.matrixWorld);
+   c.fromBufferAttribute(position,i*3+2).applyMatrix4(m.matrixWorld);
+   normal.copy(v1.subVectors(b,a).cross(v2.subVectors(c,a))).normalize();
+   center.copy(a).add(b).add(c).multiplyScalar(1/3);
+   const up=Math.max(0,normal.z),lower=1-clamp((center.z-lowZ)/dz);
+   // 25 base, up-facing salt deposition proxy and low-elevation attention.
+   // The rotating magazine may move these zones; no surface actually verified wet.
+   vals[i]=25+45*up+(chamber?30:15)*lower;
   }
-  mesh.geometry.setAttribute('color',new THREE.BufferAttribute(colors,3));
-  mesh.material?.dispose?.();
-  mesh.material=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.86,metalness:.04,side:THREE.DoubleSide});
+  m.userData.expo=vals;
  }
 }
-function updateModeUI(){
- if(!benchmarks)return;
- const published=isResearch(),study=benchmark();
- $('sourConditionChips').hidden=false;
- $('researchInfo').hidden=false;
- $('comparisonTitle').textContent=published
-  ?'Published uniform corrosion benchmark · all ten bodies'
-  :'Literature-based projected corrosion · hypothetical hotspots';
- $('baseRateHeader').textContent='Paper-based reference rate (mm/y)';
- $('comparisonNote').textContent='Each candidate uses ONE paper-linked or derived rate, but experiments used DIFFERENT temperatures, electrolytes, H₂S exposure and sometimes grades. Values cannot rank these five alloys under one sour-service condition. Mode 2 hotspot multipliers are additionally hypothetical.';
- $('modeNotice').innerHTML=published
-  ?'<b>Mode 1 — Published or derived coupon benchmarks.</b> The selected paper rate is applied uniformly to all CAD faces, with no invented pitting pattern. The original study and its conditions appear below. Study conditions differ between materials; corrosion data do not establish sour-service qualification.'
-  :'<b>Mode 2 — Literature baseline with illustrative localized attack.</b> No arbitrary low/central/high rates: each candidate now uses ONE paper-based corrosion-rate input. Hypothetical hotspots are still mapped using a 316L pit-rate factor of 2.4/0.74 (from separate 316L experiments). For the other four material candidates, this factor is NOT experimentally validated. Different papers used DIFFERENT environments, so Mode 2 is NOT a five-alloy 3-bar H₂S experiment.';
- $('researchDetails').innerHTML='<b>Candidate:</b> '+study.label+
-  '<br><b>Grade actually tested:</b> '+study.testedGrade+
-  '<br><b>Original numerical result:</b> '+study.originalReportedValue+
-  '<br><b>Single input corrosion rate:</b> '+fmt(study.rate_mm_per_year,6)+' mm/year'+
-  '<br><b>Data status:</b> '+study.rateType.replaceAll('_',' ').toLowerCase()+
-  '<br><b>Calculation / extraction:</b> '+study.method+
-  '<br><b>Test conditions:</b> '+study.environment+
-  '<br><b>Limitations:</b> '+study.limitation+
-  (!published?'<br><b>Mode 2 additional assumption:</b> Pit multiplier 2.4/0.74 applied to demonstrative hotspots, even though this ratio is from 316L and not verified for the selected alloy.':'');
- $('researchPaper').href=study.sourceUrl;
- $('researchPaper').textContent='Open exact supporting paper ↗';
+function applyVisibility(){
+ const focus=$('part').value;
+ for(const m of state.meshes){
+  const name=m.userData.part;
+  m.visible=focus==='all'?(name!=='front_end_plate'||$('front').checked):name===focus;
+ }
 }
-function updateMetrics(){
- if(!source||!profiles||!benchmarks)return;
- const published=isResearch(),selected=part.value,parts=Object.entries(source.partStats).filter(([n])=>selected==='all'||n===selected);
- const rateMin=Math.min(...parts.map(([_,s])=>materialRate(s.rateMin)));
- const rateMax=Math.max(...parts.map(([_,s])=>materialRate(s.rateMax)));
- const isChamber=selected==='all'||selected.startsWith('chamber_');
- const lower=field.value==='wall'?(isChamber?Math.max(0,10-integrateLoss(rateMax)-integrateLoss(uniformRate())):null):displayValue(rateMin);
- const upper=field.value==='wall'?(isChamber?Math.max(0,10-integrateLoss(rateMin)-integrateLoss(uniformRate())):null):displayValue(rateMax);
- const format=v=>v===null?'N/A':fmt(v,precisionForField()),unit=unitForField();
- $('minValue').textContent=format(lower);$('maxValue').textContent=format(upper);
- $('minUnit').textContent=field.value==='wall'&&!isChamber?'not evaluated':unit;
- $('maxUnit').textContent=field.value==='wall'&&!isChamber?'not evaluated':unit;
- const rates=parts.filter(([n])=>n.startsWith('chamber_')).map(([_,s])=>materialRate(s.rateMax));
- $('minWall').textContent=rates.length?fmt(Math.max(0,10-integrateLoss(Math.max(...rates))-integrateLoss(uniformRate())),4):'N/A';
- $('maxLoss').textContent=fmt(integrateLoss(rateMax),4);
- const range=published?researchRateRange():mode2FieldRange();
- let lo,hi;
- if(published){
-  const project=(r)=>field.value==='rate'?r:field.value==='loss'?integrateLoss(r):
-   Math.max(0,10-2*integrateLoss(r));
-  lo=project(range.min);hi=project(range.max);
+function colorMeshes(){
+ if(!state.source||!state.meshes.length)return;
+ for(const mesh of state.meshes)faceColors(mesh);
+ applyVisibility();
+}
+function marker(el,label,at){el.style.left=at.toFixed(5)+'%';el.textContent=label}
+function updateGradient(){
+ const bar=$('gradientBar'),arr=[];
+ for(let i=0;i<=24;i++){const f=i/24;arr.push(severityColor(isBench()?Math.pow(f,.78):Math.pow(f,.9)).getStyle()+' '+(f*100).toFixed(2)+'%')}
+ bar.style.background='linear-gradient(90deg,'+arr.join(',')+')';
+ if(isBench()){
+  const bound=fieldRange(),x=fieldMetric(rate()),f=$('field').value==='wall'?
+   (bound.max-x)/Math.max(1e-12,bound.max-bound.min):
+   (x-bound.min)/Math.max(1e-12,bound.max-bound.min);
+  const p=100*clamp(f);
+  $('minTick').style.left=p.toFixed(4)+'%';
+  $('maxTick').style.left=p.toFixed(4)+'%';
+  $('minTick').style.display='block';$('maxTick').style.display='none';
+  $('minTickLabel').style.left='clamp(49px,'+p.toFixed(4)+'%,calc(100% - 49px))';
+  $('minTickLabel').textContent='Selected: '+fmt(x,5)+' '+valueUnit();
+  $('minTickLabel').style.display='block';
+  $('maxTickLabel').style.display='none';
+  $('legendTitle').textContent='Common scale · published/derived rates';
+  $('legendSubtitle').textContent='Single uniform value for each candidate · same color = same numerical value, but test environments differ';
+  $('color-caption').textContent='One marked value for the selected material. All CAD faces share that coupon-derived baseline; this is not a spatial pit forecast.';
  }else{
-  lo=field.value==='wall'?range.max:range.min;
-  hi=field.value==='wall'?range.min:range.max;
+  $('minTick').style.display='none';$('maxTick').style.display='none';
+  $('minTickLabel').style.display='none';$('maxTickLabel').style.display='none';
+  $('legendTitle').textContent='Wetting attention · qualitative 0–100 index';
+  $('legendSubtitle').textContent='Cyan = low relative attention · orange/red = surface orientation / low-position flags';
+  $('color-caption').textContent='25–100 illustrative inspection-priority index. Same scale across all materials; it does NOT mean material-specific corrosion penetration. Local values from CAD orientation only.';
  }
- // In remaining-wall mode, left/cool corresponds to thicker wall.
- $('legendMin').textContent=fmt(lo,5)+' '+unit;
- $('legendMax').textContent=fmt(hi,5)+' '+unit;
- $('colorTitle').textContent=published
-  ?'Color scale · five published study rates'
-  :'Color scale · fixed across all five materials';
- $('colorModeLabel').textContent=published?'Research contrast':'Fixed scale';
- $('colorScope').textContent=profile().label+' · '+(published?'Uniform study benchmark':'Shared absolute scale · study-derived rate + illustrative hotspots')+' · '+currentDays()+' days';
- $('legendExplanation').textContent=published
-  ?'Mode 1: uniform color per material based on its published/derived benchmark. Different papers used DIFFERENT conditions, so colors are not a sour-service ranking.'
-  :field.value==='wall'
-   ?'Mode 2: ticks mark maximum/minimum remaining chamber wall using one shared scale. Rates come from different papers; the localized corrosion pattern is only a what-if.'
-   :'Mode 2: vertical ticks mark the selected material’s minimum/maximum '+(field.value==='rate'?'local rates':'metal loss')+' on a shared five-material color scale. Paper rates come from unmatched test conditions; only the hotspot factor is assumed.';
- const gradient=[],bar=document.querySelector('.grad');
- for(let k=0;k<=24;k++){
-  const fraction=k/24;
-  const severity=published?Math.pow(fraction,0.55):Math.pow(fraction,MODE2_COLOR_GAMMA);
-  gradient.push(severityColor(severity).getStyle()+' '+(100*fraction).toFixed(2)+'%');
- }
- bar.style.background='linear-gradient(90deg,'+gradient.join(',')+')';
- // Mode 2: show ONLY the selected material's two numeric extrema, with their
- // ticks positioned on the fixed absolute gradient. No global endpoint labels.
- $('legendNumbers').hidden=!published;
- bar.classList.toggle('marked',!published);
- const tickMin=$('rangeMinTick'),tickMax=$('rangeMaxTick');
- const labelMin=$('rangeMinLabel'),labelMax=$('rangeMaxLabel');
- for(const el of [tickMin,tickMax,labelMin,labelMax])el.hidden=published;
- if(!published){
-  const wallUnsupported=field.value==='wall'&&!isChamber;
-  for(const el of [tickMin,tickMax,labelMin,labelMax])el.hidden=wallUnsupported;
-  if(!wallUnsupported){
-   // The actual color gradient is drawn from f=0 to f=1; gamma acts on the
-   // color, not the tick location. Use the raw normalized data position.
-   const normalizedPosition=(localRate)=>{
-    const bounds=mode2FieldRange(),v=fieldValueForColor(localRate);
-    const fraction=field.value==='wall'
-     ?(bounds.max-v)/Math.max(1e-12,bounds.max-bounds.min)
-     :(v-bounds.min)/Math.max(1e-12,bounds.max-bounds.min);
-    return 100*clamp01(fraction);
-   };
-   const minPos=normalizedPosition(rateMin),maxPos=normalizedPosition(rateMax);
-   tickMin.style.left=minPos.toFixed(5)+'%';
-   tickMax.style.left=maxPos.toFixed(5)+'%';
-   // Keep each label within the full gradient width on narrow screens;
-   // stagger above/below the bar so nearby min/max marks never overlap.
-   labelMin.style.left='clamp(47px, '+minPos.toFixed(5)+'%, calc(100% - 47px))';
-   labelMax.style.left='clamp(47px, '+maxPos.toFixed(5)+'%, calc(100% - 47px))';
-   const minVal=field.value==='wall'?upper:displayValue(rateMin);
-   const maxVal=field.value==='wall'?lower:displayValue(rateMax);
-   const minText=(field.value==='wall'?'Max wall: ':'Min: ')+fmt(minVal,5)+' '+unit;
-   const maxText=(field.value==='wall'?'Min wall: ':'Max: ')+fmt(maxVal,5)+' '+unit;
-   labelMin.textContent=minText;labelMax.textContent=maxText;
-   tickMin.title=minText;tickMax.title=maxText;
+}
+function updateSource(){
+ const m=material(),html='<div class="point"><b>Actually tested:</b> '+m.testedGrade+'</div>'+
+ '<div class="point"><b>Published quantity:</b> '+m.reported+'</div>'+
+ '<div class="point"><b>Rate used:</b> '+fmt(m.rate_mm_per_year,6)+' mm/year</div>'+
+ '<div class="point"><b>Method:</b> '+m.methodCategory+'</div>'+
+ '<div class="point"><b>Test condition:</b> '+m.test+'</div>'+
+ '<div class="point"><b>Evidence caveat:</b> '+m.warning+'</div>';
+ $('paperInfo').innerHTML=html;$('paperLink').href=m.url;
+}
+function getShownFaces(){
+ return state.meshes.filter(m=>m.visible);
+}
+function updateStats(){
+ const m=material(),benchmark=isBench();
+ $('k1label').textContent=benchmark?'Literature reference rate':'Surface exposure scenario';
+ $('k1').textContent=benchmark?fmt(rate(),5):'Marine';
+ $('k1unit').textContent=benchmark?'mm/year · specific paper':'Airborne salt / rain / condensation';
+ $('k2label').textContent=benchmark?'One-face uniform loss':'Attention index · CAD mesh';
+ $('k2').textContent=benchmark?fmt(loss(rate()),6):'25–100';
+ $('k2unit').textContent=benchmark?'mm · '+days()+'-day what-if':'qualitative · dimensionless';
+ $('k3label').textContent=benchmark?'Illustrative chamber wall':'Surface exposure caveat';
+ $('k3').textContent=benchmark?fmt(singleSideWall(rate()),5):'Not FEA';
+ $('k3unit').textContent=benchmark?'mm · 10mm minus one exposed face':'orientation proxy · not pit depth';
+ $('k4label').textContent='Triangulated exposure mesh';
+ $('k4').textContent='27.293';
+ $('k4unit').textContent='m² · full ten-body CAD surface';
+ $('viewBadge').textContent=benchmark?'PUBLISHED / DERIVED UNIFORM RECESSION':'QUALITATIVE MARINE EXPOSURE MAP';
+ $('interpretation').textContent=benchmark
+  ?'The five rates are taken from DIFFERENT non-H2S chloride or seawater test methods. The 3D drum uses a single uniform-equivalent rate per selected candidate; it is only a numerical visualization of r × t/365. 1020 has a measured 336-hour weight-loss rate; the aluminum numbers come from Faraday conversions; 304/316L rates are electrochemical. 316L is a proxy for 316. Even the 7-day illustration is not a matched offshore experiment. Actual material selection also requires pitting/crevice, coating, galvanic and mechanical evidence.'
+  :'The red/orange zones are potential inspection priorities inferred ONLY from triangle orientation and relative height in the shown drum pose. They are NOT predicted corrosion rates, condensation or actual trapped-water volumes. Since the drum rotates and exposure depends on shelter and drainage, the pattern can change in service. Use it to propose seals, drainage, washing, coatings and access for inspection. Corrosion-resistance ranking from this map is invalid.';
+ updateSource();updateGradient();updateBars();
+ if(state.hasPick&&probeData)showProbe(probeData.mesh,probeData.faceIndex,probeData.point);
+}
+function updateBars(){
+ const root=$('materialBars');root.replaceChildren();
+ const max=maxBase(),items=Object.entries(state.source.materials);
+ const shown=isBench();
+ $('resultsTitle').textContent=shown?'Material literature-rate comparison':'Marine design inspection priorities';
+ $('resultsBadge').textContent=shown?'Different experimental conditions':'Inspection priorities · no measured rates';
+ $('barNote').textContent=shown
+  ?'Bar magnitude = selected publication or derived uniform-equivalent rate (mm/year). SAME visual scale across studies, but not equivalent experimental conditions or a validated offshore ranking. Click any bar to switch CAD grade.'
+  :'These are DESIGN tasks, not experimentally derived scores. The 3D exposure index is independent of alloy and only identifies geometric faces for closer inspection.';
+ if(shown){
+  for(const [k,m] of items){
+   const btn=document.createElement('button');btn.type='button';
+   btn.className='bar-item'+(state.material===k?' selected':'');
+   btn.innerHTML='<span class="bar-name">'+m.label+'</span><span class="bar-track"><span class="bar-fill" style="display:block;width:'+Math.max(.4,100*m.rate_mm_per_year/max)+'%"></span></span><span class="bar-value">'+fmt(m.rate_mm_per_year,5)+'</span>';
+   btn.title=m.source+' | '+m.test;btn.addEventListener('click',()=>{$('material').value=k;changeMaterial()});root.appendChild(btn);
+  }
+ }else{
+  const rows=[
+   ['Salt deposition on upward-facing surfaces','Reduce horizontal salt-catching ledges; inspect after spray'],
+   ['Low-elevation chambers / drainage','Verify orientation and provide drainage paths'],
+   ['Interfaces, seals and crevices','Assess crevice chemistry and fastener access'],
+   ['Dissimilar-metal attachments','Check galvanic isolation with actual fasteners'],
+   ['Coated carbon-steel components','Develop ISO 12944 offshore coating specification']];
+  for(const [label,desc] of rows){
+   const row=document.createElement('div');row.className='rulebox';
+   row.innerHTML='<strong>'+label+'</strong><div class="tiny">'+desc+'</div>';root.appendChild(row);
   }
  }
- $('activefield').textContent=(field.value==='rate'?'Assigned corrosion rate':field.value==='loss'?'Calculated metal loss':'Remaining chamber wall')+' · '+unit;
- $('durationLabel').textContent='Exposure: '+currentDays()+' days · '+(published?'paper-based uniform benchmark':'paper-based baseline, hypothetical spatial multiplier');
- const body=$('chamberrows');body.innerHTML='';
- for(const [name,s] of Object.entries(source.partStats)){
-  const chamber=name.startsWith('chamber_'),rlo=materialRate(s.rateMin),rhi=materialRate(s.rateMax),tr=document.createElement('tr');
-  if(selected===name)tr.classList.add('active');
-  tr.innerHTML=`<td>${s.label||name.replaceAll('_',' ')}</td><td>${fmt(integrateLoss(rlo),5)}</td><td>${fmt(integrateLoss(rhi),5)}</td><td>${chamber?fmt(Math.max(0,10-integrateLoss(rhi)-integrateLoss(uniformRate())),5):'N/A'}</td><td>${fmt(s.wetArea_m2,3)}</td>`;
-  tr.addEventListener('click',()=>{part.value=part.value===name?'all':name;updateAll()});body.appendChild(tr);
- }
- const compare=$('materialRows');compare.innerHTML='';
- for(const [key,p] of Object.entries(profiles.materials)){
-  const r=uniformRate(key),max=published?r:r*PITTING_SENSITIVITY,tr=document.createElement('tr');
-  if(key===material.value)tr.classList.add('active');
-  const midRate=published?r:r*(1+(PITTING_SENSITIVITY-1)*0.4),swatch=severityColor(materialSeverity(midRate,key)).getStyle();
-  tr.innerHTML=`<td><span class="material-swatch" style="background:${swatch}"></span>${p.label}</td><td>${fmt(r,5)}</td><td>${fmt(integrateLoss(r),5)}</td><td>${fmt(integrateLoss(max),5)}</td><td>${fmt(Math.max(0,10-integrateLoss(max)-integrateLoss(r)),5)}</td>`;
-  tr.title=benchmark(key).environment+' | '+benchmark(key).rateType+' | '+benchmark(key).limitation;
-  tr.addEventListener('click',()=>{material.value=key;updateModeUI();loadModel()});compare.appendChild(tr);
- }
- $('compareCase').textContent=(published?'Uniform benchmarks':'Published baseline + illustrative hotspots')+' · '+currentDays()+' days';
- if(hasPick)showProbe(pickName,pickFace,pickPosition);
- status.textContent=published
-  ?'Mode 1 · '+benchmark().paperValue+' ('+benchmark().testedGrade+'); equivalent rate '+fmt(uniformRate(),5)+' mm/year. Research environment DIFFERENT for each material. All '+source.meshTriangleCount.toLocaleString()+' faces assume uniform exposure.'
-  :'Mode 2 · '+profile().label+' · research-derived baseline '+fmt(uniformRate(),5)+' mm/year from its own paper; hypothetical localized factor. Cross-material study conditions differ.';
 }
-function showProbe(name,faceIndex,point){
- if(!source||!profiles||!benchmarks||!name||faceIndex===null)return;
- const info=source.meshes[name];if(!info||faceIndex>=info.rate.length)return;
- const r=triangleRate(name,faceIndex),o=fieldsForRate(r),isChamber=name.startsWith('chamber_');
- const xyz=point?`${fmt(point.x,0)}, ${fmt(point.y,0)}, ${fmt(point.z,0)}`:'—';
- const published=isResearch();
- probe.innerHTML=`<b>Mode:</b> ${published?'1 · literature benchmark':'2 · sour sensitivity'}<br><b>Component:</b> ${name.replaceAll('_',' ')}<br><b>Triangle:</b> ${faceIndex.toLocaleString()}<br><b>Position:</b> ${xyz} mm<br><b>Selected material:</b> ${profile().label}<br><b>Assigned local rate:</b> ${fmt(r,5)} mm/year<br><b>Calculated loss:</b> ${fmt(o.loss,6)} mm<br><b>Nominal remaining chamber wall (two sides):</b> ${isChamber?fmt(o.wall,6)+' mm':'N/A'}<br><span class="muted">${published?'Uniform rate from a published coupon study of DIFFERENT conditions, not measured here.':'Hypothetical localized intensity: '+fmt(100*hotspot(info.rate[faceIndex]),1)+'%; not a predicted pit location.'}</span>`;
+function showProbe(mesh,i,point){
+ if(!mesh||i===null)return;
+ const part=mesh.userData.part,xyz=point?fmt(point.x,0)+', '+fmt(point.y,0)+', '+fmt(point.z,0):'—';
+ const val=isBench()?( $('field').value==='wall'&&!part.startsWith('chamber_')?'Wall N/A':fmt(fieldMetric(rate()),6)+' '+valueUnit()):fmt(expoIndex(mesh,i),1)+' / 100';
+ $('probe').innerHTML='<b>Component:</b> '+part.replaceAll('_',' ')+'<br><b>Mesh triangle:</b> '+i+'<br><b>CAD world point:</b> '+xyz+' mm<br><b>Mapped value:</b> '+val+'<br><b>Interpretation:</b> '+(isBench()?'Uniform literature reference; not measured on this CAD':'Geometry-derived attention index; not corrosion rate.');
 }
-function updateAll(){updateMaterialVisibility();updateMetrics();}
-function setSize(){const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return;renderer.setSize(rect.width,rect.height,false);camera.aspect=rect.width/rect.height;camera.updateProjectionMatrix();}
-new ResizeObserver(setSize).observe(canvas);
+function updateMode(next){
+ state.mode=next;$('modeBenchmark').classList.toggle('active',isBench());$('modeExposure').classList.toggle('active',!isBench());
+ $('timeControl').classList.toggle('hidden',!isBench());$('fieldControl').classList.toggle('hidden',!isBench());
+ $('paperHeading').textContent=isBench()?'Supporting paper · selected material':'Selected material · chloride study context';
+ colorMeshes();updateStats();
+}
+function selectSize(){
+ const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return;
+ renderer.setSize(rect.width,rect.height,false);camera.aspect=rect.width/rect.height;camera.updateProjectionMatrix();
+}
+new ResizeObserver(selectSize).observe(canvas);
 const loader=new GLTFLoader();
-async function loadModel(){const serial=++objectSequence;
- loading.classList.remove('hidden');loading.textContent='Loading 3D geometry…';
- const slug=material.value;
- const paths=[`./drum_${slug}_SOUR_REFERENCE.glb?v=2`,`./models/drum_${slug}_SOUR_REFERENCE.glb?v=2`];
+async function loadGeometry(){
+ const count=++state.serial;const slug=state.material;
+ $('loading').textContent='Loading 3D CAD model for '+material().label+'…';$('loading').classList.remove('hidden');
+ const paths=['./drum_'+slug+'_SOUR_REFERENCE.glb?v=2','./models/drum_'+slug+'_SOUR_REFERENCE.glb?v=2'];
  try{
-  let gltf=null,lastLoadError=null;for(const path of paths){try{gltf=await loader.loadAsync(path);break}catch(err){lastLoadError=err}} if(!gltf)throw Error('GLB not found in repository root or models/: '+(lastLoadError?.message||''));if(serial!==objectSequence)return;
-  if(group){scene.remove(group);group.traverse(m=>{if(m.isMesh){m.geometry?.dispose?.();m.material?.dispose?.()}})}
-  group=gltf.scene;meshes=[];
-  group.traverse(m=>{if(!m.isMesh)return;
-   let n=m.name; // trimesh GLB nodes carry source part names
-   if(!source.meshes[n]&&m.parent?.name&&source.meshes[m.parent.name])n=m.parent.name;
-   if(!source.meshes[n])throw Error('Could not link 3D mesh '+m.name+' to numerical samples');
-   m.userData.fieldName=n;
-   if(m.geometry.index)m.geometry=m.geometry.toNonIndexed();
-   const fc=m.geometry.attributes.position.count/3;
-   if(fc!==source.meshes[n].rate.length)throw Error(`Triangle count mismatch for ${n}: ${fc}`);
-   m.frustumCulled=false;meshes.push(m);
+  let gltf=null,lastErr=null;
+  for(const path of paths){try{gltf=await loader.loadAsync(path);break}catch(err){lastErr=err}}
+  if(!gltf)throw Error('3D GLB asset could not be loaded: '+String(lastErr));
+  if(count!==state.serial)return;
+  if(state.group){scene.remove(state.group);state.group.traverse(x=>{if(x.isMesh){x.geometry.dispose();x.material?.dispose?.()}})}
+  state.group=gltf.scene;state.meshes=[];state.group.updateMatrixWorld(true);
+  state.group.traverse(mesh=>{
+   if(!mesh.isMesh)return;
+   let name=mesh.name;if(!state.geom.meshes[name]&&mesh.parent?.name&&state.geom.meshes[mesh.parent.name])name=mesh.parent.name;
+   if(!state.geom.meshes[name])throw Error('CAD part name not found in source geometry: '+mesh.name);
+   if(mesh.geometry.index)mesh.geometry=mesh.geometry.toNonIndexed();
+   const count3=mesh.geometry.attributes.position.count/3;
+   if(count3!==state.geom.meshes[name].rate.length)throw Error('CAD triangle count mismatch for '+name);
+   mesh.userData.part=name;mesh.frustumCulled=false;state.meshes.push(mesh);
   });
-  if(meshes.length===0)throw Error('GLB loaded without a recognized 3D mesh');
-  scene.add(group);buildNumericalColors();updateAll();
-  loading.classList.add('hidden');
- }catch(err){loading.textContent='Could not load geometry or numeric field: '+err.message;console.error(err);}
+  if(!state.meshes.length)throw Error('No part meshes were found in CAD model');
+  buildExposureIndex();scene.add(state.group);colorMeshes();updateStats();
+  state.hasPick=false;probeData=null;$('probe').textContent='Click any visible CAD surface for a reading.';
+  $('loading').classList.add('hidden');
+ }catch(err){$('loading').textContent='Model error: '+err.message;console.error(err)}
+}
+function changeMaterial(){
+ state.material=$('material').value;
+ updateSource();updateBars();loadGeometry();
 }
 (async()=>{try{
- let resp=null,lastDataError='';for(const dataPath of ['./face_fields.json?v=3','./data/face_fields.json?v=3']){try{const r=await fetch(dataPath,{cache:'no-store'});if(r.ok){resp=r;break}lastDataError=dataPath+': HTTP '+r.status}catch(e){lastDataError=e.message}} if(!resp)throw Error('Could not load numerical data from root or data/. '+lastDataError);
- source=await resp.json();
- const q=await fetch('./literature_inputs_v6.json?v=6',{cache:'no-store'});
- if(!q.ok)throw Error('literature_inputs_v6.json missing: HTTP '+q.status);
- const dataset=await q.json();benchmarks={materials:dataset.alloys,method:dataset.method};
- profiles={materials:dataset.alloys};
- updateModeUI();await loadModel();
- }catch(err){loading.textContent='Numerical dataset failed to load. '+err.message;console.error(err);}
+ const [drum,study]=await Promise.all([fetch('./face_fields.json?v=3',{cache:'no-store'}),fetch('./marine_evidence_v7.json?v=7',{cache:'no-store'})]);
+ if(!drum.ok||!study.ok)throw Error('Could not load CAD metadata or marine_evidence_v7.json');
+ state.geom=await drum.json();const full=await study.json();state.source=full;
+ await loadGeometry();
+ }catch(e){$('loading').textContent='Could not initialize marine assessment: '+e.message;console.error(e)}
 })();
-studyMode.addEventListener('change',()=>{if(!benchmarks)return;updateModeUI();buildNumericalColors();updateMetrics();});
-material.addEventListener('change',()=>{if(!benchmarks)return;updateModeUI();loadModel()});
-part.addEventListener('change',updateAll);front.addEventListener('change',updateAll);
-field.addEventListener('change',()=>{buildNumericalColors();updateMetrics()});days.addEventListener('change',()=>{buildNumericalColors();updateMetrics()});
-$('reset').addEventListener('click',()=>{camera.position.copy(originalPos);controls.target.copy(target);controls.update()});
-canvas.addEventListener('pointerdown',e=>{dragging={x:e.clientX,y:e.clientY}});
-canvas.addEventListener('pointerup',e=>{if(!dragging||Math.hypot(e.clientX-dragging.x,e.clientY-dragging.y)>6){dragging=null;return}dragging=null;
- const r=canvas.getBoundingClientRect();pointer.x=((e.clientX-r.left)/r.width)*2-1;pointer.y=-((e.clientY-r.top)/r.height)*2+1;
- raycaster.setFromCamera(pointer,camera);const intersects=raycaster.intersectObjects(meshes.filter(m=>m.visible),false);
- if(intersects.length){const h=intersects[0];hasPick=true;pickName=h.object.userData.fieldName;pickFace=h.faceIndex;pickPosition=h.point.clone();showProbe(pickName,pickFace,pickPosition);}
+$('modeBenchmark').addEventListener('click',()=>updateMode('benchmark'));
+$('modeExposure').addEventListener('click',()=>updateMode('exposure'));
+$('material').addEventListener('change',changeMaterial);
+$('days').addEventListener('change',()=>{colorMeshes();updateStats()});
+$('field').addEventListener('change',()=>{colorMeshes();updateStats()});
+$('part').addEventListener('change',()=>{applyVisibility();updateStats()});
+$('front').addEventListener('change',applyVisibility);
+$('reset').addEventListener('click',()=>{camera.position.copy(originalCam);controls.target.copy(target);controls.update()});
+$('viewTop').addEventListener('click',()=>{camera.position.set(400,0,2800);controls.target.copy(target);controls.update()});
+$('catC5').addEventListener('click',()=>changeCategory('C5'));
+$('catCX').addEventListener('click',()=>changeCategory('CX'));
+function changeCategory(value){
+ state.category=value;$('catC5').classList.toggle('active',value==='C5');$('catCX').classList.toggle('active',value==='CX');
+ $('catName').textContent=value+' · Reference scenario';$('catRange').textContent=value==='C5'?'0.08–0.20':'0.20–0.70';
+}
+$('capture').addEventListener('click',()=>{
+ if(!state.meshes.length)return;renderer.render(scene,camera);
+ const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='Offshore_Drum_'+state.mode+'_'+state.material+'.png';a.click();
 });
 $('export').addEventListener('click',()=>{
- if(!source||!profiles||!benchmarks)return;
- const published=isResearch();
- const rows=[['analysis_mode','material_candidate','source_tested_grade','rate_source_type','component','days','local_min_rate_mm_per_year','local_max_rate_mm_per_year','min_loss_mm','max_loss_mm','min_remaining_chamber_wall_mm_or_NA','exposed_area_m2','paper_URL','study_environment','scientific_limitation']];
- for(const [key,p] of Object.entries(profiles.materials)){
-  const ref=benchmark(key);
-  for(const [name,s] of Object.entries(source.partStats)){
-   const lo=materialRate(s.rateMin,key),hi=materialRate(s.rateMax,key),outer=uniformRate(key);
-   rows.push([published?'MODE_1_PAPER_UNIFORM':'MODE_2_PAPER_BASELINE_ILLUSTRATIVE_HOTSPOTS',p.label,ref.testedGrade,ref.rateType,name,currentDays(),lo,hi,integrateLoss(lo),integrateLoss(hi),name.startsWith('chamber_')?Math.max(0,10-integrateLoss(hi)-integrateLoss(outer)):'N/A',s.wetArea_m2,ref.sourceUrl,ref.environment,ref.limitation+(published?'':' | HOTSPOT FACTOR IS UNVALIDATED FOR MOST ALLOYS')]);
-  }
+ if(!state.source)return;
+ const out=[['mode','candidate','specimen_grade','published_or_derived_uniform_rate_mm_per_year','rate_type','source_url','test_environment','study_method','days','uniform_recession_mm','illustrative_one_face_remaining_10mm_wall','interpretation']];
+ for(const m of Object.values(state.source.materials)){
+  out.push([state.mode,m.label,m.testedGrade,m.rate_mm_per_year,m.methodCategory,m.url,m.test,m.method,days(),loss(m.rate_mm_per_year),Math.max(0,10-loss(m.rate_mm_per_year)),'Different laboratory conditions; constant-rate transfer is NOT offshore performance prediction; inspection index is qualitative']);
  }
- const csv=rows.map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\n');
- const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
- const link=document.createElement('a');link.href=url;link.download='Drum_'+(published?'Mode1_PublishedBenchmark':'Mode2_LiteratureBasedSpatialWhatIf')+'_'+currentDays()+'days.csv';
- document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
+ const csv=out.map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\n');
+ const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='Offshore_Marine_Evidence_v7.csv';a.click();URL.revokeObjectURL(url);
 });
-
-function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();
-</script></body></html>
+canvas.addEventListener('pointerdown',e=>{downPt={x:e.clientX,y:e.clientY}});
+canvas.addEventListener('pointerup',e=>{
+ if(!downPt||Math.hypot(e.clientX-downPt.x,e.clientY-downPt.y)>6){downPt=null;return}downPt=null;
+ const rect=canvas.getBoundingClientRect();
+ pickPointer.set((e.clientX-rect.left)/rect.width*2-1,-((e.clientY-rect.top)/rect.height*2-1));
+ pickRay.setFromCamera(pickPointer,camera);
+ const hits=pickRay.intersectObjects(getShownFaces(),false);
+ if(hits.length){probeData={mesh:hits[0].object,faceIndex:hits[0].faceIndex,point:hits[0].point.clone()};state.hasPick=true;showProbe(probeData.mesh,probeData.faceIndex,probeData.point)}
+});
+function loop(){requestAnimationFrame(loop);controls.update();renderer.render(scene,camera)}loop();
+</script>
+</body></html>
