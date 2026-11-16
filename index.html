@@ -177,7 +177,7 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 const $=id=>document.getElementById(id);
-const state={mode:'benchmark',category:'C5',source:null,geom:null,material:'AISI_316',meshes:[],group:null,hasPick:false,serial:0};
+const state={mode:'benchmark',category:'C5',source:null,accumConfig:null,geom:null,material:'AISI_316',meshes:[],group:null,hasPick:false,serial:0};
 const canvas=$('view');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuffer:true,powerPreference:'high-performance'});
 renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.toneMapping=THREE.ACESFilmicToneMapping;
@@ -197,6 +197,17 @@ let downPt=null,probeData=null;
 function clamp(x){return Math.max(0,Math.min(1,x))}
 function fmt(x,d=5){return Number(x).toFixed(d)}
 function isBench(){return state.mode==='benchmark'}
+function isAccum(){return state.mode==='accumulation'}
+function hasRate(){return isBench()||isAccum()}
+function accumFactor(){return Number($('accumMultiplier').value)}
+function upperRate(key=state.material){return rate(key)*accumFactor()}
+function localAccumRate(mesh,i,key=state.material){
+ // Geometry index is an UNVALIDATED attention proxy, not measured wetting.
+ const wetnessFraction=clamp((expoIndex(mesh,i)-25)/75);
+ return rate(key)*(1+(accumFactor()-1)*wetnessFraction);
+}
+function fullGlobalRateMax(){return maxBase()*(isAccum()?accumFactor():1)}
+
 function material(){return state.source.materials[state.material]}
 function rate(key=state.material){return state.source.materials[key].rate_mm_per_year}
 function days(){return Number($('days').value)}
@@ -207,7 +218,7 @@ function severityColor(x){const c=new THREE.Color();const y=clamp(x);return y<=.
 function maxBase(){return Math.max(...Object.values(state.source.materials).map(x=>x.rate_mm_per_year))}
 function fieldMetric(r){const field=$('field').value;return field==='rate'?r:field==='loss'?loss(r):singleSideWall(r)}
 function fieldRange(){
- const max=maxBase();
+ const max=fullGlobalRateMax();
  if($('field').value==='rate')return {min:0,max};
  if($('field').value==='loss')return {min:0,max:loss(max)};
  return {min:singleSideWall(max),max:10};
@@ -226,10 +237,12 @@ function faceColors(mesh){
  const name=mesh.userData.part,geo=mesh.geometry;
  const total=geo.attributes.position.count/3;
  const colors=new Float32Array(total*9);
- const isWallUnsupported=geo&&$('field').value==='wall'&&!name.startsWith('chamber_')&&isBench();
+ const isWallUnsupported=geo&&$('field').value==='wall'&&!name.startsWith('chamber_')&&hasRate();
  const basic=paperSeverity(rate());
  for(let i=0;i<total;i++){
-  const c=isWallUnsupported?unknown:isBench()?severityColor(basic):severityColor(Math.pow(clamp(expoIndex(mesh,i)/100),.9));
+  const c=isWallUnsupported?unknown:isBench()?severityColor(basic):
+   isAccum()?severityColor(paperSeverity(localAccumRate(mesh,i))):
+   severityColor(Math.pow(clamp(expoIndex(mesh,i)/100),.9));
   for(let k=0;k<3;k++){
    const o=i*9+k*3;colors[o]=c.r;colors[o+1]=c.g;colors[o+2]=c.b;
   }
@@ -285,29 +298,45 @@ function colorMeshes(){
 function marker(el,label,at){el.style.left=at.toFixed(5)+'%';el.textContent=label}
 function updateGradient(){
  const bar=$('gradientBar'),arr=[];
- for(let i=0;i<=24;i++){const f=i/24;arr.push(severityColor(isBench()?Math.pow(f,.78):Math.pow(f,.9)).getStyle()+' '+(f*100).toFixed(2)+'%')}
+ for(let i=0;i<=24;i++){
+  const f=i/24;
+  arr.push(severityColor(hasRate()?Math.pow(f,.78):Math.pow(f,.9)).getStyle()+' '+(f*100).toFixed(2)+'%');
+ }
  bar.style.background='linear-gradient(90deg,'+arr.join(',')+')';
+ const put=(element,p)=>{element.style.left='clamp(52px,'+p.toFixed(4)+'%,calc(100% - 52px))'};
  if(isBench()){
-  const bound=fieldRange(),x=fieldMetric(rate()),f=$('field').value==='wall'?
-   (bound.max-x)/Math.max(1e-12,bound.max-bound.min):
-   (x-bound.min)/Math.max(1e-12,bound.max-bound.min);
-  const p=100*clamp(f);
+  const bound=fieldRange(),x=fieldMetric(rate()),fraction=$('field').value==='wall'
+   ?(bound.max-x)/Math.max(1e-12,bound.max-bound.min)
+   :(x-bound.min)/Math.max(1e-12,bound.max-bound.min);
+  const p=100*clamp(fraction);
   $('minTick').style.left=p.toFixed(4)+'%';
-  $('maxTick').style.left=p.toFixed(4)+'%';
   $('minTick').style.display='block';$('maxTick').style.display='none';
-  $('minTickLabel').style.left='clamp(49px,'+p.toFixed(4)+'%,calc(100% - 49px))';
-  $('minTickLabel').textContent='Selected: '+fmt(x,5)+' '+valueUnit();
-  $('minTickLabel').style.display='block';
-  $('maxTickLabel').style.display='none';
+  put($('minTickLabel'),p);$('minTickLabel').textContent='Selected: '+fmt(x,5)+' '+valueUnit();
+  $('minTickLabel').style.display='block';$('maxTickLabel').style.display='none';
   $('legendTitle').textContent='Common scale · published/derived rates';
-  $('legendSubtitle').textContent='Single uniform value for each candidate · same color = same numerical value, but test environments differ';
-  $('color-caption').textContent='One marked value for the selected material. All CAD faces share that coupon-derived baseline; this is not a spatial pit forecast.';
+  $('legendSubtitle').textContent='One measured/converted rate per material; tested environments differ';
+  $('color-caption').textContent='One tick denotes the selected candidate paper benchmark, not a spatial pit rate.';
+ }else if(isAccum()){
+  const bounds=fieldRange(),baseVal=fieldMetric(rate()),upperVal=fieldMetric(upperRate());
+  const project=v=>100*clamp($('field').value==='wall'
+   ?(bounds.max-v)/Math.max(1e-12,bounds.max-bounds.min)
+   :(v-bounds.min)/Math.max(1e-12,bounds.max-bounds.min));
+  const p1=project(baseVal),p2=project(upperVal);
+  $('minTick').style.left=p1.toFixed(4)+'%';$('maxTick').style.left=p2.toFixed(4)+'%';
+  $('minTick').style.display='block';$('maxTick').style.display='block';
+  put($('minTickLabel'),p1);put($('maxTickLabel'),p2);
+  $('minTickLabel').textContent='Paper: '+fmt(baseVal,5)+' '+valueUnit();
+  $('maxTickLabel').textContent='3D ceiling: '+fmt(upperVal,5)+' '+valueUnit();
+  $('minTickLabel').style.display='block';$('maxTickLabel').style.display='block';
+  $('legendTitle').textContent='Shared scale · salt-accumulation design envelope';
+  $('legendSubtitle').textContent='Paper reference + '+accumFactor()+'× hypothetical upper ceiling; same color magnitude across materials';
+  $('color-caption').textContent='Two marks show the selected material’s paper reference and ASSUMED ceiling. A face is mapped between them using an uncalibrated wetting-attention index. This is NOT a measured maximum.';
  }else{
   $('minTick').style.display='none';$('maxTick').style.display='none';
   $('minTickLabel').style.display='none';$('maxTickLabel').style.display='none';
   $('legendTitle').textContent='Wetting attention · qualitative 0–100 index';
   $('legendSubtitle').textContent='Cyan = low relative attention · orange/red = surface orientation / low-position flags';
-  $('color-caption').textContent='25–100 illustrative inspection-priority index. Same scale across all materials; it does NOT mean material-specific corrosion penetration. Local values from CAD orientation only.';
+  $('color-caption').textContent='25–100 qualitative index. Same scale across all materials, not material-specific corrosion penetration.';
  }
 }
 function updateSource(){
@@ -323,65 +352,93 @@ function getShownFaces(){
  return state.meshes.filter(m=>m.visible);
 }
 function updateStats(){
- const m=material(),benchmark=isBench();
- $('k1label').textContent=benchmark?'Literature reference rate':'Surface exposure scenario';
- $('k1').textContent=benchmark?fmt(rate(),5):'Marine';
- $('k1unit').textContent=benchmark?'mm/year · specific paper':'Airborne salt / rain / condensation';
- $('k2label').textContent=benchmark?'One-face uniform loss':'Attention index · CAD mesh';
- $('k2').textContent=benchmark?fmt(loss(rate()),6):'25–100';
- $('k2unit').textContent=benchmark?'mm · '+days()+'-day what-if':'qualitative · dimensionless';
- $('k3label').textContent=benchmark?'Illustrative chamber wall':'Surface exposure caveat';
- $('k3').textContent=benchmark?fmt(singleSideWall(rate()),5):'Not FEA';
- $('k3unit').textContent=benchmark?'mm · 10mm minus one exposed face':'orientation proxy · not pit depth';
- $('k4label').textContent='Triangulated exposure mesh';
- $('k4').textContent='27.293';
- $('k4unit').textContent='m² · full ten-body CAD surface';
- $('viewBadge').textContent=benchmark?'PUBLISHED / DERIVED UNIFORM RECESSION':'QUALITATIVE MARINE EXPOSURE MAP';
- $('interpretation').textContent=benchmark
-  ?'The five rates are taken from DIFFERENT non-H2S chloride or seawater test methods. The 3D drum uses a single uniform-equivalent rate per selected candidate; it is only a numerical visualization of r × t/365. 1020 has a measured 336-hour weight-loss rate; the aluminum numbers come from Faraday conversions; 304/316L rates are electrochemical. 316L is a proxy for 316. Even the 7-day illustration is not a matched offshore experiment. Actual material selection also requires pitting/crevice, coating, galvanic and mechanical evidence.'
-  :'The red/orange zones are potential inspection priorities inferred ONLY from triangle orientation and relative height in the shown drum pose. They are NOT predicted corrosion rates, condensation or actual trapped-water volumes. Since the drum rotates and exposure depends on shelter and drainage, the pattern can change in service. Use it to propose seals, drainage, washing, coatings and access for inspection. Corrosion-resistance ranking from this map is invalid.';
- updateSource();updateGradient();updateBars();
+ const m=material(),benchmark=isBench(),stress=isAccum(),quant=hasRate();
+ $('k1label').textContent=stress?'Literature baseline corrosion rate':benchmark?'Literature reference rate':'Marine atmosphere scenario';
+ $('k1').textContent=quant?fmt(rate(),5):'Marine';
+ $('k1unit').textContent=quant?'mm/year · paper study':'Salt / rain / condensation';
+ $('k2label').textContent=stress?'Assumed '+accumFactor()+'× design ceiling':benchmark?'One-face uniform-equivalent loss':'Marine surface attention index';
+ $('k2').textContent=stress?fmt(upperRate(),5):benchmark?fmt(loss(rate()),6):'25–100';
+ $('k2unit').textContent=stress?'mm/year · not a measured maximum':benchmark?'mm · '+days()+'-day extrapolation':'unitless inspection-attention index';
+ $('k3label').textContent=stress?'Ceiling one-face loss ('+days()+' days)':benchmark?'Illustrative chamber wall':'Exposure model type';
+ $('k3').textContent=stress?fmt(loss(upperRate()),6):benchmark?fmt(singleSideWall(rate()),5):'Qualitative';
+ $('k3unit').textContent=stress?'mm · constant-rate what-if':benchmark?'mm · 10mm minus one side':'not pit depth or corrosion rate';
+ $('k4label').textContent=stress?'Remaining nominal wall (ceiling)': 'Triangulated exposure surface';
+ $('k4').textContent=stress?fmt(singleSideWall(upperRate()),5):'27.293';
+ $('k4unit').textContent=stress?'mm · only hypothetical one-face loss':'m² · all ten original CAD bodies';
+ $('viewBadge').textContent=benchmark?'PUBLISHED / DERIVED UNIFORM RATE':stress?'SALT ACCUMULATION · HYPOTHETICAL UPPER ENVELOPE':'QUALITATIVE MARINE EXPOSURE MAP';
+ $('interpretation').textContent=stress
+  ?'This is a DESIGN STRESS TEST, not an experimentally measured worst-case limit. Each material has its own source-specific baseline from an unmatched chloride/seawater test; the selected '+accumFactor()+'× factor is only an assumed ceiling. The 3D surface field distributes rates between the paper input and the ceiling based on an unvalidated orientation/elevation attention index. The magazine rotates, so the highlighted locations may change. Real pitting can exceed equivalent uniform loss. ISO 9223 does not provide these multipliers; category C5/CX numbers describe first-year corrosion of standard reference metal specimens. A valid maximum must come from matched marine wet/dry exposure and maximum-depth measurements.'
+  :benchmark
+  ?'Each paper rate comes from DIFFERENT non-H2S chloride/seawater test methods. The 3D model represents uniform equivalent loss r × t/365, not actual magazine degradation. Actual engineering selection must also consider pitting, crevices, coatings, galvanic contact and mechanical properties.'
+  :'The highlighted surfaces are qualitative inspection priorities inferred from CAD triangle orientation and elevation, not measured pooling or predicted corrosion. Drum rotation and shielding may reverse these apparent risks; use the map to motivate drainage, washing, seals and accessible inspection.';
+ updateSource();updateGradient();updateBars();updateEnvelopeTable();
  if(state.hasPick&&probeData)showProbe(probeData.mesh,probeData.faceIndex,probeData.point);
+}
+function updateEnvelopeTable(){
+ const body=$('envelopeRows');body.replaceChildren();const factor=accumFactor();
+ $('envelopeBadge').textContent=factor+'× assumed case · NOT a physical maximum';
+ $('envelopeRateHeading').textContent=factor+'× assumed ceiling (mm/year)';
+ $('envelopeLossHeading').textContent=days()+'-day ceiling loss (mm)';
+ for(const [key,m] of Object.entries(state.source.materials)){
+  const tr=document.createElement('tr');
+  if(key===state.material)tr.classList.add('active');
+  const upper=m.rate_mm_per_year*factor;
+  tr.innerHTML='<td>'+m.label+'</td><td>'+fmt(m.rate_mm_per_year,5)+'</td><td class="accum-value">'+fmt(upper,5)+'</td><td>'+fmt(loss(upper),6)+'</td>';
+  tr.title='Hypothetical multiplier, not experimentally validated for '+m.label;
+  tr.addEventListener('click',()=>{$('material').value=key;changeMaterial()});
+  body.appendChild(tr);
+ }
 }
 function updateBars(){
  const root=$('materialBars');root.replaceChildren();
- const max=maxBase(),items=Object.entries(state.source.materials);
- const shown=isBench();
- $('resultsTitle').textContent=shown?'Material literature-rate comparison':'Marine design inspection priorities';
- $('resultsBadge').textContent=shown?'Different experimental conditions':'Inspection priorities · no measured rates';
- $('barNote').textContent=shown
-  ?'Bar magnitude = selected publication or derived uniform-equivalent rate (mm/year). SAME visual scale across studies, but not equivalent experimental conditions or a validated offshore ranking. Click any bar to switch CAD grade.'
-  :'These are DESIGN tasks, not experimentally derived scores. The 3D exposure index is independent of alloy and only identifies geometric faces for closer inspection.';
- if(shown){
-  for(const [k,m] of items){
-   const btn=document.createElement('button');btn.type='button';
-   btn.className='bar-item'+(state.material===k?' selected':'');
-   btn.innerHTML='<span class="bar-name">'+m.label+'</span><span class="bar-track"><span class="bar-fill" style="display:block;width:'+Math.max(.4,100*m.rate_mm_per_year/max)+'%"></span></span><span class="bar-value">'+fmt(m.rate_mm_per_year,5)+'</span>';
-   btn.title=m.source+' | '+m.test;btn.addEventListener('click',()=>{$('material').value=k;changeMaterial()});root.appendChild(btn);
+ const max=maxBase()*(isAccum()?accumFactor():1),items=Object.entries(state.source.materials),quant=hasRate();
+ $('resultsTitle').textContent=isAccum()?'Baseline vs assumed upper rates':quant?'Paper-linked chloride rates':'Marine design inspection priorities';
+ $('resultsBadge').textContent=isAccum()?'Unvalidated '+accumFactor()+'× multiplier':quant?'Different laboratory environments':'Inspection priorities';
+ $('barNote').textContent=isAccum()
+  ?'Thin turquoise portion = published/converted reference; amber extension = '+accumFactor()+'× hypothetical accumulated-wetting ceiling. Both are on one shared rate axis, but no verified material-specific maximum exists.'
+  :quant?'Bars show unmatched published or derived rates in mm/year; not a validated same-environment offshore ranking.'
+  :'Inspect salt-catching ledges, water drainage, seals, galvanic couples and coatings; the 3D field is qualitative.';
+ if(quant){
+  for(const [key,m] of items){
+   const b=m.rate_mm_per_year,up=b*(isAccum()?accumFactor():1);
+   const btn=document.createElement('button');btn.type='button';btn.className='bar-item'+(state.material===key?' selected':'');
+   const bar=isAccum()?
+    '<span class="bar-track" style="position:relative"><span style="position:absolute;left:0;top:0;bottom:0;width:'+100*up/max+'%;background:#e5a65e;border-radius:12px"></span><span style="position:absolute;left:0;top:0;bottom:0;width:'+100*b/max+'%;background:#31b5c5;border-radius:12px"></span></span>'
+    :'<span class="bar-track"><span class="bar-fill" style="display:block;width:'+Math.max(.4,100*b/max)+'%"></span></span>';
+   btn.innerHTML='<span class="bar-name">'+m.label+'</span>'+bar+'<span class="bar-value">'+fmt(up,5)+'</span>';
+   btn.title=m.source+' | Baseline '+fmt(b,5)+' mm/y; assumed ceiling '+fmt(up,5)+' mm/y';
+   btn.addEventListener('click',()=>{$('material').value=key;changeMaterial()});root.appendChild(btn);
   }
  }else{
-  const rows=[
-   ['Salt deposition on upward-facing surfaces','Reduce horizontal salt-catching ledges; inspect after spray'],
-   ['Low-elevation chambers / drainage','Verify orientation and provide drainage paths'],
+  for(const [label,desc] of [
+   ['Salt deposition on upward-facing surfaces','Avoid salt-catching ledges; inspect after spray'],
+   ['Low-elevation chambers / drainage','Verify orientation and drainage over full rotation'],
    ['Interfaces, seals and crevices','Assess crevice chemistry and fastener access'],
-   ['Dissimilar-metal attachments','Check galvanic isolation with actual fasteners'],
-   ['Coated carbon-steel components','Develop ISO 12944 offshore coating specification']];
-  for(const [label,desc] of rows){
-   const row=document.createElement('div');row.className='rulebox';
-   row.innerHTML='<strong>'+label+'</strong><div class="tiny">'+desc+'</div>';root.appendChild(row);
-  }
+   ['Dissimilar-metal attachments','Check electrical isolation with real fastener materials'],
+   ['Coated carbon-steel components','Specify and maintain an offshore coating system']
+  ]){const div=document.createElement('div');div.className='rulebox';div.innerHTML='<strong>'+label+'</strong><div class="tiny">'+desc+'</div>';root.appendChild(div)}
  }
 }
 function showProbe(mesh,i,point){
  if(!mesh||i===null)return;
  const part=mesh.userData.part,xyz=point?fmt(point.x,0)+', '+fmt(point.y,0)+', '+fmt(point.z,0):'—';
- const val=isBench()?( $('field').value==='wall'&&!part.startsWith('chamber_')?'Wall N/A':fmt(fieldMetric(rate()),6)+' '+valueUnit()):fmt(expoIndex(mesh,i),1)+' / 100';
- $('probe').innerHTML='<b>Component:</b> '+part.replaceAll('_',' ')+'<br><b>Mesh triangle:</b> '+i+'<br><b>CAD world point:</b> '+xyz+' mm<br><b>Mapped value:</b> '+val+'<br><b>Interpretation:</b> '+(isBench()?'Uniform literature reference; not measured on this CAD':'Geometry-derived attention index; not corrosion rate.');
+ const val=isBench()
+  ?($('field').value==='wall'&&!part.startsWith('chamber_')?'Wall N/A':fmt(fieldMetric(rate()),6)+' '+valueUnit())
+  :isAccum()
+   ?($('field').value==='wall'&&!part.startsWith('chamber_')?'Wall N/A':fmt(fieldMetric(localAccumRate(mesh,i)),6)+' '+valueUnit())
+   :fmt(expoIndex(mesh,i),1)+' / 100';
+ $('probe').innerHTML='<b>Component:</b> '+part.replaceAll('_',' ')+'<br><b>Triangle:</b> '+i+'<br><b>CAD world point:</b> '+xyz+' mm<br><b>Value:</b> '+val+
+  '<br><b>Interpretation:</b> '+(isAccum()?'Hypothetical wet-salt multiplier '+fmt(localAccumRate(mesh,i)/rate(),3)+'×; actual pit damage unknown':isBench()?'Literature rate uniformly projected on CAD':'Relative geometry attention only; not corrosion rate');
 }
 function updateMode(next){
- state.mode=next;if(!state.source)return;$('modeBenchmark').classList.toggle('active',isBench());$('modeExposure').classList.toggle('active',!isBench());
- $('timeControl').classList.toggle('hidden',!isBench());$('fieldControl').classList.toggle('hidden',!isBench());
- $('paperHeading').textContent=isBench()?'Supporting paper · selected material':'Selected material · chloride study context';
+ state.mode=next;if(!state.source)return;
+ $('modeBenchmark').classList.toggle('active',isBench());
+ $('modeExposure').classList.toggle('active',state.mode==='exposure');
+ $('modeAccum').classList.toggle('active',isAccum());
+ $('timeControl').classList.toggle('hidden',!hasRate());
+ $('fieldControl').classList.toggle('hidden',!hasRate());
+ $('accumControl').classList.toggle('hidden',!isAccum());
+ $('paperHeading').textContent=hasRate()?'Supporting published paper · selected material':'Selected material · chloride study context';
  colorMeshes();updateStats();
 }
 function selectSize(){
