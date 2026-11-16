@@ -1,64 +1,77 @@
-# Revolver drum · Published-material corrosion benchmark viewer (v6.0)
+# Marine atmospheric corrosion review — external revolver magazine (v7.0)
 
-**Live interactive 3D viewer:** https://hammadi-314.github.io/drum-corrosion-simulation/?v=6.0
+**Presentation-ready interactive viewer:** https://hammadi-314.github.io/drum-corrosion-simulation/?v=7.0
 
-## Critical interpretation
+## Correction to the earlier SA9 report
 
-The five corrosion-rate inputs now come from **published experimental results or a clearly documented conversion of a published corrosion current**, rather than arbitrary low/central/high values. The **Low / Central / High dropdown has been removed**. Source conditions vary significantly. **These five values are NOT from a matched five-alloy 60°C, 3 bar H₂S experiment.** No rank of actual sour-service suitability, ISO 15156 conformity, stress-corrosion-cracking susceptibility, pressure integrity or service life can be inferred.
+The six-chamber drum is **outside** the pig launcher and is **not assumed to contact pipeline process fluid**. Earlier SA9 pages 3–5 assumed 60 °C, 3 bar H₂S, 30 bar process pressure, 5 wt% NaCl and 0.5 wt% acetic acid. These were extracted from an internal sour-fluid experimental paper and are **not applicable to the external offshore atmospheric exposure** without evidence of H₂S or process-fluid contact.
 
-The CAD is the user-supplied ten-body revolver magazine with six chambers, two end plates and two hubs (12,080 surface triangles; 27.293367 m² including interior and exterior). The mesh is colored to show modeled corrosion, but metal is **not geometrically eroded**.
+Version 7 removes H₂S corrosion predictions and the previous 316L sour-pitting multiplier entirely from the active site. The evaluation now distinguishes chloride / seawater coupons from a marine-geometry inspection-attention map. None of the five paper baselines is an experimentally validated corrosion rate of the actual magazine in offshore service.
 
-## Five source-traceable material inputs
+## Project exposure — assumed, site conditions to be confirmed
 
-| Candidate dropdown | Paper's actual specimen / method | Input rate (mm/year) | Tested environment |
-| --- | --- | ---: | --- |
-| Al 6061-T6 | Uncoated 6061-T6; polarization current **9.47 µA/cm²** converted using ASTM G102-type Faraday calculation | **0.1031524** (calculated, not paper-reported penetration) | 3.5 wt% NaCl, **no H₂S** |
-| Al 7075-T6 | Uncoated 7075-T6; polarization current **0.31 µA/cm²** converted in the same way | **0.0032445** (calculated, not paper-reported penetration) | Same 3.5 wt% NaCl study as 6061-T6, **no H₂S** |
-| AISI 1020 normalized candidate | AISI 1020, heat-treatment state not confirmed; 2400-grit polished specimen, weight loss | **0.58** (measured; 0.92 mm/y was reported for the rougher 100-grit finish) | 25°C, CO₂-saturated 3 wt% NaCl, pH ~5, static immersion, 168 h; **no H₂S** |
-| AISI 304 | Uncoated 304 stainless substrate, figure from published abstract | **0.17** (author-reported; full paper test details not independently verified) | H₂S-containing simulated oil-and-gas environment, precise temperature and H₂S pressure not verified |
-| AISI 316 candidate | **316L** specimen (not exact 316), measured weight-loss | **0.74** (measured for 316L only) | 60°C, 3 bar H₂S partial pressure, 30 bar total, 5 wt% NaCl, 0.5 wt% acetic acid, approximately 7 d |
+- External offshore platform marine atmosphere, salt deposits, rain/condensation and potential intermittent spray/washdown. **Not process fluid, not sour gas and not intentionally submerged.**
+- Primary risks: chloride pitting, galvanic corrosion, wet deposit and crevice corrosion, paint breakdown of carbon steel, inadequate drainage, contamination after washing.
+- Metal inside a closed chamber may be sheltered; the viewer shows the full triangulated surface for visualization, **not a measured equal wetting duty**.
+- The drum rotates: a low elevation on the parked CAD is not necessarily a permanently water-retaining surface.
 
-**Source URLs:**
+## Research-derived numerical chloride/seawater references
 
-1. Al 6061-T6 and Al 7075-T6: [Materials 2024, 17, 4285 — Table 3 uncoated (asterisk) specimens](https://www.mdpi.com/1996-1944/17/17/4285), DOI 10.3390/ma17174285.
-2. [ASTM G102-23](https://store.astm.org/standards/g102) — corrosion-current to uniform penetration-rate methodology.
-3. [Mohammed et al., 2026, Table 5](https://www.iieta.org/journals/ijdne/paper/10.18280/ijdne.210410) — 1020 CO₂-brine corrosion rates and surface finish.
-4. [Huang et al., 2023](https://doi.org/10.1007/s12666-023-02986-2) — 304 stainless substrate H₂S-environment benchmark from abstract.
-5. [Shah et al., 2020](https://pmc.ncbi.nlm.nih.gov/articles/PMC7399776/) — 316L weight-loss at 3 bar H₂S.
-6. [Shah et al., 2022](https://doi.org/10.48048/tis.2022.4642) — separate 316L pit-penetration study, maximum reported 2.4 mm/year at 3 bar H₂S.
+| Candidate | Used rate (mm/y) | Paper-derived basis | Experiment | Critical limit |
+| --- | ---: | --- | --- | --- |
+| Al 6061-T6 | **0.1031524** | 9.47 µA/cm² converted from uncoated coupon polarization | 3.5 wt% NaCl solution; [Materials 2024, Table 3](https://doi.org/10.3390/ma17174285) | Approximate aluminum Faraday conversion, not measured thickness |
+| Al 7075-T6 | **0.0032445** | 0.31 µA/cm² converted by same equation | Same 3.5% NaCl paper, same measurement family | Low electrochemical rate does NOT mean pitting-safe offshore or physically superior to 6061 |
+| AISI/SAE 1020 (normalization unknown) | **0.1210** | Measured gravimetric weight loss; **0.15 mm/y** separate polarization estimate | **336 h immersion** in 3.5 wt% NaCl, [Sousa et al., ABM 2026](https://doi.org/10.5151/2594-5327-43868) | Bare immersed 1020, not a normalized coated offshore drum |
+| AISI 304 | **0.03110** | Published electrochemical rate for flat SS304 after intermittent saline exposure | **168 h intermittent exposure** in 3.5 wt% NaCl; test at **27 °C**, [Metals 2021, Figure 7](https://doi.org/10.3390/met11101543) | One flat sample with its specific exposed surface; not actual outdoor rate |
+| AISI 316 candidate | **0.01320** | Published 316L electrochemical rate from unsulfided **298 K control** | Natural seawater at 25 °C **without added sodium sulfide**, [Applied Sciences 2023, Table 5](https://doi.org/10.3390/app13074366) | Grade is 316**L**, not exact 316. Other groups in the paper added sulfide; ONLY the unsulfided 298 K control is used |
 
-**Calculation for aluminum:** `CR[mm/year] = 0.00327 × i_corr[µA/cm²] × EW[g/equiv] / density[g/cm³]`. Both alloys are approximated as aluminum dissolving with valence +3, giving `EW = 26.9815385/3`; densities 6061-T6 = 2.70 and 7075-T6 = 2.81 g/cm³. **These converted rates are not experimentally measured thickness losses.** The electrochemical method and Al³⁺/density simplification can underestimate the consequences of localized corrosion or alloy element behavior.
+For aluminum, `CR(mm/year) ≈ 0.00327 × i_corr(µA/cm²) × EW(g/equiv) / ρ(g/cm³)`, assuming `EW=26.9815385/3` g/equiv and ρ of 2.70 and 2.81 g/cm³ for 6061-T6 and 7075-T6 respectively (ASTM G102-type Faraday conversion). The result is a **uniform-equivalent electrochemical estimate**, not a measured pit depth. Study techniques, test durations and alloy temper verification differ, so comparing the rate magnitudes directly for offshore selection is **not validated**.
 
-## Mode 1: uniform experimental benchmark transfer
+## Actual two-mode visualization
 
-- Applies **one material-specific published/derived uniform rate** to each mesh face.
-- Rate is uniform on all exposed faces; no spatial pit distribution is invented.
-- `penetration_i(t) = rate × t_days/365` (constant rate).
-- Hypothetical two-sided remaining chamber wall `T = max(0,10 − 2 × penetration)` mm.
-- Color reflects one uniform magnitude per material on a shared published benchmark scale; paper conditions differ, so color **does not** give a common H₂S ranking.
+### 01. Published chloride benchmarks (quantitative input; not field prediction)
 
-## Mode 2: paper-supported baseline + illustrative localized overlay
+- **One shared color scale** for all five source-specific benchmark rates; each material's entire CAD is a uniform tone. This is deliberate—there is no source-matched spatial pit field.
+- Bars are click-to-select and show all five reported/converted benchmark values with their source conditions and units.
+- Display fields are baseline corrosion rate (mm/year), illustrative one-face metal recession (mm) or illustrative 10 mm nominal wall remaining after that one-face recession.
+- `loss = rate × days / 365`; `remaining_wall = max(0,10−loss)`. The selected 7/30/90/365-day intervals are **constant-rate extrapolations**, not service-life forecasts. A numerical rate estimated by polarization is not the same as 7-day observed penetration. The metal geometry remains unchanged.
+- The full CAD is 10 original bodies and 12,080 triangles. The front plate is hidden initially to reveal the chambers but is still included in source area; user can focus on any component, reset camera and save a PNG or CSV.
 
-- Uses **exactly the same five paper-linked base rates** as Mode 1. No low/central/high rates remain in the live viewer.
-- Applies the **inherited illustrative spatial hotspot intensity H_i** to each CAD triangle. The hotspot distribution is an assumption and not measured, derived from water pooling physics, electrochemistry, CFD, or mechanical loading.
-- The *only literature-based localized corrosion factor* is a 316L **2.4 mm/year deepest-pit rate** in a seven-day experiment, compared with a **0.74 mm/year weight-loss rate** in a separate 316L study. The modeling ratio `F = 2.4 / 0.74 ≈ 3.243243` is **NOT experimentally justified for aluminum, AISI 1020, or AISI 304** and is not a prediction of pit location even for 316L.
-- `local_rate_i = material_baseline × [1 + (F−1) × H_i]`, with `H_i∈[0,1]`.
-- `penetration_i(t) = local_rate_i × t_days/365`.
-- `remaining_10mm_chamber_wall_i = max(0,10 − local_penetration_i − uniform_outer_penetration)` (not exact geometric pairing).
-- All five materials share **the same Mode 2 fixed absolute color range**, based on highest literature-derived baseline × F. The viewer labels only the selected alloy's local min/max with two position-accurate ticks; gradient endpoints are unlabeled as requested.
-- Color gamma is a visibility enhancement only; it does not change rates.
+### 02. Marine wetting attention map (qualitative; not corrosion-rate analysis)
 
-### Which mode should be used for report conclusions?
+To provide a design-oriented 3D model without fabricating chemistry or pit rates, each triangle is assigned an **inspection-attention index** on a 0–100 visualization scale using a simplified local orientation and elevation heuristic:
 
-**Mode 1** is the strongest presentation of actual published-rate evidence **but not a defensible direct ranking** because experimental conditions differ. **Mode 2** illustrates *sensitivity to hypothetical localized attack* and its consequence for the 10 mm wall, not a validated alloy-specific H₂S prediction. Cite the original papers and all limitations. **If a reviewer requires matched-condition sour-service results, the correct status is *insufficient data*, not a fabricated comparison.**
+```text
+u = max(0, world_outward_triangle_normal_z)
+low = 1 - clamp((triangle_world_centroid_z-zmin)/(zmax-zmin), 0, 1)
+for six chambers:    index = 25 + 45*u + 30*low
+for plates and hubs: index = 25 + 45*u + 15*low
+```
 
-The 7-day 316L baseline is the nearest match to the chosen original sour reference. For all other materials, even 7-day calculations are transfers from unlike test environments. The 30/90/365-day cases are constant-rate what-if extrapolations, not service-life predictions.
+- The index is **not an ISO 9223 measurement**, corrosion rate, wetted area, true probability, damage depth, CFD result or actual salt deposition estimate.
+- The heuristic is used only to highlight surfaces that might warrant checking for salt deposits or retained moisture. Upward-facing surfaces and lower locations are visualized for *inspection attention*.
+- Since normal orientation, mounting, rotation, shielding, rain, washdown, geometry of drains, surface roughness and coatings all influence real wetting, no design should conclude that these colors predict actual corrosion zones.
+- This map uses **no H₂S sour pitting factor, corrosion multiplier, predicted pit rate or material-specific hotspot kinetics**.
 
-## Reproducible files
+## Standards applicable to the revised exposure
 
-- `index.html`: active dual-mode viewer v6.
-- `literature_inputs_v6.json`: **single source of truth for all five active rates**, source URLs, original measurements, methods, tested grades and limitations.
-- `literature_results_v6.csv`: 40 rows (five materials × two modes × four durations), showing model values and interpretation flags.
-- `face_fields.json`: full-surface numerical template and 12,080 face-aligned samples.
-- `drum_*.glb`: original assembly geometry.
-- `material_scenarios_v4.json`, `research_benchmarks_v5.json`, `simulate_corrosion_v4.py`, and `simulation_results_v4.csv` are **historical records only**. The active v6 website does **not** read the old hypothetical sensitivity file. Do not cite v4 results as active v6 numerical inputs.
+**ISO 9223:2012** — [official ISO publication](https://www.iso.org/standard/53499.html), current edition confirmed in 2022. Classifies the corrosivity of **atmospheres** using standard specimen first-year mass/thickness loss and environmental variables (temperature/humidity/time of wetness, air salinity, pollution). The dashboard compares indicative category **C5** (very high) and **CX** (extreme offshore) as **unconfirmed design reference categories**, not measured categories for this site. Under ISO 9223, typical first-year **standard carbon-steel specimen** thickness-loss category limits are:
+- **C5:** more than 80 up to 200 μm/year ≈ **0.08–0.20 mm first year**.
+- **CX:** more than 200 up to 700 μm/year ≈ **0.20–0.70 mm first year**.
+
+**Crucial:** These category ranges are *not* extrapolated to aluminum, 304, 316, exact AISI 1020 heat treatment, coated parts, local pit depth or multiple-year wall-thinning; the initial local category requires site exposure/salt/wetness information or specimens (ISO 9226). ISO 9223 explicitly warns first-year rates cannot simply be extrapolated to predict long-term corrosion.
+
+**ISO 12944-2:2017** — [official ISO](https://www.iso.org/standard/64834.html). Classification of environments for steel protective paint systems. **ISO 12944-9:2018** — [official ISO](https://www.iso.org/standard/64832.html). Offshore and related high-durability protective **paint systems for carbon-steel structures**; not a qualification standard for aluminum, stainless alloy components, fasteners or the full uncoated mechanism. A coating specification for 1020 / other steel framing must address actual geometry, prep, paint-system testing and inspection.
+
+## Outputs and reproducibility
+
+- `index.html`: responsive three.js model, tabs, citations, ISO reference cards, live probe, rate bars, screenshot PNG and CSV exports.
+- `marine_evidence_v7.json`: canonical active non-H₂S source data, science warnings, standard URLs, formulae and design categories.
+- `marine_benchmark_results_v7.csv`: all 5 source rates and hypothetical 7/30/90/365 day one-face results (20 rows).
+- `face_fields.json`: **CAD mesh inventory only** in v7. The old sour-rate triangles exist in this historical file but **are not used as corrosion values**.
+- `drum_*.glb`: reuses the CAD geometry.
+- The old v4/v5/v6 source/input files remain in GitHub for history and **are not loaded by v7**. Their assumed H₂S rates must not be cited in the revised report.
+
+## Presentation conclusions
+
+The external magazine is assessed against **airborne marine salinity / salt wetting**, not a sour-fluid environment. The five literature datasets are **different coupon test conditions** and serve as qualitative/quantitative screening references only. The ISO panel establishes the basis for specifying a coastal/offshore exposure category subject to verification. The 3D qualitative inspection map identifies design features for drainage, washability, dissimilar-metal isolation and corrosion protection—not predicted metal failure. To finalize a candidate, test representative materials/coatings using matched marine atmospheric cycles and evaluate structural FEA and manufacturing as separate decision criteria.
