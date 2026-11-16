@@ -1,0 +1,50 @@
+{
+  "version": "8.0",
+  "title": "Offshore salt and moisture accumulation design sensitivity (not experimentally determined maximum corrosion rates)",
+  "basis": "User-requested increased chloride/wetting exposure screening on the external, non-H2S pig-magazine; not a verified material-specific maximum or design allowance.",
+  "baseline_file": "marine_evidence_v7.json",
+  "reference_standards": [
+    {
+      "standard": "ISO 9223:2012",
+      "url": "https://www.iso.org/standard/53499.html",
+      "application": "C5 and CX first-year rate ranges apply to standard carbon-steel reference specimens, not exact magazine metal loss, not specific to AISI 1020 normalized, and not transferable to Al 6061/7075 or austenitic stainless steels."
+    },
+    {
+      "standard": "ISO 12944-9:2018",
+      "url": "https://www.iso.org/standard/64832.html",
+      "application": "High-durability offshore protective paint systems for carbon-steel structures; not corrosion rate acceleration multiplier."
+    },
+    {
+      "standard": "ISO 16701:2025",
+      "url": "https://www.iso.org/search.html?q=ISO%2016701%202025",
+      "application": "An example cyclic salt/wetting method; it does not provide a universal material-specific multiplier or convert test duration to offshore service life."
+    }
+  ],
+  "multipliers": [
+    {
+      "value": 2,
+      "label": "2× elevated wetting (illustrative)"
+    },
+    {
+      "value": 3,
+      "label": "3× severe accumulation (default illustrative)"
+    },
+    {
+      "value": 5,
+      "label": "5× extreme screening envelope (illustrative)"
+    }
+  ],
+  "default_multiplier": 3,
+  "material_envelope_equation": "r_upper_material = r_published_or_converted_material × selected_assumption_multiplier",
+  "local_spatial_equation": "r_local = r_base × [1 + (M−1) × clamp((attention_index−25)/75,0,1)]",
+  "upper_envelope_disclaimer": "No reviewed chloride paper measured exactly 2x, 3x, or 5x service rate for all five candidates. These are transparent multipliers for design sensitivity only, NOT worst-case physical bounds or standard-defined protection factors. Actual localized pitting can be deeper even if uniform loss is small.",
+  "spatial_disclaimer": "The geometry attention index is an illustrative surface-orientation/elevation proxy; it has not been calibrated to salt deposition, wetting hours, seawater pooling, chloride concentration, coating state, or pit kinetics. Magazine motion changes orientation.",
+  "wall_disclaimer": "Any computed wall number is a one-face hypothetical uniform-equivalent recession from a 10 mm nominal chamber tube, not actual shell thinning, structural integrity, pressure rating, service life, or a paired inner-outer assessment.",
+  "scenario_use": "Option to test influence of arbitrary higher-than-benchmark uniform-equivalent rates on color and numerical indicators before obtaining site-specific cyclic corrosion or outdoor exposure measurements.",
+  "priority_tests": [
+    "Measure airborne salt deposition and time of wetness at the actual offshore installation.",
+    "Verify drainage and sealed chamber water exposure while the drum indexes and parks.",
+    "Run identical marine cyclic wet/dry tests on five exact grades and selected coatings, with pit depth and mass loss.",
+    "Use worst measured penetration (not arbitrary multiplier) for updated material-selection / wall assessment."
+  ]
+}
