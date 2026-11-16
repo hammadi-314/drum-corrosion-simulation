@@ -478,14 +478,25 @@ function changeMaterial(){
  updateSource();updateBars();loadGeometry();
 }
 (async()=>{try{
- const [drum,study]=await Promise.all([fetch('./face_fields.json?v=3',{cache:'no-store'}),fetch('./marine_evidence_v7.json?v=7',{cache:'no-store'})]);
- if(!drum.ok||!study.ok)throw Error('Could not load CAD metadata or marine_evidence_v7.json');
- state.geom=await drum.json();const full=await study.json();state.source=full;
+ const [drum,study,scenario]=await Promise.all([
+  fetch('./face_fields.json?v=3',{cache:'no-store'}),
+  fetch('./marine_evidence_v7.json?v=7',{cache:'no-store'}),
+  fetch('./offshore_accumulation_scenarios_v8.json?v=8',{cache:'no-store'})
+ ]);
+ if(!drum.ok||!study.ok||!scenario.ok)throw Error('Could not load CAD metadata, marine research inputs, or accumulation assumptions');
+ state.geom=await drum.json();
+ state.source=await study.json();
+ state.accumConfig=await scenario.json();
  await loadGeometry();
  }catch(e){$('loading').textContent='Could not initialize marine assessment: '+e.message;console.error(e)}
 })();
 $('modeBenchmark').addEventListener('click',()=>updateMode('benchmark'));
 $('modeExposure').addEventListener('click',()=>updateMode('exposure'));
+$('modeAccum').addEventListener('click',()=>updateMode('accumulation'));
+$('accumMultiplier').addEventListener('change',()=>{
+ if(!state.source)return;
+ colorMeshes();updateStats();
+});
 $('material').addEventListener('change',changeMaterial);
 $('days').addEventListener('change',()=>{colorMeshes();updateStats()});
 $('field').addEventListener('change',()=>{colorMeshes();updateStats()});
@@ -507,7 +518,7 @@ $('capture').addEventListener('click',()=>{
  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,1600,960);
  ctx.fillStyle='#11354c';ctx.fillRect(0,0,1600,114);
  ctx.fillStyle='#8bdaee';ctx.font='700 17px system-ui';ctx.fillText('MEEN 401  /  OFFSHORE MAGAZINE ENGINEERING ASSESSMENT',46,38);
- ctx.fillStyle='#ffffff';ctx.font='800 35px system-ui';ctx.fillText(isBench()?'Published marine chloride benchmark':'Marine exposure · inspection-attention model',46,85);
+ ctx.fillStyle='#ffffff';ctx.font='800 35px system-ui';ctx.fillText(isBench()?'Published marine chloride benchmark':isAccum()?'Salt accumulation · design sensitivity (NOT a test)':'Marine exposure · inspection-attention model',46,85);
  ctx.fillStyle='#f2f7fa';ctx.fillRect(34,134,978,700);
  ctx.strokeStyle='#c9dce6';ctx.lineWidth=2;ctx.strokeRect(34,134,978,700);
  const iw=canvas.width,ih=canvas.height,scale=Math.min(966/iw,687/ih),w=iw*scale,h=ih*scale;
@@ -537,6 +548,13 @@ $('capture').addEventListener('click',()=>{
   line(fmt(m.rate_mm_per_year,6)+' mm/year',y,30,850,'#173d55');y+=40;
   line('Illustrative '+days()+'-day one-face loss',y,15,700);y+=30;
   line(fmt(loss(rate()),6)+' mm',y,25,800,'#1c5570');y+=46;
+ }else if(isAccum()){
+  line('Published/derived rate',y,15,700,'#2b7186');y+=28;
+  line(fmt(m.rate_mm_per_year,6)+' mm/year',y,24,850,'#173d55');y+=39;
+  line('ASSUMED '+accumFactor()+'x accumulation ceiling',y,15,760,'#99583d');y+=31;
+  line(fmt(upperRate(),6)+' mm/year',y,27,850,'#ae6644');y+=35;
+  line('Ceiling '+days()+'-day one-face loss',y,15,700);y+=28;
+  line(fmt(loss(upperRate()),6)+' mm',y,24,850,'#173d55');y+=35;
  }else{
   line('Qualitative orientation-based map',y,19,750);y+=36;
   y=wrap('Inspection attention index: 25 to 100. NOT a corrosion rate or predicted pit-depth distribution.',y,43,26,16,500);
@@ -551,22 +569,25 @@ $('capture').addEventListener('click',()=>{
  const grad=ctx.createLinearGradient(1058,738,1536,738);
  grad.addColorStop(0,'#2bbad1');grad.addColorStop(.5,'#eebf5d');grad.addColorStop(1,'#e46951');
  ctx.fillStyle=grad;ctx.beginPath();ctx.roundRect(1058,735,478,16,6);ctx.fill();
- line(isBench()?'Uniform corrosion-rate reference':'Relative inspection-attention index',780,14,750);
+ line(isBench()?'Uniform paper-based corrosion-rate reference':isAccum()?'Uniform-equivalent design stress-test (unmeasured)':'Relative inspection-attention index',780,14,750);
  ctx.fillStyle='#f3f8fa';ctx.fillRect(34,852,1536,81);
  ctx.fillStyle='#415f70';ctx.font='500 17px system-ui';
  ctx.fillText('External magazine · no assumed H₂S · ISO 9223 C5/CX reference categories, NOT site classification',48,884);
- ctx.fillText('Research environments differ. Values and color maps are not a validated offshore performance ranking.',48,914);
+ ctx.fillText(isAccum()?'ACCUMULATION RATE IS ASSUMED, NOT A MEASURED MAXIMUM. Spatial wetting weights are hypothetical.':'Research environments differ. Not a validated offshore performance ranking.',48,914);
  const link=document.createElement('a');link.href=poster.toDataURL('image/png');link.download='MEEN401_Offshore_Drum_'+state.mode+'_'+state.material+'_figure.png';link.click();
 });
 $('export').addEventListener('click',()=>{
  if(!state.source)return;
- const out=[['mode','candidate','specimen_grade','published_or_derived_uniform_rate_mm_per_year','rate_type','source_url','test_environment','study_method','days','uniform_recession_mm','illustrative_one_face_remaining_10mm_wall','interpretation']];
+ const out=[['mode','candidate','specimen_grade','paper_rate_mm_per_year','assumed_accumulation_multiplier','illustrative_accumulation_ceiling_mm_per_year','paper_measurement_method','paper_url','laboratory_environment','exposure_days','paper_uniform_oneface_loss_mm','assumed_ceiling_oneface_loss_mm','illustrative_10mm_wall_after_ceiling_mm','scientific_validity_note']];
  for(const m of Object.values(state.source.materials)){
-  out.push([state.mode,m.label,m.testedGrade,m.rate_mm_per_year,m.methodCategory,m.url,m.test,m.method,days(),loss(m.rate_mm_per_year),Math.max(0,10-loss(m.rate_mm_per_year)),'Different laboratory conditions; constant-rate transfer is NOT offshore performance prediction; inspection index is qualitative']);
+  const base=m.rate_mm_per_year,upper=base*accumFactor();
+  out.push([state.mode,m.label,m.testedGrade,base,accumFactor(),upper,m.methodCategory,m.url,m.test,days(),loss(base),loss(upper),Math.max(0,10-loss(upper)),'Assumed '+accumFactor()+'x design envelope, NOT a measured upper corrosion rate. ISO 9223 bounds concern standard reference specimens, not this alloy. Original paper lab conditions differ. 3D pattern is orientation/elevation inspection heuristic.']);
  }
  const csv=out.map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\n');
- const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='Offshore_Marine_Evidence_v7.csv';a.click();URL.revokeObjectURL(url);
+ const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+ const a=document.createElement('a');a.href=url;a.download='Offshore_Marine_Accumulation_Sensitivity_v8.csv';a.click();URL.revokeObjectURL(url);
 });
+
 canvas.addEventListener('pointerdown',e=>{downPt={x:e.clientX,y:e.clientY}});
 canvas.addEventListener('pointerup',e=>{
  if(!downPt||Math.hypot(e.clientX-downPt.x,e.clientY-downPt.y)>6){downPt=null;return}downPt=null;
