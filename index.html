@@ -99,15 +99,29 @@ footer{margin:20px 0 0;color:#71899b;font-size:10px;line-height:1.7}
 @media(max-width:1200px){.modelgrid{grid-template-columns:minmax(0,1fr) 310px}.viewport{height:540px}}
 @media(max-width:830px){main{padding:15px 12px 35px}.modelgrid,.contentgrid{grid-template-columns:1fr}.viewport{height:57vh;min-height:350px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.bar-item{grid-template-columns:115px minmax(70px,1fr) 72px}.modelgrid aside{display:grid;grid-template-columns:1fr 1fr}.panel{min-width:0}}
 @media(max-width:570px){.modelgrid aside{grid-template-columns:1fr}.viewport{height:48vh;min-height:320px}.stat{padding:13px}.head h1{font-size:27px}.rulegrid{grid-template-columns:1fr 1fr}.bar-item{grid-template-columns:97px 1fr 71px;gap:7px}.bar-name{font-size:10px}}
+.envelope-table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+.envelope-table th{font-size:10px;text-transform:uppercase;letter-spacing:.03em;text-align:left;color:#6a8091;background:#f5f8fa;padding:10px 11px;border-bottom:1px solid #dbe6ee}
+.envelope-table td{border-bottom:1px solid #e8eef3;padding:10px 11px;color:#345065}
+.envelope-table td:not(:first-child){font-weight:780;white-space:nowrap}
+.envelope-table tbody tr.active{background:#ecf9f7}
+.envelope-table tbody tr:hover{background:#f4fafb}
+.envelope-table tbody tr{cursor:pointer}
+.accum-value{color:#b45d34!important}
+.accum-value small{color:#71889a;font-size:9px}
+.bar-legend{display:flex;justify-content:space-between;gap:8px;font-size:10px;font-weight:700;color:#4d7083;margin-bottom:7px}
+.modebar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.modebtn{min-width:0}
+@media(max-width:830px){.modebar{grid-template-columns:1fr}}
 </style></head><body>
 <main>
-<div class="topbar"><div class="brand">MEEN 401 · SENIOR DESIGN ENGINEERING REVIEW</div><div class="toplabel">6-chamber revolver magazine · CAD-based assessment · v7.0</div></div>
+<div class="topbar"><div class="brand">MEEN 401 · SENIOR DESIGN ENGINEERING REVIEW</div><div class="toplabel">6-chamber revolver magazine · CAD-based assessment · v8.0</div></div>
 <section class="head"><h1>Offshore marine corrosion<br>and exposure assessment</h1><p>External pig-loading magazine exposed to offshore salt, humidity and possible spray — not internal pipeline fluid. A literature-traceable material screening and geometry-based inspection-priority visualization.</p></section>
 <div class="pills"><span class="pill primary">EXTERNAL MAGAZINE · NO ASSUMED PROCESS H₂S</span><span class="pill">Marine atmosphere / intermittent salt wetting</span><span class="pill">ISO 9223 · C5 / CX reference</span><span class="pill">10 CAD bodies · 12,080 surface faces</span><span class="pill">10 mm nominal chamber wall</span></div>
-<div class="banner"><strong>Engineering validity:</strong> The papers used different electrolytes, specimen grades, exposure methods and temperatures. Experimental and derived coupon rates are <strong>not</strong> matched offshore corrosion rates. The marine-wetting 3D view is an <strong>inspection-attention heuristic</strong>, not a corrosion simulation or pit forecast. ISO C5/CX categories are reference scenarios until site corrosivity is established.</div>
+<div class="banner"><strong>Engineering validity:</strong> The five published/converted chloride rates come from different experiments. The separate salt-accumulation **2× / 3× / 5× design envelope is hypothetical**, not measured upper corrosion rate and not defined by ISO 9223. The offshore geometry-attention map is qualitative; neither predicts real pitting, service life or a validated material ranking. Site C5/CX category remains unconfirmed.</div>
 <div class="modebar">
 <button class="modebtn active" id="modeBenchmark" type="button"><strong>01 · Published chloride benchmarks</strong><span>Five paper-linked rates · uniform recession illustration · comparable color scale</span></button>
 <button class="modebtn" id="modeExposure" type="button"><strong>02 · Offshore surface attention map</strong><span>3D geometry-informed salt/deposit and low-elevation attention · qualitative only</span></button>
+<button class="modebtn" id="modeAccum" type="button"><strong>03 · Salt accumulation stress test</strong><span>Five reference rates × adjustable 2× / 3× / 5× hypothetical design factors</span></button>
 </div>
 <div class="modelgrid">
 <section class="viewport" aria-label="Interactive CAD-based offshore corrosion visualization">
@@ -120,6 +134,7 @@ footer{margin:20px 0 0;color:#71899b;font-size:10px;line-height:1.7}
 <section class="panel">
 <h2>Analysis controls</h2>
 <div class="control"><label for="material">Drum candidate material</label><select id="material"><option value="6061_T6">Al 6061-T6</option><option value="7075_T6">Al 7075-T6</option><option value="1020_NORMALIZED">AISI 1020 (normalized candidate)</option><option value="AISI_304">AISI 304</option><option value="AISI_316" selected>AISI 316 (316L research proxy)</option></select></div>
+<div class="control hidden" id="accumControl"><label for="accumMultiplier">Assumed salt-accumulation severity (not a measured maximum)</label><select id="accumMultiplier"><option value="2">2× · elevated wetting (what-if)</option><option value="3" selected>3× · severe accumulation (what-if)</option><option value="5">5× · extreme envelope (what-if)</option></select><p class="tiny">Multiplier is an explicit scenario assumption, not a value supplied by ISO or a material experiment.</p></div>
 <div class="control" id="timeControl"><label for="days">Illustrative equal-rate exposure interval</label><select id="days"><option value="7" selected>7 days · what-if</option><option value="30">30 days · what-if</option><option value="90">90 days · what-if</option><option value="365">365 days · unvalidated extrapolation</option></select></div>
 <div class="control" id="fieldControl"><label for="field">Display numerical field</label><select id="field"><option value="rate">Paper-based rate · mm/year</option><option value="loss" selected>Uniform-equivalent surface recession · mm</option><option value="wall">One-side 10 mm wall illustration · mm</option></select></div>
 <div class="control"><label for="part">Focus CAD component</label><select id="part"><option value="all">All 10 bodies</option><option value="chamber_1">Chamber 1</option><option value="chamber_2">Chamber 2</option><option value="chamber_3">Chamber 3</option><option value="chamber_4">Chamber 4</option><option value="chamber_5">Chamber 5</option><option value="chamber_6">Chamber 6</option><option value="front_end_plate">Front end plate</option><option value="rear_end_plate">Rear end plate</option><option value="hub_1">Hub 1</option><option value="hub_2">Hub 2</option></select></div>
@@ -140,6 +155,10 @@ footer{margin:20px 0 0;color:#71899b;font-size:10px;line-height:1.7}
 <div class="stat"><label id="k3label">Remaining nominal wall</label><div class="num" id="k3">—</div><small id="k3unit">mm · illustrative one-side subtraction</small></div>
 <div class="stat"><label id="k4label">Surface coverage</label><div class="num" id="k4">27.29</div><small id="k4unit">m² · all triangulated faces</small></div>
 </div>
+<section class="section" id="accumSummary"><div class="sectionhead"><h2>Marine salt retention · material-by-material screening ceiling</h2><span class="badge" id="envelopeBadge">Illustrative 3× design case · NOT a measured maximum</span></div>
+<p class="tiny">The <b>paper rate</b> is a measured or converted literature benchmark from its original conditions. The <b>accumulation ceiling</b> is only <code>published benchmark × assumed factor</code>. There is no demonstrated physical maximum for these five alloys. ISO 9223 C5/CX rates are standard carbon-steel reference classifications, <b>not</b> multiplication factors.</p>
+<div style="overflow-x:auto"><table class="envelope-table"><thead><tr><th>Material</th><th>Paper input (mm/year)</th><th id="envelopeRateHeading">3× design ceiling (mm/year)</th><th id="envelopeLossHeading">7-day ceiling loss (mm)</th></tr></thead><tbody id="envelopeRows"></tbody></table></div>
+</section>
 <div class="contentgrid">
 <section class="section"><div class="sectionhead"><h2 id="resultsTitle">Five-material literature benchmarks</h2><span class="badge" id="resultsBadge">Unmatched test conditions</span></div><div class="barrows" id="materialBars"></div><p class="tiny" id="barNote">Bars use one shared numerical scale but do not represent controlled tests in the same marine exposure.</p></section>
 <section class="section"><div class="sectionhead"><h2>Offshore standards and design basis</h2><span class="badge">Classification ≠ material test</span></div>
