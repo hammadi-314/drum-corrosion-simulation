@@ -124,7 +124,7 @@ footer{margin:20px 0 0;color:#71899b;font-size:10px;line-height:1.7}
 <div class="control" id="fieldControl"><label for="field">Display numerical field</label><select id="field"><option value="rate">Paper-based rate · mm/year</option><option value="loss" selected>Uniform-equivalent surface recession · mm</option><option value="wall">One-side 10 mm wall illustration · mm</option></select></div>
 <div class="control"><label for="part">Focus CAD component</label><select id="part"><option value="all">All 10 bodies</option><option value="chamber_1">Chamber 1</option><option value="chamber_2">Chamber 2</option><option value="chamber_3">Chamber 3</option><option value="chamber_4">Chamber 4</option><option value="chamber_5">Chamber 5</option><option value="chamber_6">Chamber 6</option><option value="front_end_plate">Front end plate</option><option value="rear_end_plate">Rear end plate</option><option value="hub_1">Hub 1</option><option value="hub_2">Hub 2</option></select></div>
 <label class="checkline"><input type="checkbox" id="front"> Show front plate (hidden by default to reveal chambers)</label>
-<div class="actions"><button class="small" type="button" id="reset">Reset view</button><button class="small" type="button" id="capture">Save 3D image</button></div>
+<div class="actions"><button class="small" type="button" id="reset">Reset view</button><button class="small" type="button" id="capture">Save report figure</button></div>
 <div class="actions"><button class="small" type="button" id="export">Export results CSV</button><button class="small" type="button" id="viewTop">View from above</button></div>
 </section>
 <section class="panel"><h2 id="legendTitle">Corrosion rate · five-study range</h2><div class="tiny" id="legendSubtitle">Same colors across five paper inputs, despite different experimental conditions</div>
@@ -360,7 +360,7 @@ function showProbe(mesh,i,point){
  $('probe').innerHTML='<b>Component:</b> '+part.replaceAll('_',' ')+'<br><b>Mesh triangle:</b> '+i+'<br><b>CAD world point:</b> '+xyz+' mm<br><b>Mapped value:</b> '+val+'<br><b>Interpretation:</b> '+(isBench()?'Uniform literature reference; not measured on this CAD':'Geometry-derived attention index; not corrosion rate.');
 }
 function updateMode(next){
- state.mode=next;$('modeBenchmark').classList.toggle('active',isBench());$('modeExposure').classList.toggle('active',!isBench());
+ state.mode=next;if(!state.source)return;$('modeBenchmark').classList.toggle('active',isBench());$('modeExposure').classList.toggle('active',!isBench());
  $('timeControl').classList.toggle('hidden',!isBench());$('fieldControl').classList.toggle('hidden',!isBench());
  $('paperHeading').textContent=isBench()?'Supporting paper · selected material':'Selected material · chloride study context';
  colorMeshes();updateStats();
@@ -424,8 +424,63 @@ function changeCategory(value){
  $('catName').textContent=value+' · Reference scenario';$('catRange').textContent=value==='C5'?'0.08–0.20':'0.20–0.70';
 }
 $('capture').addEventListener('click',()=>{
- if(!state.meshes.length)return;renderer.render(scene,camera);
- const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='Offshore_Drum_'+state.mode+'_'+state.material+'.png';a.click();
+ if(!state.meshes.length)return;
+ renderer.render(scene,camera);
+ const poster=document.createElement('canvas');poster.width=1600;poster.height=960;
+ const ctx=poster.getContext('2d');const m=material();
+ ctx.fillStyle='#ffffff';ctx.fillRect(0,0,1600,960);
+ ctx.fillStyle='#11354c';ctx.fillRect(0,0,1600,114);
+ ctx.fillStyle='#8bdaee';ctx.font='700 17px system-ui';ctx.fillText('MEEN 401  /  OFFSHORE MAGAZINE ENGINEERING ASSESSMENT',46,38);
+ ctx.fillStyle='#ffffff';ctx.font='800 35px system-ui';ctx.fillText(isBench()?'Published marine chloride benchmark':'Marine exposure · inspection-attention model',46,85);
+ ctx.fillStyle='#f2f7fa';ctx.fillRect(34,134,978,700);
+ ctx.strokeStyle='#c9dce6';ctx.lineWidth=2;ctx.strokeRect(34,134,978,700);
+ const iw=canvas.width,ih=canvas.height,scale=Math.min(966/iw,687/ih),w=iw*scale,h=ih*scale;
+ ctx.drawImage(canvas,40+(966-w)/2,140+(687-h)/2,w,h);
+ ctx.fillStyle='#f6fafc';ctx.fillRect(1034,134,536,700);
+ ctx.strokeStyle='#d6e4ed';ctx.strokeRect(1034,134,536,700);
+ const line=(str,y,size=18,weight=600,color='#25495e')=>{
+  ctx.fillStyle=color;ctx.font=weight+' '+size+'px system-ui';
+  ctx.fillText(str,1058,y,489);
+ };
+ const wrap=(str,y,maxChars=49,step=26,size=18,weight=500,color='#3e6074')=>{
+  const words=str.split(' ');let part='',lines=0;
+  for(const word of words){
+   if((part+' '+word).length>maxChars&&part){
+    line(part,y+step*lines,size,weight,color);part=word;lines++;
+   }else part+=(part?' ':'')+word;
+  }
+  if(part)line(part,y+step*lines,size,weight,color);
+  return y+step*(lines+1);
+ };
+ line('CANDIDATE MATERIAL',175,15,800,'#337d8d');
+ let y=219;
+ y=wrap(m.label,y,35,34,25,800,'#163c54')+12;
+ line('Tested specimen: '+m.testedGrade,y,15,500,'#4e7181');y+=41;
+ if(isBench()){
+  line('Paper-based input',y,15,750,'#2b7186');y+=32;
+  line(fmt(m.rate_mm_per_year,6)+' mm/year',y,30,850,'#173d55');y+=40;
+  line('Illustrative '+days()+'-day one-face loss',y,15,700);y+=30;
+  line(fmt(loss(rate()),6)+' mm',y,25,800,'#1c5570');y+=46;
+ }else{
+  line('Qualitative orientation-based map',y,19,750);y+=36;
+  y=wrap('Inspection attention index: 25 to 100. NOT a corrosion rate or predicted pit-depth distribution.',y,43,26,16,500);
+  y+=12;
+ }
+ line('Actual source result',y,15,750,'#397a8b');y+=31;
+ y=wrap(m.reported+' · '+m.methodCategory,y,45,25,16,600);y+=10;
+ line('Test environment',y,15,750,'#397a8b');y+=29;
+ y=wrap(m.test,y,48,24,15,500);y+=13;
+ line('Reference',y,15,750,'#397a8b');y+=26;
+ y=wrap(m.url,y,53,21,14,500);
+ const grad=ctx.createLinearGradient(1058,738,1536,738);
+ grad.addColorStop(0,'#2bbad1');grad.addColorStop(.5,'#eebf5d');grad.addColorStop(1,'#e46951');
+ ctx.fillStyle=grad;ctx.beginPath();ctx.roundRect(1058,735,478,16,6);ctx.fill();
+ line(isBench()?'Uniform corrosion-rate reference':'Relative inspection-attention index',780,14,750);
+ ctx.fillStyle='#f3f8fa';ctx.fillRect(34,852,1536,81);
+ ctx.fillStyle='#415f70';ctx.font='500 17px system-ui';
+ ctx.fillText('External magazine · no assumed H₂S · ISO 9223 C5/CX reference categories, NOT site classification',48,884);
+ ctx.fillText('Research environments differ. Values and color maps are not a validated offshore performance ranking.',48,914);
+ const link=document.createElement('a');link.href=poster.toDataURL('image/png');link.download='MEEN401_Offshore_Drum_'+state.mode+'_'+state.material+'_figure.png';link.click();
 });
 $('export').addEventListener('click',()=>{
  if(!state.source)return;
