@@ -1,6 +1,6 @@
-# Marine atmospheric corrosion review — external revolver magazine (v7.0)
+# Marine atmospheric corrosion review — external revolver magazine (v8.0)
 
-**Presentation-ready interactive viewer:** https://hammadi-314.github.io/drum-corrosion-simulation/?v=7.0
+**Presentation-ready interactive viewer:** https://hammadi-314.github.io/drum-corrosion-simulation/?v=8.0
 
 ## Correction to the earlier SA9 report
 
@@ -53,6 +53,48 @@ for plates and hubs: index = 25 + 45*u + 15*low
 - Since normal orientation, mounting, rotation, shielding, rain, washdown, geometry of drains, surface roughness and coatings all influence real wetting, no design should conclude that these colors predict actual corrosion zones.
 - This map uses **no H₂S sour pitting factor, corrosion multiplier, predicted pit rate or material-specific hotspot kinetics**.
 
+## Mode 03: offshore salt-accumulation design sensitivity (NEW v8)
+
+The user asked to compare **higher possible corrosion rates if rainwater, seawater spray, or salts accumulate on the revolver magazine**. No five matched-condition chloride experiments provide defensible alloy-specific physical maximum rates for all candidates. ISO 9223 defines first-year **standard specimen atmospheric category rates**, not alloy-specific maximum pit rates or accumulation factors. Therefore the website displays a **clearly labeled, unvalidated design stress test**, not a paper-proven upper corrosion rate.
+
+For each candidate with its source-specific paper/derived rate `r0`, choose an **assumed** global severity multiplier `M∈{2,3,5}`; default **M=3**. The user can switch to M=2 or M=5 without changing the paper values.
+
+```text
+assumed_screening_ceiling_rate = M × paper_rate
+assumed_ceiling_one_face_loss(t) = (M × paper_rate) × (t_days / 365)
+remaining_chamber_wall_screen = max(0, 10 mm − assumed_ceiling_one_face_loss)
+```
+
+The 3D local rate colors interpolate between the paper baseline and this chosen ceiling using the original geometrical *inspection attention* proxy:
+
+```text
+wetness_attention = clamp((triangle_attention_index − 25) / 75, 0, 1)
+illustrative_rate_i = paper_rate × [1 + (M − 1) × wetness_attention_i]
+```
+
+No physical salt deposition, wetting duty, pit kinetics, galvanic coupling, coating performance, fluid flow, or geometry loss is solved. This spatial interpolation is a **what-if map** and cannot establish that the apparent lower chamber or upward-facing region truly experiences greater corrosion. The drum's rotation changes orientation. The **theoretical ceiling M×r0** is not necessarily attained on any face. Source alloy testing conditions differ; some rates were derived from polarization and two grades are imperfect proxies.
+
+### Numerical example, default M = 3
+
+| Candidate | Paper-based benchmark (mm/year) | 3× assumed scenario ceiling (mm/year) |
+|---|---:|---:|
+| Al 6061-T6 | 0.10315 | **0.30946** |
+| Al 7075-T6 | 0.00324 | **0.00973** |
+| AISI 1020 (normalization state unverified) | 0.12100 | **0.36300** |
+| AISI 304 | 0.03110 | **0.09330** |
+| AISI 316 (316L proxy) | 0.01320 | **0.03960** |
+
+**These upper inputs are NOT experimentally measured, NOT statistical confidence limits, NOT absolute maximum corrosion rates, and NOT ISO 9223 recommended multipliers.** They are derived from a visibly documented *user-selectable assumption*. Actual maximum pitting rates may be much higher than uniform-equivalent averages and require matched corrosion coupon, pit-depth, electrochemical and field/wet-dry testing.
+
+The website provides a third tab ("Salt accumulation stress test"), 2×/3×/5× selector, comparison bars, **always-visible five-material reference/ceiling table**, same-across-materials numerical color normalization, marker ticks for selected paper baseline and assumed ceiling, click-to-probe local scenario value, PNG report-figure export and assumption-rich CSV export.
+
+Data files:
+- `offshore_accumulation_scenarios_v8.json` — adjustable factors, equations, scientific warnings, ISO references.
+- `offshore_accumulation_results_v8.csv` — 60 rows (5 materials × 3 factors × 4 time windows), with paper rates and assumed ceilings clearly separated.
+- `marine_evidence_v7.json` — **unchanged paper baseline input**; do not replace source rates with assumed ceiling values.
+
+For a defensible physical offshore maximum, test the five exact grades and proposed protective treatments **under the same cyclic saline wetting and drying conditions**, record **maximum pit depth** and mass loss, and determine in-service deposited salt and actual wetness. ISO 9226 standard-specimen exposures can help establish site corrosivity classification, while coating-system qualification may follow relevant parts of ISO 12944 for steel.
+
 ## Standards applicable to the revised exposure
 
 **ISO 9223:2012** — [official ISO publication](https://www.iso.org/standard/53499.html), current edition confirmed in 2022. Classifies the corrosivity of **atmospheres** using standard specimen first-year mass/thickness loss and environmental variables (temperature/humidity/time of wetness, air salinity, pollution). The dashboard compares indicative category **C5** (very high) and **CX** (extreme offshore) as **unconfirmed design reference categories**, not measured categories for this site. Under ISO 9223, typical first-year **standard carbon-steel specimen** thickness-loss category limits are:
@@ -65,7 +107,7 @@ for plates and hubs: index = 25 + 45*u + 15*low
 
 ## Outputs and reproducibility
 
-- `index.html`: responsive three.js model, tabs, citations, ISO reference cards, live probe, rate bars, screenshot PNG and CSV exports.
+- `index.html`: responsive three.js model, three tabs (paper rate / qualitative map / hypothetical salt-accumulation ceiling), citations, ISO reference cards, live probe, comparative rates, report-figure PNG and CSV exports.
 - `marine_evidence_v7.json`: canonical active non-H₂S source data, science warnings, standard URLs, formulae and design categories.
 - `marine_benchmark_results_v7.csv`: all 5 source rates and hypothetical 7/30/90/365 day one-face results (20 rows).
 - `face_fields.json`: **CAD mesh inventory only** in v7. The old sour-rate triangles exist in this historical file but **are not used as corrosion values**.
