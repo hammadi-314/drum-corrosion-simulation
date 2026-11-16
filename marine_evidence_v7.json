@@ -1,0 +1,170 @@
+{
+  "version": "7.0",
+  "title": "Offshore external marine corrosion evidence",
+  "revisionReason": "Revolver magazine located OUTSIDE launcher: no process-gas or internal H2S exposure assumed. Replace all former wet H2S scenarios.",
+  "environment": {
+    "operatingSetting": "Exposed or partially sheltered offshore platform marine atmosphere; intermittent saline spray, condensation and wet/dry cycles",
+    "assumedAddedH2S": false,
+    "operatingLiquidImmersion": false,
+    "studyComparator": "Chloride/wetting bench tests, mostly 3.5% NaCl, NOT a uniform five-alloy same-method field test",
+    "actualIsoCategory": "Unknown until site's corrosivity conditions or first-year standard specimen losses are evaluated"
+  },
+  "standard": {
+    "designation": "ISO 9223:2012",
+    "currentConfirmed2022": true,
+    "official": "https://www.iso.org/standard/53499.html",
+    "scope": "Classification of atmospheric corrosivity based on standard specimen first-year loss and exposure conditions; sulfur dioxide, airborne salinity, humidity/time of wetness and temperature",
+    "categoryRanges": {
+      "C5": {
+        "name": "Very high marine-atmosphere candidate",
+        "steel_um_per_year": [
+          80,
+          200
+        ]
+      },
+      "CX": {
+        "name": "Extreme offshore-atmosphere candidate",
+        "steel_um_per_year": [
+          200,
+          700
+        ]
+      }
+    },
+    "rangesDescription": "Indicative ISO 9223 category bounds for first-year standard carbon-steel specimen thickness loss only. These intervals do NOT measure our specific 1020 drum, nor permit extrapolation to aluminum, stainless steel, lifetime or local pitting.",
+    "categoryDisclaimer": "C5/CX selected for DESIGN REVIEW scenarios only. The user's exact offshore atmospheric classification is NOT measured or confirmed.",
+    "coatings": {
+      "designation": "ISO 12944-9:2018",
+      "official": "https://www.iso.org/standard/64832.html",
+      "scope": "High-durability protective paint systems and performance tests for carbon steel offshore and related structures, including CX atmosphere; NOT a standard certifying stainless/aluminum specimens or an uncoated machine assembly.",
+      "limitations": "Specific coating specifications, surface preparation, tests and details require design and vendor evaluation."
+    }
+  },
+  "materials": {
+    "6061_T6": {
+      "label": "Al 6061-T6",
+      "testedGrade": "Uncoated 6061-T6",
+      "rate_mm_per_year": 0.10315242031798148,
+      "reported": "9.47 μA/cm²",
+      "method": "Converted from published i_corr by ASTM G102-type Faraday relation; not a directly measured penetration rate",
+      "test": "3.5 wt% NaCl solution; uncoated control in Table 3; no added H₂S",
+      "temperature": "Study-specific; verify before specifying exact temperature",
+      "source": "Effect of Citric Acid Hard Anodizing on the Mechanical Properties and Corrosion Resistance of Different Aluminum Alloys, Materials (2024), Table 3",
+      "url": "https://doi.org/10.3390/ma17174285",
+      "methodCategory": "Current-density conversion",
+      "warning": "Uniform-equivalent conversion assumes dominant Al→Al³⁺ dissolution and ρ≈2.70 g/cm³. The source reports positive polarization hysteresis (pitting susceptibility). Rate is not verified for atmospheric exposure.",
+      "coastalRisk": "Localized pitting; avoid dissimilar-metal contact; assess welds/coatings and crevices."
+    },
+    "7075_T6": {
+      "label": "Al 7075-T6",
+      "testedGrade": "Uncoated 7075-T6",
+      "rate_mm_per_year": 0.0032445059996975083,
+      "reported": "0.31 μA/cm²",
+      "method": "Converted from published i_corr using same Al³⁺ model and ρ≈2.81 g/cm³; not direct penetration",
+      "test": "3.5 wt% NaCl solution; uncoated control in same Table 3 as 6061-T6; no added H₂S",
+      "temperature": "Study-specific; verify before specifying exact temperature",
+      "source": "Effect of Citric Acid Hard Anodizing on the Mechanical Properties and Corrosion Resistance of Different Aluminum Alloys, Materials (2024), Table 3",
+      "url": "https://doi.org/10.3390/ma17174285",
+      "methodCategory": "Current-density conversion",
+      "warning": "Low i_corr in this test is not proof of 7075-T6 marine durability; susceptibility to pitting/exfoliation and galvanic corrosion is not represented by uniform-equivalent loss.",
+      "coastalRisk": "Localized pitting, intergranular/exfoliation susceptibility and galvanic coupling."
+    },
+    "1020_NORMALIZED": {
+      "label": "AISI 1020 (normalized candidate)",
+      "testedGrade": "SAE/AISI 1020; normalized heat treatment NOT verified",
+      "rate_mm_per_year": 0.121,
+      "reported": "0.121 mm/year by weight loss (336 h); 0.15 mm/year by polarization",
+      "method": "Direct reported weight-loss average (selected instead of electrochemical estimate)",
+      "test": "3.5% aqueous NaCl; 336 h immersion; no intentional H₂S",
+      "temperature": "Not specified by accessible abstract; do not present as confirmed 25°C",
+      "source": "Corrosion of 1020 carbon steel in 3.5% NaCl: Analysis by mass loss and electrochemical polarization, 79th ABM Annual Congress (2026)",
+      "url": "https://doi.org/10.5151/2594-5327-43868",
+      "methodCategory": "Measured weight-loss rate",
+      "warning": "Fully immersed 336 h coupon, not outdoor marine atmosphere. Exact normalized heat treatment unknown. Corrosion rates depend on wetness, oxygen and coating state.",
+      "coastalRisk": "Uniform rusting and under-deposit corrosion; carbon-steel coating plan critical."
+    },
+    "AISI_304": {
+      "label": "AISI 304",
+      "testedGrade": "Flat/unmodified SS304 specimen",
+      "rate_mm_per_year": 0.0311,
+      "reported": "311 × 10⁻⁴ mm/year = 0.03110 mm/year",
+      "method": "Published electrochemical corrosion-rate estimate after intermittent saline exposure",
+      "test": "Intermittent 3.5 wt% NaCl exposure over 168 h; electrochemical test at 27°C; no added H₂S",
+      "temperature": "27°C polarization test",
+      "source": "Anticorrosion Behaviour of SS304 Microgroove Surfaces in Saline Water, Metals (2021), Figure 7 (flat surface after intermittent exposure)",
+      "url": "https://doi.org/10.3390/met11101543",
+      "methodCategory": "Published electrochemical rate",
+      "warning": "Flat SS304 rate in a specific saline-wetting experiment, not service-life measurement. Intermittent wetting and passive-film/crevice effects vary in real equipment.",
+      "coastalRisk": "Chloride pitting and crevice attack near interfaces and retained salt deposits."
+    },
+    "AISI_316": {
+      "label": "AISI 316 (316L research proxy)",
+      "testedGrade": "AISI 316L (not the same as 316)",
+      "rate_mm_per_year": 0.0132,
+      "reported": "0.0132 mm/year at 298 K",
+      "method": "Published electrochemical corrosion-rate v_corr, Table 5, 316L row at 298 K without Na₂S additions",
+      "test": "Natural seawater, 298 K (25°C), no added sulfide in control; note paper also studies added sulfide in separate test groups",
+      "temperature": "25°C",
+      "source": "Corrosion Behavior of Stainless Steel in Seawater in the Presence of Sulfide, Applied Sciences (2023), Table 5 — 298 K baseline seawater, NO Na₂S",
+      "url": "https://doi.org/10.3390/app13074366",
+      "methodCategory": "Published electrochemical rate (316L proxy)",
+      "warning": "316L is not exact 316. Use ONLY the zero-added-sulfide 298 K control; the paper's other sulfide-dosed groups are excluded. Passive stainless alloy still susceptible to chloride pits and crevices.",
+      "coastalRisk": "Watch crevices/fasteners and salt retention; material grade and surface state matter."
+    }
+  },
+  "modelModes": {
+    "benchmark": {
+      "name": "Published chloride / seawater benchmarks",
+      "computed": "Uniform-rate constant-time illustrative specimen-to-CAD transfer. The model does not remove metal or account for passive film changes.",
+      "equations": [
+        "loss = published_or_converted_rate × exposure_days/365",
+        "10mm wall_screen = max(0,10 − 2×loss)"
+      ],
+      "scope": "Numbers compare study-reported/converted rates across different experiments, not actual offshore rates; 7/30/90/365 day visualized values are NOT validated forecasts."
+    },
+    "exposure": {
+      "name": "Marine wetting attention map",
+      "computed": "Qualitative geometry-informed index 0..100 combining baseline marine salt deposition, surface-facing orientation and lower-chamber elevation proxy.",
+      "weights": {
+        "baseline": 25,
+        "upwardFacingContribution": 45,
+        "lowElevationContribution": 30
+      },
+      "formula": "index = 25 + 45*max(0,normal_world_z) + 30*(1 − clamp((world_centroid_z − z_min)/(z_max−z_min),0,1)) on selected chamber; other bodies use 25+45*max(0,normal_world_z)+15*lowElevation. Values depend on CAD orientation; intended only to prioritize visual inspection, not prediction.",
+      "notes": "No CFD, wetting contact angle, salt deposition rate, condensation model, electrochemical pit kinetics or measured pit rates. Drum rotation could reverse actual pooling locations; risk positions are orientation-dependent hypotheses. No multiplying measured coupon rates by this index."
+    }
+  },
+  "noAssumedH2S": true,
+  "removedInputs": [
+    "3 bar H2S",
+    "30 bar total pressure",
+    "5% NaCl + acetic acid acid sour fluid",
+    "316L sour pitting multiplier 2.4/0.74",
+    "low-central-high unvalidated scenario ratings"
+  ],
+  "sources": [
+    {
+      "title": "ISO 9223 (official)",
+      "url": "https://www.iso.org/standard/53499.html"
+    },
+    {
+      "title": "ISO 12944-9 (official)",
+      "url": "https://www.iso.org/standard/64832.html"
+    },
+    {
+      "title": "6061/7075 chloride comparison",
+      "url": "https://doi.org/10.3390/ma17174285"
+    },
+    {
+      "title": "1020 gravimetric chloride test",
+      "url": "https://doi.org/10.5151/2594-5327-43868"
+    },
+    {
+      "title": "304 saline intermittent test",
+      "url": "https://doi.org/10.3390/met11101543"
+    },
+    {
+      "title": "316L no-sulfide seawater control",
+      "url": "https://doi.org/10.3390/app13074366"
+    }
+  ]
+}
